@@ -15,7 +15,7 @@ describe('demo snapshot', () => {
       pipelineRuns: s.pipelineRuns.length,
       deployments: s.deployments.length,
       initiatives: s.initiatives.length,
-    }).toEqual({ squads: 4, repositories: 9, contributors: 12, changeRequests: 25, pipelineRuns: 8, deployments: 7, initiatives: 4 });
+    }).toEqual({ squads: 3, repositories: 9, contributors: 12, changeRequests: 25, pipelineRuns: 8, deployments: 7, initiatives: 4 });
   });
 
   it('is a demo source', () => {

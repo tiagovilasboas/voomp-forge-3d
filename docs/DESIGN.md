@@ -162,7 +162,6 @@ Sala temática por setor (`SectorTheme.feature`; squad sem tema recebe o próxim
 | E · Experience (`sq-admin`) | `coordination-desk` | Balcão de coordenação com tela de vidro |
 | R · Reliability (`sq-n3`) | `monitoring-room` | Sala de vidro com parede de gráficos de monitoramento |
 | P · Platform (`sq-enable`) | `architecture-room` | Sala de vidro com holograma em wireframe rotativo |
-| N · Integrations (`sq-vmpg`) | ciclo | Próximo tema do ciclo, sem sala própria |
 
 ### Racks = repositórios
 

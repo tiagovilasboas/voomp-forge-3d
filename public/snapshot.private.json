@@ -41,12 +41,6 @@
       "description": "Incidents, failure signals and production fixes."
     },
     {
-      "id": "squad-rotas",
-      "code": "R",
-      "name": "Integrations",
-      "description": "Partner APIs, event contracts and connectors."
-    },
-    {
       "id": "squad-trilho",
       "code": "T",
       "name": "Platform",

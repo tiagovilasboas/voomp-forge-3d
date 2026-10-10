@@ -59,7 +59,6 @@ const SQUADS: Squad[] = [
   { id: 'sq-admin',  code: 'E', name: 'Experience',     description: 'Telas web, fluxos de usuário e o console do produto.' },
   { id: 'sq-n3',     code: 'R', name: 'Reliability',    description: 'Incidentes, sinais de falha e correções em produção.' },
   { id: 'sq-enable', code: 'P', name: 'Platform',       description: 'CI, design system e ferramentas compartilhadas.' },
-  { id: 'sq-vmpg',   code: 'N', name: 'Integrations',   description: 'APIs de parceiros, contratos de evento e conectores.' },
 ];
 
 // [name, squad, language, description]
@@ -71,7 +70,7 @@ const REPOS: Array<[string, string, string, string]> = [
   ['pecas-conferencia', 'sq-n3', 'Kotlin', 'Conferência diária entre peças pedidas, usadas e devolvidas.'],
   ['catalogo-antigo', 'sq-n3', 'PHP', 'Catálogo antigo de modelos, mantido apenas para consulta.'],
   ['forge-ci-templates', 'sq-enable', 'YAML', 'Templates compartilhados de pipeline de integração contínua.'],
-  ['design-system', 'sq-vmpg', 'TypeScript', 'Biblioteca de componentes e tokens visuais usada pelos produtos.'],
+  ['design-system', 'sq-enable', 'TypeScript', 'Biblioteca de componentes e tokens visuais usada pelos produtos.'],
   ['sinais-plataforma', 'sq-enable', 'Go', 'Coletores, painéis e alertas dos sinais da oficina.'],
 ];
 
@@ -82,15 +81,15 @@ const PEOPLE: Array<[string, string, string, ContributorRole | null]> = [
   ['iara-v', 'Iara Venturim', 'sq-admin', 'tech-lead'],
   ['otavio-b', 'Otávio Brisa', 'sq-admin', 'product-manager'],
   ['zelia-k', 'Zélia Kantarini', 'sq-admin', 'developer'],
-  ['bento-m', 'Bento Marapuama', 'sq-vmpg', 'reviewer'],
+  ['bento-m', 'Bento Marapuama', 'sq-admin', 'reviewer'],
   ['tupa-r', 'Tupã Ravelli', 'sq-n3', 'tech-lead'],
-  ['oriana-c', 'Oriana Capibaribe', 'sq-vmpg', 'product-manager'],
+  ['oriana-c', 'Oriana Capibaribe', 'sq-n3', 'product-manager'],
   ['nilo-q', 'Nilo Quaresmeira', 'sq-n3', 'developer'],
   ['maira-t', 'Maíra Tamoio', 'sq-n3', null],
   ['caetano-u', 'Caetano Urubuí', 'sq-enable', 'tech-lead'],
   ['jandira-f', 'Jandira Folhaverde', 'sq-enable', 'product-manager'],
   ['dalva-p', 'Dalva Pitangueira', 'sq-enable', 'reviewer'],
-  ['anselmo-j', 'Anselmo Jabuticaba', 'sq-vmpg', null],
+  ['anselmo-j', 'Anselmo Jabuticaba', 'sq-enable', null],
 ];
 
 const INITIATIVES: ProductInitiative[] = [
