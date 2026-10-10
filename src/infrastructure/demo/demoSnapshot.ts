@@ -56,9 +56,13 @@ const ctId = (handle: string) => `ct-${handle}`;
 // ---------------------------------------------------------------------------
 
 const SQUADS: Squad[] = [
-  { id: 'sq-admin', code: 'A', name: 'Admin', description: 'Funcionalidades administrativas e de back-office usadas pela operação da Voomp.' },
-  { id: 'sq-n3', code: 'B', name: 'Sustentação N3', description: 'Suporte de produção: incidentes, correções urgentes e estabilidade dos pagamentos.' },
-  { id: 'sq-enable', code: 'C', name: 'Enablement', description: 'Plataforma, ferramentas e padrões que destravam o trabalho das outras squads.' },
+  { id: 'sq-admin',  code: 'A', name: 'Admin',                description: 'Painel do seller, KYC, vendas, contratos, BDR e Minhas Compras.' },
+  { id: 'sq-n3',     code: 'S', name: 'Sustentação',          description: 'Bugfix em produção, investigação de incidentes e observabilidade cross-squad.' },
+  { id: 'sq-enable', code: 'E', name: 'Enablement',           description: 'Especialistas transversais: observabilidade, AppSec, agentic AI e CI/CD.' },
+  { id: 'sq-vmpg',   code: 'P', name: 'Meios de Pagamento',   description: 'Fluxo de checkout, payment flows e integração com PSPs.' },
+  { id: 'sq-vgfe',   code: 'F', name: 'Gestão Financeira',    description: 'Financeiro, ERP, saques, Celcoin e backoffice.' },
+  { id: 'sq-vgat',   code: 'G', name: 'Gateway',              description: 'Pagamentos, assinaturas, split, PagarMe e pipeline-templates.' },
+  { id: 'sq-vply',   code: 'L', name: 'Play',                 description: 'Plataforma de cursos, membros, WhatsApp e certificados.' },
 ];
 
 // [name, squad, language, description]
