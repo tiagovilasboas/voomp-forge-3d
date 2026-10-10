@@ -46,6 +46,10 @@ export interface SourceCapabilities {
   pipelines: CapabilityLevel;
   deployments: CapabilityLevel;
   documents: CapabilityLevel;
+  /** Tracker issues (Jira, Linear, Git issues…). */
+  workItems: CapabilityLevel;
+  /** Delivery fronts (planning sheet / config). */
+  workstreams: CapabilityLevel;
 }
 
 /** Bumped on breaking changes of the snapshot contract. */
@@ -208,6 +212,87 @@ export interface KnowledgeDocument {
   webUrl: string;
 }
 
+export type WorkItemType = 'epic' | 'story' | 'task' | 'bug';
+/** Normalised status category; the tracker's own name is kept in `statusName`. */
+export type WorkItemStatus = 'todo' | 'in_progress' | 'done';
+
+/** A tracker issue (Jira, Linear, GitHub/GitLab issue…). Keys match `WorkItemRef.key`. */
+export interface WorkItem {
+  key: string;
+  title: string;
+  type: WorkItemType;
+  status: WorkItemStatus;
+  statusName: string;
+  /** Parent epic key, when the tracker has one. */
+  epicKey: string | null;
+  sprint: string | null;
+  updatedAt: ISODate;
+  /**
+   * Production evidence from the tracker itself (a status mapped as "in
+   * production", or a released fix version). Null = the tracker does not say so.
+   */
+  productionAt: ISODate | null;
+  url: string | null;
+}
+
+/** How the planning sheet groups fronts. */
+export type WorkstreamCategory = 'sprint_priority' | 'closing' | 'sustaining' | 'open_topic';
+export type StaffRole = 'tl' | 'dev' | 'qa' | 'pm' | 'n2';
+
+export interface StaffAssignment {
+  role: StaffRole;
+  /** Linked contributor when known; planning sheets often only have a display name. */
+  personId: ID | null;
+  displayName: string;
+  /** e.g. "front", "back", "fullstack", "apoio". */
+  specialty: string | null;
+}
+
+export interface PlannedDelivery {
+  /** As written by the team: "MVP Semana 2 - quinta (10)", "Sob demanda"… */
+  label: string;
+  /** Parsed target date when there is one. Null = no committed date (e.g. on demand). */
+  target: ISODate | null;
+  /** When this plan was recorded. */
+  recordedAt: ISODate;
+}
+
+export interface WorkstreamDependency {
+  description: string;
+  /** blocker = work cannot proceed; waiting = waiting on someone else's answer or delivery. */
+  kind: 'blocker' | 'waiting';
+}
+
+/**
+ * Frente: a delivery workstream as planned by the team (typically a column of
+ * the planning sheet), linked to tracker epics and to initiatives so its
+ * progress can be checked against Git evidence.
+ *
+ * A front is NOT a squad: a squad works on many fronts, and a front may involve
+ * several squads. Its team is per-front (the same person may be TL here and DEV
+ * elsewhere).
+ */
+export interface Workstream {
+  id: ID;
+  name: string;
+  category: WorkstreamCategory;
+  /** Squads involved (many-to-many). Empty = not identified. */
+  squadIds: ID[];
+  initiativeId: ID | null;
+  /** Repositories touched by this front, when declared. */
+  repositoryIds: ID[];
+  /** Tracker epics whose issues belong to this front. */
+  epicKeys: string[];
+  team: StaffAssignment[];
+  /** Plan history, oldest first; the last entry is the current plan. */
+  plans: PlannedDelivery[];
+  dependencies: WorkstreamDependency[];
+  /** What the sheet declares ("Finalizado", "Entregue"). Never trusted alone. */
+  declaredDone: boolean;
+  links: { label: string; url: string }[];
+  notes: string[];
+}
+
 /** A complete, normalised picture returned by any data source. */
 export interface ForgeSnapshot {
   schemaVersion: number;
@@ -223,4 +308,6 @@ export interface ForgeSnapshot {
   deployments: Deployment[];
   initiatives: ProductInitiative[];
   documents: KnowledgeDocument[];
+  workItems: WorkItem[];
+  workstreams: Workstream[];
 }
