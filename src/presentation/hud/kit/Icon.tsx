@@ -34,6 +34,8 @@ const PATHS: Record<IconName, string> = {
   chevron: 'M9 6l6 6-6 6',
   close: 'M6 6l12 12M18 6 6 18',
   play: 'M7 5v14l11-7z',
+  github: 'M9 19c-4 1.3-4-2-6-2.5M15 21v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1-.3-3.4 1.3a11.6 11.6 0 0 0-6 0C6.8 2.8 5.8 3.1 5.8 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4.4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21',
+  heart: 'M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z',
 };
 
 export function Icon({ name, size = 16, className = '' }: { name: IconName; size?: number; className?: string }) {

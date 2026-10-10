@@ -1,6 +1,7 @@
 import { SIGNAL_LOOK } from '../../theme';
 import { useUiStore } from '../../state/uiStore';
 import { Icon } from '../kit/Icon';
+import { AuthorCredit } from '../kit/AuthorCredit';
 
 /** Footer legend: what each rack signal means, plus the way into the accessible table view. */
 export function Legend() {
@@ -24,6 +25,8 @@ export function Legend() {
         <Icon name="table" size={12} />
         Visão tabular
       </button>
+      <span className="h-4 w-px bg-white/10" aria-hidden="true" />
+      <AuthorCredit />
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { AuthorCredit } from '../../kit/AuthorCredit';
 import { useId } from 'react';
 import { useUiStore, type Quality } from '@presentation/state/uiStore';
 import { IconButton, Segmented } from '@presentation/hud/kit/primitives';
@@ -54,6 +55,9 @@ export function SettingsPanel() {
             { value: 'low', label: 'Leve' },
           ]}
         />
+      </div>
+      <div className="mt-1 border-t border-white/[0.06] px-1 pt-2">
+        <AuthorCredit />
       </div>
     </>
   );
