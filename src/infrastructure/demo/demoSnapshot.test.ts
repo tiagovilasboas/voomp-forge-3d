@@ -153,3 +153,42 @@ describe('knowledge documents', () => {
     }
   });
 });
+
+describe('work items and workstreams', () => {
+  const keys = new Set(s.workItems.map((w) => w.key));
+
+  it('has about 40 issues, 8 fronts and native capabilities', () => {
+    expect(s.workItems.length).toBeGreaterThanOrEqual(38);
+    expect(s.workstreams).toHaveLength(8);
+    expect(s.source.capabilities.workItems).toBe('native');
+    expect(s.source.capabilities.workstreams).toBe('native');
+  });
+
+  it('every change request task key exists as an issue; production issues carry productionAt', () => {
+    for (const cr of s.changeRequests) for (const w of cr.workItems) expect(keys.has(w.key)).toBe(true);
+    const inProd = new Set(s.deployments.filter((d) => d.environment === 'production' && d.status === 'success').flatMap((d) => d.changeRequestIds));
+    for (const cr of s.changeRequests.filter((c) => inProd.has(c.id) && c.workItems.length)) {
+      const item = s.workItems.find((w) => w.key === cr.workItems[0].key)!;
+      expect(item.status).toBe('done');
+      expect(item.productionAt).not.toBeNull();
+    }
+  });
+
+  it('fronts reference existing squads, repos, people, initiatives and epics', () => {
+    const ids = (l: Array<{ id: string }>) => new Set(l.map((x) => x.id));
+    const squads = ids(s.squads), repos = ids(s.repositories), people = ids(s.contributors), inis = ids(s.initiatives);
+    for (const ws of s.workstreams) {
+      ws.squadIds.forEach((x) => expect(squads.has(x)).toBe(true));
+      ws.repositoryIds.forEach((x) => expect(repos.has(x)).toBe(true));
+      ws.epicKeys.forEach((k) => expect(s.workItems.find((w) => w.key === k)?.type).toBe('epic'));
+      ws.team.forEach((t) => t.personId && expect(people.has(t.personId)).toBe(true));
+      if (ws.initiativeId) expect(inis.has(ws.initiativeId)).toBe(true);
+    }
+    expect(s.workstreams.some((w) => w.squadIds.length === 2)).toBe(true);
+    expect(s.workstreams.some((w) => w.team.some((t) => t.personId === null))).toBe(true);
+  });
+
+  it('links use .invalid domains', () => {
+    for (const ws of s.workstreams) for (const l of ws.links) expect(new URL(l.url).hostname.endsWith('.invalid')).toBe(true);
+  });
+});

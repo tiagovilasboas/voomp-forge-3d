@@ -54,7 +54,7 @@ describe('buildSnapshotFromGit', () => {
     const s = build();
     expect(s.source.kind).toBe('imported');
     expect(s.source.provider.vocabulary.changeRequestShort).toBe('Merge');
-    expect(s.source.capabilities).toEqual({ changeRequests: 'inferred', reviews: 'unavailable', pipelines: 'unavailable', deployments: 'inferred', documents: 'unavailable' });
+    expect(s.source.capabilities).toEqual({ changeRequests: 'inferred', reviews: 'unavailable', pipelines: 'unavailable', deployments: 'inferred', documents: 'unavailable', workItems: 'unavailable', workstreams: 'unavailable' });
     expect(build({ ...config, deployments: [] }).source.capabilities.deployments).toBe('unavailable');
   });
 
