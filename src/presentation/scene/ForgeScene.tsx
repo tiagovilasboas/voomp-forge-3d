@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { listDeliveries, STATUS_GROUP } from '@application/queries/deliveries';
 import { useReadyData } from '../state/dataStore';
 import { useUiStore } from '../state/uiStore';
+import { useNotesStore } from '../state/notesStore';
 import { useEvents, useFigureScripts, useRepoHealth, useScope } from '../state/selectors';
 import { SectorEntity, type SectorBoards } from './entities/SectorEntity';
 import { RackEntity } from './entities/RackEntity';
@@ -24,6 +25,7 @@ export function ForgeScene() {
   const selection = useUiStore((s) => s.selection);
   const highlightInitiativeId = useUiStore((s) => s.highlightInitiativeId);
   const reducedMotion = useUiStore((s) => s.reducedMotion);
+  const notes = useNotesStore((s) => s.notes);
 
   const boards = useMemo(() => {
     const result = new Map<string, SectorBoards>();
@@ -114,7 +116,7 @@ export function ForgeScene() {
         stagingCount={gateCounts.staging}
         reducedMotion={reducedMotion}
       />
-      <WeekBoard position={world.weekBoard} deliveries={weekDeliveries} vocabularyShort={snapshot.source.provider.vocabulary.changeRequestShort} />
+      <WeekBoard position={world.weekBoard} deliveries={weekDeliveries} notes={notes} vocabularyShort={snapshot.source.provider.vocabulary.changeRequestShort} />
       <CreditPlaque position={world.creditPlaque} />
       {/* snapshot marker for debugging in devtools */}
       <group name={`forge:${snapshot.source.kind}`} />
