@@ -20,7 +20,7 @@ export const PALETTE = {
 export type IconName =
   | 'pulse' | 'check' | 'clock' | 'alert' | 'moon' | 'help' | 'merge' | 'rocket' | 'flask' | 'eye'
   | 'draft' | 'x' | 'branch' | 'pipeline' | 'commit' | 'squad' | 'rack' | 'person' | 'target' | 'search'
-  | 'gear' | 'table' | 'compass' | 'home' | 'plus' | 'minus' | 'rotate' | 'bell' | 'external' | 'chevron' | 'close' | 'play' | 'github' | 'heart';
+  | 'gear' | 'table' | 'compass' | 'home' | 'plus' | 'minus' | 'rotate' | 'bell' | 'external' | 'chevron' | 'close' | 'play' | 'github' | 'heart' | 'book' | 'note';
 
 export interface Look {
   label: string;
