@@ -10,13 +10,13 @@ import { HoloPanel } from './HoloPanel';
 import {
   HOLO, drawBar, drawEmpty, drawRow, drawSparkline, drawStat, drawStepper, drawTitle, relativeTime, truncate, type StepState,
 } from './holoDraw';
+import { SIGN_YAW } from '../kit/orientation';
 
 const DAY = 86_400_000;
-const YAW = 0.62;
-const RIGHT = [Math.cos(YAW), -Math.sin(YAW)] as const;
-const TOWARD = [Math.sin(YAW), Math.cos(YAW)] as const;
+const RIGHT = [Math.cos(SIGN_YAW), -Math.sin(SIGN_YAW)] as const;
+const TOWARD = [Math.sin(SIGN_YAW), Math.cos(SIGN_YAW)] as const;
 
-/** Panel slots in the camera-facing frame: sideways, height, towards-camera. */
+/** Panel slots in the sign frame: sideways, height, towards-camera. */
 const SLOTS: [number, number, number][] = [
   [-3.5, 4.4, 0],
   [-4.1, 2.3, 0.4],

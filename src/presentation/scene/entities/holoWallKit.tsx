@@ -5,8 +5,8 @@ import type { Vec2 } from '../../world/worldModel';
 import type { Draw } from '../kit/canvasTexture';
 import { useCanvasTexture } from '../kit/Part';
 import { drawPanelBase } from '../holo/holoDraw';
+import { SIGN_YAW } from '../kit/orientation';
 
-const YAW = 0.62;
 const PLANE = new THREE.PlaneGeometry(1, 1);
 const EDGES = new THREE.EdgesGeometry(PLANE);
 
@@ -49,7 +49,7 @@ export function HoloWall({
   });
   const edge = selected ? '#FF8C32' : hovered ? '#FFFFFF' : '#38E1FF';
   return (
-    <group position={[position[0], 0, position[1]]} rotation={[0, YAW, 0]} {...handlers}>
+    <group position={[position[0], 0, position[1]]} rotation={[0, SIGN_YAW, 0]} {...handlers}>
       <mesh position={[-w / 2 + 0.2, 0.25, -0.04]} scale={[0.08, 0.5, 0.08]}>
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial color="#2A3340" metalness={0.6} roughness={0.4} />

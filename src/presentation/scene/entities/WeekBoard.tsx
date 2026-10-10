@@ -5,6 +5,7 @@ import { useInteractive } from '../../interaction/useInteractive';
 import { Box, Decal, useCanvasTexture } from '../kit/Part';
 import { mat } from '../kit/materials';
 import { FONTS } from '../kit/canvasTexture';
+import { SIGN_YAW } from '../kit/orientation';
 
 const INK = { blue: '#1F3A8A', green: '#15803D', orange: '#E45A00', grey: '#6B7280' };
 export const STICKY: Record<NoteColor, string> = { yellow: '#FDE68A', orange: '#FDBA74', green: '#BBF7D0', blue: '#BFDBFE' };
@@ -166,7 +167,7 @@ export function WeekBoard({
   const [x, z] = position;
   const frame = selected ? mat.matte('#FF6A00') : hovered ? mat.matte('#FF8C32') : mat.matte('#B9BEC6');
   return (
-    <group position={[x, 0, z]} rotation={[0, 0.62, 0]} {...handlers}>
+    <group position={[x, 0, z]} rotation={[0, SIGN_YAW, 0]} {...handlers}>
       <Box position={[-2.25, 0.95, -0.12]} size={[0.06, 1.9, 0.06]} material={mat.steel()} />
       <Box position={[2.25, 0.95, -0.12]} size={[0.06, 1.9, 0.06]} material={mat.steel()} />
       <Box position={[0, 1.75, -0.04]} size={[4.7, 2.1, 0.06]} material={frame} />

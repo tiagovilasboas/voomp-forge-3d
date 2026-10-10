@@ -3,6 +3,7 @@ import type { Vec2 } from '../../world/worldModel';
 import { Box, Decal, useCanvasTexture } from '../kit/Part';
 import { mat } from '../kit/materials';
 import { FONTS } from '../kit/canvasTexture';
+import { SIGN_YAW } from '../kit/orientation';
 
 /** Small brushed-metal credit plaque on a pedestal. */
 export function CreditPlaque({ position }: { position: Vec2 }) {
@@ -32,7 +33,7 @@ export function CreditPlaque({ position }: { position: Vec2 }) {
   );
   const [x, z] = position;
   return (
-    <group position={[x, 0, z]} rotation={[0, 0.62, 0]}>
+    <group position={[x, 0, z]} rotation={[0, SIGN_YAW, 0]}>
       <Box position={[0, 0.45, 0]} size={[0.5, 0.9, 0.4]} material={mat.rackMetal()} />
       <Box position={[0, 0.91, 0]} size={[0.56, 0.03, 0.46]} material={mat.glow(PALETTE.forge, 0.5)} shadows={false} />
       <group position={[0, 1.25, 0]} rotation={[-0.35, 0, 0]}>

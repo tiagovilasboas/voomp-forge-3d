@@ -198,7 +198,7 @@ function TerminalKiosk({ position, yaw, reducedMotion }: { position: [number, nu
   });
 
   return (
-    <group position={position} rotation={[0, 0.45 + yaw, 0]} {...handlers}>
+    <group position={position} rotation={[0, yaw, 0]} {...handlers}>
       {/* base + pedestal */}
       <mesh position={[0, 0.06, 0]} material={mat.rackMetal()} scale={[1.9, 0.12, 1.5]} geometry={once('boxg', () => new THREE.BoxGeometry(1, 1, 1))} receiveShadow />
       <Box position={[0, 0.58, -0.25]} size={[0.32, 0.9, 0.26]} material={mat.steel()} />
@@ -323,7 +323,7 @@ function PinballCabinet({ position, yaw, reducedMotion }: { position: [number, n
 
   const tilt = -0.32;
   return (
-    <group position={position} rotation={[0, -0.45 + yaw, 0]} {...handlers}>
+    <group position={position} rotation={[0, yaw, 0]} {...handlers}>
       {/* legs + body */}
       {[-1, 1].flatMap((sx) => [-1, 1].map((sz) => <Box key={`${sx}${sz}`} position={[sx * (FW / 2 + 0.02), 0.45, sz * (FL / 2 - 0.1)]} size={[0.1, 0.9, 0.1]} material={mat.steel()} />))}
       <Box position={[-(FW / 2 + 0.05), 1.0, 0]} size={[0.1, 0.3, FL]} material={mat.rackMetal()} />
