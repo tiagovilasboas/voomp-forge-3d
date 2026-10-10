@@ -72,18 +72,20 @@ function WideTopBar({ tablet }: { tablet: boolean }) {
         <button
           type="button"
           onClick={() => select({ kind: 'fronts' })}
+          title="Mural de Frentes"
           className="focus-ring hidden h-8 tap:h-11 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 text-[13px] font-semibold text-snow transition hover:bg-white/[0.12] md:flex"
         >
           <Icon name="target" size={14} />
-          <span className="sr-only xl:not-sr-only">Mural de Frentes</span>
+          <span className="sr-only min-[1600px]:not-sr-only">Mural de Frentes</span>
         </button>
         <button
           type="button"
           onClick={() => select({ kind: 'calendar' })}
+          title="Calendário de entregas"
           className="focus-ring hidden h-8 tap:h-11 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 text-[13px] font-semibold text-snow transition hover:bg-white/[0.12] md:flex"
         >
           <Icon name="clock" size={14} />
-          <span className="sr-only xl:not-sr-only">Calendário</span>
+          <span className="sr-only min-[1600px]:not-sr-only">Calendário</span>
         </button>
         <button
           type="button"
