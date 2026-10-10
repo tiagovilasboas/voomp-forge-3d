@@ -65,6 +65,8 @@ export function buildWorld(squads: Squad[], repositories: Repository[], people: 
     stagingDock: [-5.5, LAYOUT.gateZ],
     weekBoard: [10.5, LAYOUT.gateZ - 0.4],
     creditPlaque: [-12, LAYOUT.gateZ + 0.6],
+    frontsWall: [17.5, LAYOUT.gateZ - 0.2],
+    calendarWall: [-19, LAYOUT.gateZ - 0.2],
     aiHub: {
       center: hubCenter,
       size: hubSize,
@@ -97,6 +99,12 @@ export function focusFor(world: WorldModel, ref: EntityRef): FocusTarget | null 
       return { center: world.knowledgeVault, radius: 6 };
     case 'hub':
       return { center: [world.aiHub.center[0], world.aiHub.center[1] + 1], radius: Math.max(...world.aiHub.size) * 0.55 };
+    case 'fronts':
+      return { center: world.frontsWall, radius: 5 };
+    case 'calendar':
+      return { center: world.calendarWall, radius: 4.5 };
+    case 'workstream':
+      return { center: world.frontsWall, radius: 5 };
     case 'terminal':
       return { center: world.aiHub.terminal, radius: 3.5 };
     case 'pinball':
