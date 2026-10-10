@@ -1,36 +1,44 @@
 /**
- * Deterministic robot design per person: every robot looks different, and the
- * same person always gets the same robot. Pure data — no Three.js here.
- * Sleek humanoid language: glossy shell panels, dark carbon joints, a black
- * glass face with a light band. No skin tones, no gender cues.
+ * Robot design language (extracted from the art-direction reference as data):
+ * chibi proportions, rounded helmet with a black screen face and LED eyes,
+ * gunmetal armour with glowing joint rings, chunky boots with light strips.
+ *
+ * Every robot is unique and deterministic per person. Pure data — no Three.js.
  */
 
-export type HeadShape = 'capsule' | 'slim' | 'broad';
-export type FaceLight = 'band' | 'dual' | 'split';
+export const ROBOT_STYLE = {
+  proportions: { height: 1.32, headRadius: 0.27, torso: [0.36, 0.32, 0.26], hipY: 0.42 },
+  /** LED eyes on the face screen. Cyan is reserved for robots: no status uses it. */
+  eyeColor: '#38E1FF',
+  ringSecondary: '#38BDF8',
+  faceScreen: '#050608',
+} as const;
+
+export type EarStyle = 'ring' | 'fin' | 'pod';
 
 export interface Finish {
   shell: string;
-  clearcoat: number;
+  metalness: number;
   roughness: number;
 }
 
 export interface RobotDesign {
-  head: HeadShape;
-  face: FaceLight;
+  ear: EarStyle;
   finish: Finish;
+  /** Helmet crest stripe on top of the head. */
+  crest: boolean;
   /** 5-light chest signature: a subtle, unique "ID LED" pattern. */
   signature: boolean[];
 }
 
-const HEADS: HeadShape[] = ['capsule', 'slim', 'broad'];
-const FACES: FaceLight[] = ['band', 'dual', 'split'];
+const EARS: EarStyle[] = ['ring', 'fin', 'pod'];
 const FINISHES: Finish[] = [
-  { shell: '#ECEDEF', clearcoat: 1, roughness: 0.22 }, // pearl white
-  { shell: '#2A2D33', clearcoat: 1, roughness: 0.3 }, // graphite
-  { shell: '#A9AEB6', clearcoat: 0.8, roughness: 0.28 }, // titanium
-  { shell: '#CBBFA8', clearcoat: 0.7, roughness: 0.35 }, // sand
-  { shell: '#121418', clearcoat: 0.4, roughness: 0.55 }, // matte black
-  { shell: '#D7DADF', clearcoat: 1, roughness: 0.18 }, // silver white
+  { shell: '#2E3138', metalness: 0.75, roughness: 0.38 }, // gunmetal
+  { shell: '#1C1E23', metalness: 0.6, roughness: 0.45 }, // graphite
+  { shell: '#4A4E57', metalness: 0.8, roughness: 0.32 }, // steel
+  { shell: '#D9DBDF', metalness: 0.35, roughness: 0.3 }, // pearl
+  { shell: '#5B5145', metalness: 0.7, roughness: 0.4 }, // bronze
+  { shell: '#3B3F4A', metalness: 0.7, roughness: 0.5 }, // slate
 ];
 
 function hash(seed: string, salt: number): number {
@@ -48,7 +56,7 @@ export function robotDesign(personId: string): RobotDesign {
   const signature = Array.from({ length: 5 }, (_, i) => ((bits >> i) & 1) === 1);
   // Never an all-off signature: it would read as "powered down".
   if (!signature.some(Boolean)) signature[2] = true;
-  return { head: pick(HEADS, 1), face: pick(FACES, 3), finish: pick(FINISHES, 4), signature };
+  return { ear: pick(EARS, 1), finish: pick(FINISHES, 4), crest: hash(personId, 5) % 2 === 0, signature };
 }
 
 export const ROLE_TAG: Record<string, string> = {
