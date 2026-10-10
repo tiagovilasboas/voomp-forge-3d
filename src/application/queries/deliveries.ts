@@ -94,7 +94,7 @@ export function listDeliveries(idx: ForgeIndex, scope: ScopeFilter, f: DeliveryF
         (!f.initiativeId || (f.initiativeId === 'none' ? d.initiative === null : d.initiative?.id === f.initiativeId)) &&
         (!f.environment || d.environments.includes(f.environment)) &&
         (!text ||
-          [d.cr.title, d.cr.productSummary ?? '', d.repo.name, d.initiative?.name ?? '', `#${d.cr.number}`]
+          [d.cr.title, d.cr.productSummary ?? '', d.repo.name, d.initiative?.name ?? '', `#${d.cr.number}`, ...d.cr.workItems.map((w) => w.key)]
             .join(' ')
             .toLowerCase()
             .includes(text)),
