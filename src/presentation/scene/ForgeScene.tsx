@@ -8,6 +8,8 @@ import { RackEntity } from './entities/RackEntity';
 import { FigureEntity } from './entities/FigureEntity';
 import { FlowStreams } from './entities/FlowStreams';
 import { ProductionGate } from './entities/ProductionGate';
+import { WeekBoard } from './entities/WeekBoard';
+import { CreditPlaque } from './entities/CreditPlaque';
 
 const PLATFORM_H = 0.14;
 
@@ -60,6 +62,11 @@ export function ForgeScene() {
     }),
     [events],
   );
+  /** The whiteboard always shows the last 7 days, across squads. */
+  const weekDeliveries = useMemo(
+    () => listDeliveries(index, { ...scope, periodDays: 7, squadId: null }, { status: 'production' }),
+    [index, scope],
+  );
   const dimmedSquad = (squadId: string) => squadFilter !== null && squadFilter !== squadId;
 
   return (
@@ -107,6 +114,8 @@ export function ForgeScene() {
         stagingCount={gateCounts.staging}
         reducedMotion={reducedMotion}
       />
+      <WeekBoard position={world.weekBoard} deliveries={weekDeliveries} vocabularyShort={snapshot.source.provider.vocabulary.changeRequestShort} />
+      <CreditPlaque position={world.creditPlaque} />
       {/* snapshot marker for debugging in devtools */}
       <group name={`forge:${snapshot.source.kind}`} />
     </>
