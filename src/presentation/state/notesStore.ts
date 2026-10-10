@@ -15,6 +15,8 @@ export interface Note {
   /** Optional link to something in the data center (a change request, initiative, repository…). */
   ref: EntityRef | null;
   createdAt: string;
+  /** Optional free position on the board, relative 0..1 (top-left of the note within the free area). Auto-grid when absent. */
+  pos?: { x: number; y: number };
 }
 
 export const MAX_NOTES = 12;
@@ -45,6 +47,8 @@ interface NotesStore {
   add: (text: string, color: NoteColor, ref: EntityRef | null) => void;
   update: (id: string, patch: Partial<Pick<Note, 'text' | 'color' | 'ref'>>) => void;
   remove: (id: string) => void;
+  /** Moves a note on the board; coordinates are clamped to 0..1. */
+  move: (id: string, pos: { x: number; y: number }) => void;
 }
 
 const newId = () => `note-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
@@ -64,5 +68,9 @@ export const useNotesStore = create<NotesStore>((set, get) => {
     update: (id, patch) =>
       commit(get().notes.map((n) => (n.id === id ? { ...n, ...patch, text: (patch.text ?? n.text).slice(0, MAX_NOTE_LENGTH) } : n))),
     remove: (id) => commit(get().notes.filter((n) => n.id !== id)),
+    move: (id, pos) => {
+      const clamp = (v: number) => (Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : 0);
+      commit(get().notes.map((n) => (n.id === id ? { ...n, pos: { x: clamp(pos.x), y: clamp(pos.y) } } : n)));
+    },
   };
 });
