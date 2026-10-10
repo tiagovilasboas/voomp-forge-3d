@@ -1,0 +1,39 @@
+{
+  "organization": { "name": "Minha Empresa", "slug": "minha-empresa" },
+  "provider": {
+    "name": "GitLab",
+    "vocabulary": { "changeRequest": "Merge request", "changeRequestShort": "MR", "pipeline": "Pipeline" }
+  },
+  "squads": [
+    {
+      "id": "sq-pagamentos",
+      "code": "A",
+      "name": "Pagamentos",
+      "description": "Checkout, repasses e conciliação.",
+      "repositories": [
+        { "path": "../clones/payments-api", "name": "payments-api", "webUrl": "https://git.example.com/acme/payments-api", "defaultBranch": "main", "language": "TypeScript" },
+        { "path": "../clones/checkout-web", "webUrl": "https://git.example.com/acme/checkout-web" }
+      ]
+    },
+    {
+      "id": "sq-plataforma",
+      "code": "B",
+      "name": "Plataforma",
+      "description": "Ferramentas e infraestrutura.",
+      "repositories": [{ "path": "../clones/infra" }]
+    }
+  ],
+  "people": [
+    { "email": "ana@example.com", "displayName": "Ana Souza", "role": "tech-lead", "squadId": "sq-pagamentos" }
+  ],
+  "initiatives": [
+    { "key": "INI-12", "name": "Pix parcelado", "summary": "Pagamento parcelado via Pix.", "ownerSquadId": "sq-pagamentos", "status": "in_delivery" }
+  ],
+  "initiativePattern": "INI-\\d+",
+  "workItemPattern": "[A-Z][A-Z0-9]+-\\d+",
+  "workItemUrlTemplate": "https://tracker.example.com/browse/{key}",
+  "deployments": [
+    { "environment": "staging", "tagPattern": "^rc-" },
+    { "environment": "production", "tagPattern": "^v\\d+\\.\\d+\\.\\d+$" }
+  ]
+}
