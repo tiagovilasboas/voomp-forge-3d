@@ -228,6 +228,7 @@ const DEPLOYMENTS: Array<[DeploymentEnvironment, DeploymentStatus, string, numbe
   ['staging', 'success', 'admin-billing-api', 4, [208, 214]], // 214 reaches staging only
   ['production', 'success', 'incident-gateway', 11, [301]],
   ['production', 'failure', 'incident-gateway', 1, [309]],
+  ['production', 'running', 'admin-console-web', 20 / 1440, [418]], // in flight right now (20 min ago)
 ];
 
 // Two old commits in the otherwise silent repo: [days ago, author, message]
@@ -451,6 +452,7 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
       createdAt: ago(days),
       status,
       changeRequestIds: ids,
+      triggeredById: changeRequests.find((c) => c.id === ids[ids.length - 1])?.authorId ?? null,
       webUrl: `${repoUrl(repo)}/deployments/${id}`,
     };
   });

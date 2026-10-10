@@ -315,6 +315,7 @@ export function buildSnapshotFromGit(input: BuildSnapshotInput): ForgeSnapshot {
             createdAt: tag.date,
             status: 'success',
             changeRequestIds: crIds,
+            triggeredById: null,
             webUrl: webUrl ? `${webUrl}/releases/tag/${encodeURIComponent(tag.name)}` : '',
           });
           previous = reachable;
