@@ -4,7 +4,8 @@ import { CameraControls, CameraControlsImpl } from '@react-three/drei';
 import * as THREE from 'three';
 import { useUiStore } from '../../state/uiStore';
 import type { FocusTarget, WorldModel } from '../../world/worldModel';
-import { focusFor, overviewFocus } from '../../world/buildWorld';
+import { focusFor, focusForRepos, overviewFocus } from '../../world/buildWorld';
+import { useReadyData } from '../../state/dataStore';
 import { livePositions } from '../../interaction/livePositions';
 
 const { ACTION } = CameraControlsImpl;
@@ -28,6 +29,7 @@ interface SavedView {
  */
 export function CameraRig({ world }: { world: WorldModel }) {
   const controls = useRef<CameraControlsImpl>(null);
+  const { index } = useReadyData();
   const { size } = useThree();
   const reducedMotion = useUiStore((s) => s.reducedMotion);
   const command = useUiStore((s) => s.camera);
@@ -76,6 +78,14 @@ export function CameraRig({ world }: { world: WorldModel }) {
       case 'focus': {
         const ref = command.ref;
         let f = focusFor(world, ref);
+        // Change requests and initiatives live on racks: frame the racks they touch.
+        if (ref.kind === 'cr') {
+          const cr = index.cr.get(ref.id);
+          f = cr ? focusFor(world, { kind: 'repo', id: cr.repositoryId }) : null;
+        }
+        if (ref.kind === 'initiative') {
+          f = focusForRepos(world, (index.crsByInitiative.get(ref.id) ?? []).map((c) => c.repositoryId));
+        }
         if (ref.kind === 'person') {
           const live = livePositions.get(ref.id);
           if (live && f) f = { ...f, center: live };
