@@ -1,4 +1,5 @@
 import { useUiStore } from '../../state/uiStore';
+import { isObjectRef } from '../objects/objectRefs';
 import { Drawer } from '../kit/Drawer';
 import { useMediaQuery } from '../kit/useMediaQuery';
 import { DeliveryTracking } from '../panels/DeliveryTracking';
@@ -18,7 +19,7 @@ const GUTTER = 12;
  * Activity queues sit behind the top-bar button.
  */
 export function TabletHud() {
-  const hasSelection = useUiStore((s) => s.selection !== null);
+  const hasSelection = useUiStore((s) => s.selection !== null && !isObjectRef(s.selection));
   const drawerOpen = useUiStore((s) => s.leftDrawerOpen);
   const setDrawerOpen = useUiStore((s) => s.setLeftDrawerOpen);
   const docked = useMediaQuery('(min-width: 1024px)');

@@ -4,6 +4,7 @@ import { useBreakpoint } from './kit/useMediaQuery';
 import { DesktopHud } from './layouts/DesktopHud';
 import { PhoneHud } from './layouts/PhoneHud';
 import { TabletHud } from './layouts/TabletHud';
+import { ObjectScreenHost } from './objects/ObjectScreenHost';
 import { DeliveryExplorer } from './views/DeliveryExplorer';
 import { TableView } from './views/TableView';
 import { TourCoach, WelcomeModal } from './views/WelcomeModal';
@@ -24,6 +25,7 @@ export function HudLayout() {
       {overlay === 'explorer' && <DeliveryExplorer />}
       {overlay === 'table' && <TableView />}
       {overlay === 'welcome' && <WelcomeModal />}
+      <ObjectScreenHost />
       <TourCoach />
       <HoverTooltip />
     </div>

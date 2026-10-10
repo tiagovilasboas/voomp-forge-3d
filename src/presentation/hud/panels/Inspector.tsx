@@ -3,6 +3,7 @@ import type { ForgeIndex } from '@application/queries/forgeIndex';
 import { refKey, type EntityRef } from '../../world/worldModel';
 import { useReadyData } from '../../state/dataStore';
 import { useUiStore } from '../../state/uiStore';
+import { isObjectRef } from '../objects/objectRefs';
 import { Card, EmptyState } from '../kit/primitives';
 import { ChangeInspector } from './inspector/ChangeInspector';
 import { DocumentInspector } from './inspector/DocumentInspector';
@@ -11,7 +12,6 @@ import { InspectorHeader } from './inspector/InspectorHeader';
 import { PersonInspector } from './inspector/PersonInspector';
 import { RepoInspector } from './inspector/RepoInspector';
 import { SquadInspector } from './inspector/SquadInspector';
-import { WhiteboardInspector } from './inspector/WhiteboardInspector';
 
 function exists(index: ForgeIndex, ref: EntityRef): boolean {
   switch (ref.kind) {
@@ -29,6 +29,8 @@ function exists(index: ForgeIndex, ref: EntityRef): boolean {
       return index.document.has(ref.id);
     case 'gate':
     case 'whiteboard':
+    case 'board':
+    case 'desk':
       return true;
   }
 }
@@ -48,7 +50,9 @@ function Variant({ selection }: { selection: EntityRef }) {
     case 'document':
       return <DocumentInspector id={selection.id} />;
     case 'whiteboard':
-      return <WhiteboardInspector />;
+    case 'board':
+    case 'desk':
+      return null; // shown as an Object Screen instead
     case 'gate':
       return (
         <>
@@ -104,7 +108,7 @@ export function InspectorContent() {
 
 /** Right-hand panel (tablet and desktop). On phones the same content lives in a bottom sheet. */
 export function Inspector() {
-  const hasSelection = useUiStore((s) => s.selection !== null);
+  const hasSelection = useUiStore((s) => s.selection !== null && !isObjectRef(s.selection));
   if (!hasSelection) return null;
   return (
     <Card label="Detalhes" className="scroll-thin max-h-[62vh] overflow-auto md:max-h-[calc(100vh-96px)]">

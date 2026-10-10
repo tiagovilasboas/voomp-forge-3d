@@ -1,4 +1,5 @@
 import { useUiStore } from '../../state/uiStore';
+import { isObjectRef } from '../objects/objectRefs';
 import { ActivityTabs } from '../panels/ActivityTabs';
 import { DeliveryTracking } from '../panels/DeliveryTracking';
 import { Inspector } from '../panels/Inspector';
@@ -20,7 +21,7 @@ import { Legend } from '../views/Legend';
  *  └───────────────────────────────────────────────────────────────────┘
  */
 export function DesktopHud() {
-  const hasSelection = useUiStore((s) => s.selection !== null);
+  const hasSelection = useUiStore((s) => s.selection !== null && !isObjectRef(s.selection));
   return (
     <>
       <div className="absolute inset-x-3 top-3">

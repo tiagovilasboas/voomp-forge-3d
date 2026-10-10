@@ -1,4 +1,5 @@
 import { useUiStore } from '../../state/uiStore';
+import { isObjectRef } from '../objects/objectRefs';
 import { KpiStrip } from '../panels/KpiStrip';
 import { MapControls } from '../panels/MapControls';
 import { TopBar } from '../panels/TopBar';
@@ -13,7 +14,7 @@ import { SearchSheet } from '../mobile/SearchSheet';
 export function PhoneHud() {
   const searchOpen = useUiStore((s) => s.searchOpen);
   const sheetFull = useUiStore((s) => s.sheetFull);
-  const sheetOpen = useUiStore((s) => s.mobileTab !== 'map' || s.selection !== null);
+  const sheetOpen = useUiStore((s) => s.mobileTab !== 'map' || (s.selection !== null && !isObjectRef(s.selection)));
   return (
     <>
       <div className="absolute inset-x-2 top-[calc(8px+env(safe-area-inset-top))] z-30">

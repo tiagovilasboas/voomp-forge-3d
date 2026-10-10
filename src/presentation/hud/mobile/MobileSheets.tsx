@@ -7,6 +7,7 @@ import { InspectorContent } from '../panels/Inspector';
 import { InitiativesCard } from '../panels/left/InitiativesCard';
 import { TechHealth } from '../panels/left/TechHealth';
 import { WeeklyQuestions } from '../panels/left/WeeklyQuestions';
+import { isObjectRef } from '../objects/objectRefs';
 import { MoreContent } from './MoreContent';
 
 const TITLES: Record<Exclude<MobileTab, 'map'>, string> = {
@@ -47,7 +48,7 @@ function TabContent({ tab }: { tab: Exclude<MobileTab, 'map'> }) {
  */
 export function MobileSheets() {
   const tab = useUiStore((s) => s.mobileTab);
-  const hasSelection = useUiStore((s) => s.selection !== null);
+  const hasSelection = useUiStore((s) => s.selection !== null && !isObjectRef(s.selection));
   const setTab = useUiStore((s) => s.setMobileTab);
   const select = useUiStore((s) => s.select);
   const setSheetFull = useUiStore((s) => s.setSheetFull);
