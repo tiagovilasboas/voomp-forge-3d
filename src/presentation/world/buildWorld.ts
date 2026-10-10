@@ -85,6 +85,16 @@ export function focusFor(world: WorldModel, ref: EntityRef): FocusTarget | null 
   }
 }
 
+/** Frames a group of racks (e.g. every repository touched by an initiative). */
+export function focusForRepos(world: WorldModel, repoIds: string[]): FocusTarget | null {
+  const racks = world.racks.filter((r) => repoIds.includes(r.repoId));
+  if (!racks.length) return null;
+  const xs = racks.map((r) => r.position[0]);
+  const zs = racks.map((r) => r.position[1]);
+  const center: Vec2 = [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...zs) + Math.max(...zs)) / 2 + 1.2];
+  return { center, radius: Math.max(6.5, (Math.max(...xs) - Math.min(...xs)) * 0.6 + 4) };
+}
+
 export function overviewFocus(world: WorldModel): FocusTarget {
   const { min, max } = world.bounds;
   const center: Vec2 = [(min[0] + max[0]) / 2, (min[1] + max[1]) / 2];
