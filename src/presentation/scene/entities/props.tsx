@@ -1,12 +1,12 @@
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import type * as THREE from 'three';
+import * as THREE from 'three';
 import type { SectorFeature } from '@config/world';
 import { PALETTE } from '../../theme';
 import type { Vec2 } from '../../world/worldModel';
 import { Box, Cylinder, Decal, useCanvasTexture } from '../kit/Part';
 import { useInteractive } from '../../interaction/useInteractive';
-import { HoloMonitor, ProjectorRing, StatusOrb } from './holoProps';
+import { HOLO_CYAN, HoloMonitor, ProjectorRing, StatusOrb } from './holoProps';
 import { mat } from '../kit/materials';
 import { FONTS } from '../kit/canvasTexture';
 
@@ -203,8 +203,11 @@ export function FeatureProp({ feature, position, alert, reducedMotion, yaw = 0 }
   );
 }
 
-/** Overhead cable tray with a faint glowing conduit. */
-export function CableTray({ from, to, y = 3.4 }: { from: Vec2; to: Vec2; y?: number }) {
+/** Holographic floor conduit: a translucent strip with a bright core, flush with the floor. */
+const conduitGlass = new THREE.MeshBasicMaterial({ color: HOLO_CYAN, transparent: true, opacity: 0.16, toneMapped: false, depthWrite: false });
+const conduitCore = new THREE.MeshBasicMaterial({ color: HOLO_CYAN, transparent: true, opacity: 0.85, toneMapped: false, depthWrite: false });
+
+export function CableTray({ from, to, y = 0.025 }: { from: Vec2; to: Vec2; y?: number }) {
   const dx = to[0] - from[0];
   const dz = to[1] - from[1];
   const len = Math.hypot(dx, dz);
@@ -212,8 +215,8 @@ export function CableTray({ from, to, y = 3.4 }: { from: Vec2; to: Vec2; y?: num
   const mid: [number, number, number] = [(from[0] + to[0]) / 2, y, (from[1] + to[1]) / 2];
   return (
     <group position={mid} rotation={[0, angle, 0]}>
-      <Box position={[0, 0, 0]} size={[0.32, 0.06, len]} material={mat.steel()} shadows={false} />
-      <Box position={[0, 0.045, 0]} size={[0.06, 0.03, len]} material={mat.glow(PALETTE.forge, 0.35)} shadows={false} />
+      <Box position={[0, 0, 0]} size={[0.34, 0.01, len]} material={conduitGlass} shadows={false} />
+      <Box position={[0, 0.008, 0]} size={[0.05, 0.01, len]} material={conduitCore} shadows={false} />
     </group>
   );
 }
