@@ -15,7 +15,7 @@ describe('demo snapshot', () => {
       pipelineRuns: s.pipelineRuns.length,
       deployments: s.deployments.length,
       initiatives: s.initiatives.length,
-    }).toEqual({ squads: 3, repositories: 9, contributors: 12, changeRequests: 25, pipelineRuns: 8, deployments: 6, initiatives: 4 });
+    }).toEqual({ squads: 3, repositories: 9, contributors: 12, changeRequests: 25, pipelineRuns: 8, deployments: 7, initiatives: 4 });
   });
 
   it('is a demo source', () => {
@@ -190,5 +190,12 @@ describe('work items and workstreams', () => {
 
   it('links use .invalid domains', () => {
     for (const ws of s.workstreams) for (const l of ws.links) expect(new URL(l.url).hostname.endsWith('.invalid')).toBe(true);
+  });
+
+  it('has one in-flight production deployment triggered by a known contributor', () => {
+    const s = buildDemoSnapshot(new Date('2026-05-10T12:00:00Z'));
+    const running = s.deployments.filter((d) => d.environment === 'production' && d.status === 'running');
+    expect(running).toHaveLength(1);
+    expect(s.contributors.some((c) => c.id === running[0].triggeredById)).toBe(true);
   });
 });
