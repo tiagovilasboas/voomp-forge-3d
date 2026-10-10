@@ -7,6 +7,8 @@ import { useInteractive } from '../../interaction/useInteractive';
 import { Box, Decal, useCanvasTexture } from '../kit/Part';
 import { mat } from '../kit/materials';
 import { FONTS, makeCanvasTexture } from '../kit/canvasTexture';
+import { N8nDesk } from './N8nDesk';
+import { NpcBot } from './NpcBot';
 
 const PLATFORM_H = 0.14;
 const CYAN = '#38E1FF';
@@ -366,7 +368,7 @@ function PinballCabinet({ position, reducedMotion }: { position: [number, number
 
 /** HUB IA: knowledge vault, terminal and holographic pinball inside a glass-walled room. */
 export function AiHubRoom({ world, reducedMotion }: { world: WorldModel; reducedMotion: boolean }) {
-  const { center, size, terminal, pinball } = world.aiHub;
+  const { center, size, terminal, pinball, automation } = world.aiHub;
   const [cx, cz] = center;
   const [w, d] = size;
   const { hovered, selected, handlers } = useInteractive({ kind: 'hub' });
@@ -429,6 +431,8 @@ export function AiHubRoom({ world, reducedMotion }: { world: WorldModel; reduced
       <group position={[0, PLATFORM_H, 0]}>
         <TerminalKiosk position={[terminal[0], 0, terminal[1]]} reducedMotion={reducedMotion} />
         <PinballCabinet position={[pinball[0], 0, pinball[1]]} reducedMotion={reducedMotion} />
+        <N8nDesk position={[automation[0], 0, automation[1]]} reducedMotion={reducedMotion} />
+        <NpcBot world={world} reducedMotion={reducedMotion} />
       </group>
     </group>
   );

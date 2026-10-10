@@ -20,6 +20,8 @@ export type EntityRef =
   | { kind: 'hub' }
   | { kind: 'terminal' }
   | { kind: 'pinball' }
+  /** n8n workstation in the Hub IA (future ingestion automation). */
+  | { kind: 'automation' }
   /** Delivery fronts wall ("Mural de Frentes") and delivery calendar wall. */
   | { kind: 'fronts' }
   | { kind: 'calendar' }
@@ -71,7 +73,7 @@ export interface WorldModel {
   frontsWall: Vec2;
   calendarWall: Vec2;
   /** Hub IA room: knowledge base, terminal and holographic pinball. */
-  aiHub: { center: Vec2; size: Vec2; terminal: Vec2; pinball: Vec2 };
+  aiHub: { center: Vec2; size: Vec2; terminal: Vec2; pinball: Vec2; automation: Vec2 };
   /** Knowledge base vault (Confluence, Notion, docs in repos…), inside the Hub IA. */
   knowledgeVault: Vec2;
   bounds: { min: Vec2; max: Vec2 };

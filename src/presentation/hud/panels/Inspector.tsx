@@ -34,6 +34,7 @@ function exists(index: ForgeIndex, ref: EntityRef): boolean {
     case 'hub':
     case 'terminal':
     case 'pinball':
+    case 'automation':
     case 'fronts':
     case 'calendar':
       return true;
@@ -62,6 +63,7 @@ function Variant({ selection }: { selection: EntityRef }) {
     case 'hub':
     case 'terminal':
     case 'pinball':
+    case 'automation':
     case 'fronts':
     case 'calendar':
     case 'workstream':

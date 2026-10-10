@@ -72,6 +72,7 @@ export function buildWorld(squads: Squad[], repositories: Repository[], people: 
       size: hubSize,
       terminal: [hubCenter[0] - 4.5, 3.6],
       pinball: [hubCenter[0] + 4.5, 3.6],
+      automation: [hubCenter[0] - 5.6, -4.8],
     },
     knowledgeVault: [hubCenter[0], -2.2],
     bounds: { min: [minX, -depth / 2 - 3], max: [half, LAYOUT.gateZ + 4] },
@@ -109,6 +110,8 @@ export function focusFor(world: WorldModel, ref: EntityRef): FocusTarget | null 
       return { center: world.aiHub.terminal, radius: 3.5 };
     case 'pinball':
       return { center: world.aiHub.pinball, radius: 3.5 };
+    case 'automation':
+      return { center: world.aiHub.automation, radius: 3.5 };
     case 'whiteboard':
       return { center: world.weekBoard, radius: 4.5 };
     case 'board': {
