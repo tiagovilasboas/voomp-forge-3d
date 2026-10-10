@@ -1,6 +1,6 @@
 import type { Connector, ConnectorContext, SnapshotFragment } from '@application/ports/connectors';
 import type { WorkItem, WorkItemStatus, WorkItemType } from '@domain/entities';
-import { basicAuthHeaders, defaultFetchJson, trimSlash, type FetchJson } from './http';
+import { assertSafeBaseUrl, basicAuthHeaders, defaultFetchJson, MAX_PAGES, trimSlash, type FetchJson } from './http';
 
 export interface JiraConfig {
   baseUrl: string;
@@ -118,6 +118,7 @@ export class JiraConnector implements Connector<JiraConfig> {
     private readonly fetchJson: FetchJson = defaultFetchJson,
   ) {
     if (!config.baseUrl) throw new Error('jira: "baseUrl" é obrigatório.');
+    assertSafeBaseUrl('jira', config.baseUrl);
     if (!config.jql && !config.project) throw new Error('jira: informe "project" ou "jql".');
   }
 
@@ -128,12 +129,13 @@ export class JiraConnector implements Connector<JiraConfig> {
     const pageSize = 100;
     const items: WorkItem[] = [];
     let startAt = 0;
-    for (;;) {
+    for (let pages = 0; ; pages++) {
+      if (pages >= MAX_PAGES) throw new Error(`jira: limite de ${MAX_PAGES} páginas excedido.`);
       const url =
         `${trimSlash(config.baseUrl)}/rest/api/3/search?jql=${encodeURIComponent(jql)}` +
         `&fields=${encodeURIComponent(jiraFields(config).join(','))}&startAt=${startAt}&maxResults=${pageSize}`;
       const page = (await this.fetchJson(url, headers)) as { issues?: JiraRaw[]; total?: number };
-      const issues = page.issues ?? [];
+      const issues = Array.isArray(page.issues) ? page.issues : [];
       for (const issue of issues) items.push(mapJiraIssue(issue, config));
       startAt += issues.length;
       if (issues.length === 0 || startAt >= (page.total ?? 0)) break;
