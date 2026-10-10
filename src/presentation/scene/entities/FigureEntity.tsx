@@ -12,24 +12,23 @@ import { livePositions } from '../../interaction/livePositions';
 import { Box } from '../kit/Part';
 import { mat } from '../kit/materials';
 
-interface Outfit {
-  shirt: string;
-  trim: string;
-  pants: string;
+interface RoleStyle {
+  /** Accent light: antenna, eyes, chest strip. */
+  accent: string;
   device: 'laptop' | 'tablet' | 'card' | null;
 }
 
-/** Role → outfit. Unknown role gets a neutral outfit: we never invent a function. */
-const OUTFITS: Record<ContributorRole | 'unknown', Outfit> = {
-  developer: { shirt: '#2A2F38', trim: PALETTE.forge, pants: '#1A1D23', device: 'laptop' },
-  reviewer: { shirt: '#3B4656', trim: PALETTE.forgeBright, pants: '#1D2129', device: 'tablet' },
-  'tech-lead': { shirt: '#1E2128', trim: PALETTE.warn, pants: '#2B2F37', device: 'tablet' },
-  'product-manager': { shirt: '#D9D4CB', trim: PALETTE.forge, pants: '#2A2E36', device: 'card' },
-  unknown: { shirt: '#4A505C', trim: '#9DA3AE', pants: '#22262E', device: null },
+/** Role → accent. Unknown role stays neutral grey: a function is never invented. */
+const ROLE_STYLE: Record<ContributorRole | 'unknown', RoleStyle> = {
+  developer: { accent: PALETTE.forge, device: 'laptop' },
+  reviewer: { accent: PALETTE.forgeBright, device: 'tablet' },
+  'tech-lead': { accent: PALETTE.warn, device: 'tablet' },
+  'product-manager': { accent: PALETTE.snow, device: 'card' },
+  unknown: { accent: PALETTE.fog, device: null },
 };
 
-const SKIN = ['#E8C3A0', '#C99A72', '#9C6B4A', '#F1D3B6', '#B07D58', '#7A5236'];
-const HAIR = ['#1B1714', '#3A2A1E', '#6B4A2E', '#121212', '#8A6A4A', '#2C2C33'];
+/** Neutral shell finishes, varied per person (no skin tones, no gender cues). */
+const SHELLS = ['#2B3038', '#3A404A', '#C9CDD3', '#B9AE9C', '#4A4F58', '#8E949E'];
 
 function pick<T>(list: T[], seed: string, salt: number): T {
   let h = salt;
@@ -45,9 +44,12 @@ interface Props {
   reducedMotion: boolean;
 }
 
+const JOINT = new THREE.SphereGeometry(1, 12, 10);
+const LIMB = new THREE.CylinderGeometry(1, 1, 1, 12);
+
 /**
- * Block-built mini figure. Its pose comes from the animation system; this
- * component only maps joint angles onto meshes. Purely illustrative.
+ * Unisex block robot. Its pose comes from the animation system; this component
+ * only maps joint angles onto meshes. Purely illustrative.
  */
 export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: Props) {
   const { hovered, selected, handlers } = useInteractive({ kind: 'person', id: person.id });
@@ -59,20 +61,23 @@ export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: 
   const legL = useRef<THREE.Group>(null);
   const legR = useRef<THREE.Group>(null);
   const device = useRef<THREE.Group>(null);
+  const eyes = useRef<THREE.Group>(null);
+  const antenna = useRef<THREE.MeshBasicMaterial>(null);
 
-  const outfit = OUTFITS[person.role ?? 'unknown'];
-  const look = useMemo(
-    () => ({
-      skin: mat.matte(pick(SKIN, person.id, 7)),
-      hair: mat.matte(pick(HAIR, person.id, 13)),
-      shirt: mat.matte(outfit.shirt),
-      trim: mat.emissive(outfit.trim, 0.6),
-      pants: mat.matte(outfit.pants),
-      shoes: mat.rubber(),
-      eye: mat.matte('#111317'),
-    }),
-    [person.id, outfit],
-  );
+  const style = ROLE_STYLE[person.role ?? 'unknown'];
+  const look = useMemo(() => {
+    const shell = pick(SHELLS, person.id, 11);
+    const light = new THREE.Color(shell).getHSL({ h: 0, s: 0, l: 0 }).l > 0.5;
+    return {
+      shell: new THREE.MeshStandardMaterial({ color: shell, roughness: 0.42, metalness: 0.55 }),
+      frame: mat.rackMetal(),
+      joint: mat.steel(),
+      visor: new THREE.MeshStandardMaterial({ color: '#07090C', roughness: 0.15, metalness: 0.6 }),
+      accentGlow: mat.glow(style.accent, 1.4),
+      accentSoft: mat.emissive(style.accent, 0.5),
+      trim: light ? mat.rackMetal() : mat.steel(),
+    };
+  }, [person.id, style.accent]);
 
   useFrame(({ clock }) => {
     const time = clock.elapsedTime;
@@ -85,7 +90,7 @@ export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: 
       // Smooth turning instead of snapping between segments.
       const current = root.current.rotation.y;
       const delta = Math.atan2(Math.sin(pose.heading - current), Math.cos(pose.heading - current));
-      root.current.rotation.y = current + delta * Math.min(1, reducedMotion ? 1 : 0.18);
+      root.current.rotation.y = current + delta * (reducedMotion ? 1 : 0.18);
     }
     livePositions.set(person.id, pose.position);
     if (body.current) body.current.position.y = rig.bob;
@@ -94,72 +99,100 @@ export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: 
     if (armR.current) armR.current.rotation.set(rig.armR, 0, -rig.armSpread);
     if (legL.current) legL.current.rotation.x = rig.legL;
     if (legR.current) legR.current.rotation.x = rig.legR;
-    if (device.current) device.current.visible = rig.holdsDevice && outfit.device !== null && pose.action !== 'type';
+    if (device.current) device.current.visible = rig.holdsDevice && style.device !== null && pose.action !== 'type';
+    if (eyes.current) {
+      // Blink every few seconds; happy squint while celebrating.
+      const blink = !reducedMotion && (time + person.id.length) % 4.2 < 0.12;
+      eyes.current.scale.y = pose.action === 'celebrate' ? 0.35 : blink ? 0.1 : 1;
+    }
+    if (antenna.current) {
+      const k = reducedMotion ? 1 : 0.7 + Math.sin(time * 3 + person.id.length) * 0.5;
+      antenna.current.color.set(style.accent).multiplyScalar(dimmed ? 0.3 : 1 + k);
+    }
   });
 
-  const ring = hovered || selected;
+  const limb = (len: number, r: number, m: THREE.Material, y: number) => (
+    <mesh geometry={LIMB} material={m} position={[0, y, 0]} scale={[r, len, r]} castShadow />
+  );
+  const joint = (r: number, y: number) => <mesh geometry={JOINT} material={look.joint} position={[0, y, 0]} scale={r} castShadow />;
 
   return (
     <group ref={root} {...handlers} scale={dimmed ? 0.9 : 1}>
       {/* invisible, generous hit volume */}
-      <mesh position={[0, 0.55, 0]}>
-        <boxGeometry args={[0.6, 1.2, 0.5]} />
+      <mesh position={[0, 0.6, 0]}>
+        <boxGeometry args={[0.6, 1.25, 0.5]} />
         <meshBasicMaterial visible={false} />
       </mesh>
 
       <group ref={body}>
         {/* legs (pivot at hip) */}
-        <group ref={legL} position={[-0.085, 0.42, 0]}>
-          <Box position={[0, -0.18, 0]} size={[0.15, 0.36, 0.17]} material={look.pants} />
-          <Box position={[0, -0.39, 0.03]} size={[0.16, 0.07, 0.22]} material={look.shoes} />
-        </group>
-        <group ref={legR} position={[0.085, 0.42, 0]}>
-          <Box position={[0, -0.18, 0]} size={[0.15, 0.36, 0.17]} material={look.pants} />
-          <Box position={[0, -0.39, 0.03]} size={[0.16, 0.07, 0.22]} material={look.shoes} />
-        </group>
+        {[
+          { ref: legL, x: -0.09 },
+          { ref: legR, x: 0.09 },
+        ].map(({ ref, x }) => (
+          <group key={x} ref={ref} position={[x, 0.42, 0]}>
+            {joint(0.055, 0)}
+            {limb(0.3, 0.05, look.frame, -0.17)}
+            <RoundedBox args={[0.15, 0.08, 0.22]} radius={0.03} smoothness={2} position={[0, -0.37, 0.03]} material={look.shell} castShadow />
+          </group>
+        ))}
 
-        {/* hips + torso */}
-        <Box position={[0, 0.45, 0]} size={[0.34, 0.08, 0.19]} material={look.pants} />
-        <mesh position={[0, 0.66, 0]} castShadow material={look.shirt}>
-          <cylinderGeometry args={[0.17, 0.2, 0.36, 4, 1]} />
-        </mesh>
-        <Box position={[0, 0.6, 0.142]} size={[0.06, 0.2, 0.01]} material={look.trim} shadows={false} />
+        {/* pelvis + torso */}
+        <RoundedBox args={[0.3, 0.09, 0.18]} radius={0.03} smoothness={2} position={[0, 0.46, 0]} material={look.frame} />
+        <RoundedBox args={[0.38, 0.36, 0.25]} radius={0.07} smoothness={3} position={[0, 0.69, 0]} material={look.shell} castShadow />
+        <RoundedBox args={[0.24, 0.16, 0.02]} radius={0.02} smoothness={2} position={[0, 0.71, 0.126]} material={look.visor} />
+        <Box position={[0, 0.71, 0.138]} size={[0.16, 0.025, 0.005]} material={look.accentGlow} shadows={false} />
+        <Box position={[-0.05, 0.665, 0.138]} size={[0.03, 0.03, 0.005]} material={look.accentSoft} shadows={false} />
+        <Box position={[0.0, 0.665, 0.138]} size={[0.03, 0.03, 0.005]} material={look.trim} shadows={false} />
+        <Box position={[0.05, 0.665, 0.138]} size={[0.03, 0.03, 0.005]} material={look.accentSoft} shadows={false} />
 
         {/* arms (pivot at shoulder) */}
-        <group ref={armL} position={[-0.235, 0.8, 0]}>
-          <Box position={[0, -0.14, 0]} size={[0.1, 0.3, 0.12]} material={look.shirt} />
-          <Box position={[0, -0.31, 0]} size={[0.09, 0.07, 0.1]} material={look.skin} />
-        </group>
-        <group ref={armR} position={[0.235, 0.8, 0]}>
-          <Box position={[0, -0.14, 0]} size={[0.1, 0.3, 0.12]} material={look.shirt} />
-          <Box position={[0, -0.31, 0]} size={[0.09, 0.07, 0.1]} material={look.skin} />
-          <group ref={device} position={[-0.12, -0.36, 0.12]} rotation={[-0.4, 0, 0]} visible={false}>
-            {outfit.device === 'tablet' && (
-              <>
-                <Box position={[0, 0, 0]} size={[0.26, 0.02, 0.19]} material={mat.rackMetal()} />
-                <Box position={[0, 0.012, 0]} size={[0.22, 0.005, 0.15]} material={mat.glow(PALETTE.forgeBright, 0.8)} shadows={false} />
-              </>
+        {[
+          { ref: armL, x: -0.245, side: -1 },
+          { ref: armR, x: 0.245, side: 1 },
+        ].map(({ ref, x, side }) => (
+          <group key={x} ref={ref} position={[x, 0.82, 0]}>
+            {joint(0.065, 0)}
+            {limb(0.26, 0.042, look.frame, -0.15)}
+            <mesh geometry={JOINT} material={look.shell} position={[0, -0.32, 0]} scale={[0.06, 0.055, 0.06]} castShadow />
+            {side === 1 && (
+              <group ref={device} position={[-0.12, -0.36, 0.12]} rotation={[-0.4, 0, 0]} visible={false}>
+                {style.device === 'tablet' && (
+                  <>
+                    <Box position={[0, 0, 0]} size={[0.26, 0.02, 0.19]} material={mat.rackMetal()} />
+                    <Box position={[0, 0.012, 0]} size={[0.22, 0.005, 0.15]} material={mat.glow(PALETTE.forgeBright, 0.8)} shadows={false} />
+                  </>
+                )}
+                {style.device === 'card' && <Box position={[0, 0, 0]} size={[0.18, 0.01, 0.13]} material={mat.glow(PALETTE.ok, 0.7)} shadows={false} />}
+                {style.device === 'laptop' && <Box position={[0, 0, 0]} size={[0.28, 0.025, 0.2]} material={mat.steel()} />}
+              </group>
             )}
-            {outfit.device === 'card' && <Box position={[0, 0, 0]} size={[0.18, 0.01, 0.13]} material={mat.glow(PALETTE.ok, 0.7)} shadows={false} />}
-            {outfit.device === 'laptop' && <Box position={[0, 0, 0]} size={[0.28, 0.025, 0.2]} material={mat.steel()} />}
           </group>
-        </group>
+        ))}
 
         {/* neck + head */}
-        <Box position={[0, 0.87, 0]} size={[0.1, 0.05, 0.1]} material={look.skin} />
-        <group ref={head} position={[0, 0.89, 0]}>
-          <RoundedBox args={[0.27, 0.26, 0.25]} radius={0.05} smoothness={2} position={[0, 0.13, 0]} castShadow material={look.skin} />
-          <RoundedBox args={[0.29, 0.09, 0.27]} radius={0.03} smoothness={2} position={[0, 0.27, -0.01]} material={look.hair} />
-          <Box position={[0, 0.2, -0.11]} size={[0.29, 0.14, 0.05]} material={look.hair} shadows={false} />
-          <Box position={[-0.06, 0.15, 0.126]} size={[0.035, 0.045, 0.005]} material={look.eye} shadows={false} />
-          <Box position={[0.06, 0.15, 0.126]} size={[0.035, 0.045, 0.005]} material={look.eye} shadows={false} />
-          {person.role === 'tech-lead' && (
-            <Box position={[0.15, 0.13, 0]} size={[0.03, 0.12, 0.08]} material={mat.emissive(PALETTE.warn, 0.8)} shadows={false} />
-          )}
+        {limb(0.06, 0.05, look.joint, 0.9)}
+        <group ref={head} position={[0, 0.93, 0]}>
+          <RoundedBox args={[0.34, 0.27, 0.28]} radius={0.08} smoothness={3} position={[0, 0.14, 0]} material={look.shell} castShadow />
+          {/* visor + eyes */}
+          <RoundedBox args={[0.27, 0.14, 0.03]} radius={0.03} smoothness={2} position={[0, 0.15, 0.135]} material={look.visor} />
+          <group ref={eyes} position={[0, 0.155, 0.152]}>
+            <Box position={[-0.06, 0, 0]} size={[0.045, 0.05, 0.005]} material={look.accentGlow} shadows={false} />
+            <Box position={[0.06, 0, 0]} size={[0.045, 0.05, 0.005]} material={look.accentGlow} shadows={false} />
+          </group>
+          {/* ear modules */}
+          <mesh geometry={LIMB} material={look.frame} position={[-0.18, 0.14, 0]} rotation={[0, 0, Math.PI / 2]} scale={[0.045, 0.03, 0.045]} />
+          <mesh geometry={LIMB} material={look.frame} position={[0.18, 0.14, 0]} rotation={[0, 0, Math.PI / 2]} scale={[0.045, 0.03, 0.045]} />
+          {/* antenna */}
+          {limb(0.1, 0.008, look.joint, 0.33)}
+          <mesh position={[0, 0.4, 0]}>
+            <sphereGeometry args={[0.028, 12, 10]} />
+            <meshBasicMaterial ref={antenna} color={style.accent} toneMapped={false} />
+          </mesh>
         </group>
       </group>
 
-      {ring && (
+      {(hovered || selected) && (
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
           <ringGeometry args={[0.36, 0.44, 40]} />
           <meshBasicMaterial color={selected ? PALETTE.forge : PALETTE.snow} transparent opacity={selected ? 0.95 : 0.5} toneMapped={false} />
