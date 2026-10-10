@@ -1,6 +1,6 @@
 import type { ForgeIndex } from './forgeIndex';
 import { listEvents, type DeliveryEvent, type DeliveryEventKind } from './events';
-import type { ScopeFilter } from './period';
+import { periodStart, type ScopeFilter } from './period';
 
 export interface CalendarDay {
   /** Local calendar date, YYYY-MM-DD. */
@@ -26,10 +26,13 @@ export function dayKey(iso: string, timeZone?: string): string {
  * scope's period (empty days included so the grid has no gaps).
  */
 export function deliveryCalendar(idx: ForgeIndex, scope: ScopeFilter, timeZone?: string): CalendarDay[] {
+  // The period starts mid-day, so it spans periodDays + 1 calendar dates: cover them all.
   const byDay = new Map<string, CalendarDay>();
-  for (let i = scope.periodDays - 1; i >= 0; i--) {
-    const date = dayKey(new Date(scope.now.getTime() - i * 86_400_000).toISOString(), timeZone);
-    byDay.set(date, { date, events: [], counts: EMPTY_COUNTS() });
+  const last = dayKey(scope.now.toISOString(), timeZone);
+  for (let t = periodStart(scope); ; t += 86_400_000) {
+    const date = dayKey(new Date(t).toISOString(), timeZone);
+    if (!byDay.has(date)) byDay.set(date, { date, events: [], counts: EMPTY_COUNTS() });
+    if (date === last) break;
   }
   for (const event of listEvents(idx, scope)) {
     const day = byDay.get(dayKey(event.at, timeZone));
