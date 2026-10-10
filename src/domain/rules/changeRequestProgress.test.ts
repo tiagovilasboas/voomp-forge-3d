@@ -13,7 +13,7 @@ const T = (day: number) => `2026-10-${String(day).padStart(2, '0')}T10:00:00.000
 
 const cr = (o: Partial<ChangeRequest> = {}): ChangeRequest => ({
   id: 'cr-1',
-  evidence: 'provider',
+  origin: 'provider',
   number: 1,
   repositoryId: 'repo-1',
   title: 't',
@@ -66,6 +66,7 @@ const evidence = (o: Partial<ChangeRequestEvidence> = {}): ChangeRequestEvidence
   reviews: [],
   headRuns: [],
   deployments: [],
+  capabilities: { changeRequests: 'native', reviews: 'native', pipelines: 'native', deployments: 'native' },
   ...o,
 });
 const merged = (deployments: Deployment[] = []) =>
@@ -204,5 +205,26 @@ describe('timeline', () => {
   it('approval after changes requested by the same reviewer marks approved done', () => {
     const e = evidence({ reviews: [review('r', 'changes_requested', 2), review('r', 'approved', 3)] });
     expect(stateOf(e, 'approved')).toBe('done');
+  });
+});
+
+describe('capabilities', () => {
+  const gitOnly = { changeRequests: 'inferred', reviews: 'unavailable', pipelines: 'unavailable', deployments: 'unavailable' } as const;
+
+  it('marks review and deployment stages unknown — never pending or done — when the source cannot know them', () => {
+    const merged = cr({ origin: 'merge-commit', state: 'merged', mergedAt: T(5), mergeCommitSha: 'm' });
+    const stages = timeline(evidence({ changeRequest: merged, capabilities: gitOnly }));
+    const state = (id: StageId) => stages.find((s) => s.id === id)!.state;
+    expect(state('opened')).toBe('done');
+    expect(state('in_review')).toBe('unknown');
+    expect(state('approved')).toBe('unknown');
+    expect(state('merged')).toBe('done');
+    expect(state('deployed')).toBe('unknown');
+    expect(state('production')).toBe('unknown');
+  });
+
+  it('still reports a merged change as merged, not in production', () => {
+    const merged = cr({ origin: 'merge-commit', state: 'merged', mergedAt: T(5), mergeCommitSha: 'm' });
+    expect(deliveryStatus(evidence({ changeRequest: merged, capabilities: gitOnly }))).toBe('merged');
   });
 });
