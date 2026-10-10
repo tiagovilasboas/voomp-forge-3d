@@ -7,6 +7,7 @@ import { useUiStore } from '../state/uiStore';
 import { Environment } from './stage/Environment';
 import { CameraRig } from './stage/CameraRig';
 import { Effects } from './stage/Effects';
+import { Reflections } from './stage/Reflections';
 import { ForgeScene } from './ForgeScene';
 
 /**
@@ -39,6 +40,7 @@ export default function ForgeCanvas() {
         }}
       />
       <Environment world={world} shadows={high} />
+      <Reflections />
       <ForgeScene />
       <CameraRig world={world} />
       {high && <Effects />}

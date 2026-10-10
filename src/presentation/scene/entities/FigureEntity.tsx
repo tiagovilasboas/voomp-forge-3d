@@ -44,7 +44,7 @@ const RING = new THREE.TorusGeometry(1, 0.16, 10, 32);
 const CYL = new THREE.CylinderGeometry(1, 1, 1, 24);
 /** Curved screen patch on the front of the helmet (UVs span the whole patch). */
 const SCREEN = new THREE.SphereGeometry(1, 32, 16, Math.PI / 2 - 0.85, 1.7, Math.PI / 2 - 0.62, 1.18);
-const JOINT_DARK = new THREE.MeshStandardMaterial({ color: '#111317', roughness: 0.45, metalness: 0.7 });
+const JOINT_DARK = new THREE.MeshStandardMaterial({ color: '#15171C', roughness: 0.28, metalness: 0.95 });
 
 interface Props {
   layout: FigureLayout;

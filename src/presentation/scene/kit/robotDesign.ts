@@ -33,12 +33,12 @@ export interface RobotDesign {
 
 const EARS: EarStyle[] = ['ring', 'fin', 'pod'];
 const FINISHES: Finish[] = [
-  { shell: '#2E3138', metalness: 0.75, roughness: 0.38 }, // gunmetal
-  { shell: '#1C1E23', metalness: 0.6, roughness: 0.45 }, // graphite
-  { shell: '#4A4E57', metalness: 0.8, roughness: 0.32 }, // steel
-  { shell: '#D9DBDF', metalness: 0.35, roughness: 0.3 }, // pearl
-  { shell: '#5B5145', metalness: 0.7, roughness: 0.4 }, // bronze
-  { shell: '#3B3F4A', metalness: 0.7, roughness: 0.5 }, // slate
+  { shell: '#B8BEC8', metalness: 1, roughness: 0.16 }, // chrome
+  { shell: '#8A9099', metalness: 1, roughness: 0.24 }, // titanium
+  { shell: '#3A3E46', metalness: 0.95, roughness: 0.22 }, // polished graphite
+  { shell: '#9C8466', metalness: 1, roughness: 0.3 }, // brushed bronze
+  { shell: '#5A606B', metalness: 1, roughness: 0.2 }, // gunmetal
+  { shell: '#D4D7DC', metalness: 0.9, roughness: 0.14 }, // pearl alloy
 ];
 
 function hash(seed: string, salt: number): number {
