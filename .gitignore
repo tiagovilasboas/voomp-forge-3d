@@ -2,3 +2,8 @@ node_modules
 dist
 .vitest
 *.tsbuildinfo
+
+# Real-data snapshots and connector config never go to the repo (the site is public)
+public/snapshot*.json
+*.private.json
+forge.config.json
