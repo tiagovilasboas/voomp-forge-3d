@@ -159,9 +159,9 @@ Sala temática por setor (`SectorTheme.feature`; squad sem tema recebe o próxim
 
 | Squad (demo) | Feature | Cena |
 |--------------|---------|------|
-| I · Interface (`sq-admin`) | `coordination-desk` | Balcão de coordenação com tela de vidro |
-| C · Confiabilidade (`sq-n3`) | `monitoring-room` | Sala de vidro com parede de gráficos de monitoramento |
-| P · Plataforma (`sq-enable`) | `architecture-room` | Sala de vidro com holograma em wireframe rotativo |
+| E · Experience (`sq-admin`) | `coordination-desk` | Balcão de coordenação com tela de vidro |
+| R · Reliability (`sq-n3`) | `monitoring-room` | Sala de vidro com parede de gráficos de monitoramento |
+| P · Platform (`sq-enable`) | `architecture-room` | Sala de vidro com holograma em wireframe rotativo |
 
 ### Racks = repositórios
 

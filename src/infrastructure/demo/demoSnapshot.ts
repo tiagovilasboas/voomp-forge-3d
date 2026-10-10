@@ -56,13 +56,13 @@ const ctId = (handle: string) => `ct-${handle}`;
 // ---------------------------------------------------------------------------
 
 const SQUADS: Squad[] = [
-  { id: 'sq-admin',  code: 'I', name: 'Interface',        description: 'Telas web, fluxos de usuário e o console do produto.' },
-  { id: 'sq-n3',     code: 'C', name: 'Confiabilidade',   description: 'Incidentes, sinais de falha e correções em produção.' },
-  { id: 'sq-enable', code: 'P', name: 'Plataforma',       description: 'CI, design system e ferramentas compartilhadas.' },
-  { id: 'sq-vmpg',   code: 'N', name: 'Integrações',      description: 'APIs de parceiros, contratos de evento e conectores.' },
-  { id: 'sq-vgfe',   code: 'D', name: 'Dados',            description: 'Pipelines, modelos analíticos e catálogos de dados.' },
-  { id: 'sq-vgat',   code: 'M', name: 'Mensageria',       description: 'Filas, notificações e contratos entre serviços.' },
-  { id: 'sq-vply',   code: 'K', name: 'Catálogo',         description: 'Cadastro de itens, busca e a vitrine do produto.' },
+  { id: 'sq-admin',  code: 'E', name: 'Experience',     description: 'Telas web, fluxos de usuário e o console do produto.' },
+  { id: 'sq-n3',     code: 'R', name: 'Reliability',    description: 'Incidentes, sinais de falha e correções em produção.' },
+  { id: 'sq-enable', code: 'P', name: 'Platform',       description: 'CI, design system e ferramentas compartilhadas.' },
+  { id: 'sq-vmpg',   code: 'N', name: 'Integrations',   description: 'APIs de parceiros, contratos de evento e conectores.' },
+  { id: 'sq-vgfe',   code: 'D', name: 'Data',           description: 'Pipelines, modelos analíticos e catálogos de dados.' },
+  { id: 'sq-vgat',   code: 'M', name: 'Messaging',      description: 'Filas, notificações e contratos entre serviços.' },
+  { id: 'sq-vply',   code: 'K', name: 'Discovery',      description: 'Busca, cadastro de itens e a vitrine do produto.' },
 ];
 
 // [name, squad, language, description]
@@ -638,7 +638,7 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
     },
     {
       id: 'ws-sustentacao-n3',
-      name: 'Operação da Confiabilidade',
+      name: 'Reliability operations',
       category: 'sustaining',
       squadIds: ['sq-n3'],
       initiativeId: 'ini-payment-stability',

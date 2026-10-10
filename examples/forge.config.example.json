@@ -26,8 +26,8 @@
         {
           "id": "sq-atelie",
           "code": "A",
-          "name": "Interface",
-          "description": "Telas web, fluxos de usuário e o console do produto.",
+          "name": "Experience",
+          "description": "Web screens, user flows and the product console.",
           "repositories": [
             {
               "path": "../clones/bancada-web",

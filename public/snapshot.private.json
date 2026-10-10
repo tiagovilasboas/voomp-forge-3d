@@ -31,44 +31,44 @@
     {
       "id": "squad-atelie",
       "code": "A",
-      "name": "Interface",
-      "description": "Telas web, fluxos de usuário e o console do produto."
+      "name": "Experience",
+      "description": "Web screens, user flows and the product console."
     },
     {
       "id": "squad-farol",
       "code": "F",
-      "name": "Confiabilidade",
-      "description": "Incidentes, sinais de falha e correções em produção."
+      "name": "Reliability",
+      "description": "Incidents, failure signals and production fixes."
     },
     {
       "id": "squad-rotas",
       "code": "R",
-      "name": "Integrações",
-      "description": "APIs de parceiros, contratos de evento e conectores."
+      "name": "Integrations",
+      "description": "Partner APIs, event contracts and connectors."
     },
     {
       "id": "squad-almoxarifado",
       "code": "M",
-      "name": "Dados",
-      "description": "Pipelines, modelos analíticos e catálogos de dados."
+      "name": "Data",
+      "description": "Pipelines, analytical models and data catalogs."
     },
     {
       "id": "squad-ponte",
       "code": "P",
-      "name": "Mensageria",
-      "description": "Filas, notificações e contratos entre serviços."
+      "name": "Messaging",
+      "description": "Queues, notifications and service contracts."
     },
     {
       "id": "squad-vitrine",
       "code": "V",
-      "name": "Catálogo",
-      "description": "Cadastro de itens, busca e a vitrine do produto."
+      "name": "Discovery",
+      "description": "Search, item records and the product storefront."
     },
     {
       "id": "squad-trilho",
       "code": "T",
-      "name": "Plataforma",
-      "description": "CI, design system e ferramentas compartilhadas."
+      "name": "Platform",
+      "description": "CI, design system and shared tooling."
     }
   ],
   "repositories": [],
