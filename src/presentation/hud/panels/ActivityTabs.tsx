@@ -143,7 +143,7 @@ export function ActivityTabs() {
               tabIndex={selected ? 0 : -1}
               onClick={() => setActive(t.id)}
               onKeyDown={(e) => onKeyDown(e, i)}
-              className={`focus-ring -mb-px flex items-center gap-1 border-b-2 pb-2 text-[12px] font-semibold whitespace-nowrap ${
+              className={`focus-ring -mb-px flex items-center gap-1 border-b-2 pb-2 tap:min-h-11 tap:items-end text-[12px] font-semibold whitespace-nowrap ${
                 selected ? 'border-forge text-snow' : 'border-transparent text-fog hover:text-snow'
               }`}
             >

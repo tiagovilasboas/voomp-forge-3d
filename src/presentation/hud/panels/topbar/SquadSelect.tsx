@@ -19,9 +19,9 @@ export function SquadSelect() {
   }, [squadId, index, snapshot]);
 
   return (
-    <div className="relative flex min-w-0 shrink items-center gap-2 rounded-xl bg-white/[0.04] py-1 pr-7 pl-1.5 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-forge-bright hover:bg-white/[0.07]">
+    <div className="relative flex min-w-0 shrink items-center gap-2 rounded-xl bg-white/[0.04] py-1 pr-7 pl-1.5 tap:min-h-11 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-forge-bright hover:bg-white/[0.07]">
       <span className="rounded-md bg-forge px-1.5 py-0.5 font-mono text-[10px] font-bold text-ink-950">{code}</span>
-      <div className="min-w-0 leading-tight">
+      <div className="hidden min-w-0 leading-tight lg:block">
         <div className="truncate text-[13px] font-semibold text-snow">{name}</div>
         <div className="hidden truncate text-[11px] text-fog xl:block">
           {repos} repositórios · {people} pessoas

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { ForgeIndex } from '@application/queries/forgeIndex';
-import type { EntityRef } from '../../world/worldModel';
+import { refKey, type EntityRef } from '../../world/worldModel';
 import { useReadyData } from '../../state/dataStore';
 import { useUiStore } from '../../state/uiStore';
 import { Card, EmptyState } from '../kit/primitives';
@@ -24,6 +24,8 @@ function exists(index: ForgeIndex, ref: EntityRef): boolean {
     case 'initiative':
       return index.initiative.has(ref.id);
     case 'gate':
+    case 'document':
+    case 'whiteboard':
       return true;
   }
 }
@@ -40,6 +42,19 @@ function Variant({ selection }: { selection: EntityRef }) {
       return <ChangeInspector id={selection.id} />;
     case 'initiative':
       return <InitiativeInspector id={selection.id} />;
+    case 'document':
+    case 'whiteboard':
+      return (
+        <>
+          <InspectorHeader
+            icon="draft"
+            eyebrow={selection.kind === 'document' ? 'Documento' : 'Quadro da equipe'}
+            title={selection.kind === 'document' ? 'Documento' : 'Quadro branco'}
+            target={selection}
+          />
+          <div className="pb-4" />
+        </>
+      );
     case 'gate':
       return (
         <>
@@ -50,13 +65,13 @@ function Variant({ selection }: { selection: EntityRef }) {
   }
 }
 
-/** Right-hand panel. Shows the entity picked in the world or in any list. Esc closes it. */
-export function Inspector() {
+/** Body of the inspector (no chrome). Esc closes it; keyboard focus lands on the first control. */
+export function InspectorContent() {
   const { index } = useReadyData();
   const selection = useUiStore((s) => s.selection);
   const select = useUiStore((s) => s.select);
   const ref = useRef<HTMLDivElement>(null);
-  const key = selection ? (selection.kind === 'gate' ? 'gate' : `${selection.kind}:${selection.id}`) : '';
+  const key = selection ? refKey(selection) : '';
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -76,21 +91,30 @@ export function Inspector() {
   if (!selection) return null;
 
   return (
-    <Card label="Detalhes" className="scroll-thin max-h-[62vh] overflow-auto md:max-h-[calc(100vh-96px)]">
-      <div ref={ref}>
-        {exists(index, selection) ? (
-          <Variant selection={selection} />
-        ) : (
-          <div className="p-2">
-            <EmptyState icon="help" title="Item não encontrado nos dados atuais" />
-            <div className="flex justify-center pb-3">
-              <button type="button" data-autofocus onClick={() => select(null)} className="focus-ring rounded-lg bg-white/[0.08] px-3 py-1.5 text-xs font-semibold text-snow">
-                Fechar
-              </button>
-            </div>
+    <div ref={ref}>
+      {exists(index, selection) ? (
+        <Variant selection={selection} />
+      ) : (
+        <div className="p-2">
+          <EmptyState icon="help" title="Item não encontrado nos dados atuais" />
+          <div className="flex justify-center pb-3">
+            <button type="button" data-autofocus onClick={() => select(null)} className="focus-ring rounded-lg bg-white/[0.08] px-3 py-1.5 text-xs font-semibold text-snow">
+              Fechar
+            </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Right-hand panel (tablet and desktop). On phones the same content lives in a bottom sheet. */
+export function Inspector() {
+  const hasSelection = useUiStore((s) => s.selection !== null);
+  if (!hasSelection) return null;
+  return (
+    <Card label="Detalhes" className="scroll-thin max-h-[62vh] overflow-auto md:max-h-[calc(100vh-96px)]">
+      <InspectorContent />
     </Card>
   );
 }

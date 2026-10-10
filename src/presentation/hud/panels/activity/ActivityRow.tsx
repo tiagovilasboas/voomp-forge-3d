@@ -16,7 +16,7 @@ interface ActivityRowProps {
 export function ActivityRow({ icon, title, subline, onOpen, action, badge }: ActivityRowProps) {
   return (
     <li className="flex items-center gap-2 rounded-lg px-1.5 py-1 hover:bg-white/[0.04]">
-      <button type="button" onClick={onOpen} className="focus-ring flex min-w-0 flex-1 items-center gap-2 rounded-md text-left">
+      <button type="button" onClick={onOpen} className="focus-ring flex min-w-0 flex-1 items-center gap-2 rounded-md tap:min-h-11 text-left">
         <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-white/5 text-fog">
           <Icon name={icon} size={14} />
         </span>
@@ -31,7 +31,7 @@ export function ActivityRow({ icon, title, subline, onOpen, action, badge }: Act
           type="button"
           onClick={action.onClick}
           aria-label={action.ariaLabel}
-          className="focus-ring shrink-0 rounded-md bg-forge/15 px-2 py-0.5 text-[11px] font-semibold text-forge-bright hover:bg-forge/25"
+          className="focus-ring shrink-0 rounded-md bg-forge/15 px-2 py-0.5 tap:min-h-9 tap:px-3 text-[11px] font-semibold text-forge-bright hover:bg-forge/25"
         >
           {action.label}
         </button>

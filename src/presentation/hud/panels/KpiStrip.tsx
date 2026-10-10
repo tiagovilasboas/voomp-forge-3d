@@ -35,7 +35,7 @@ function KpiCard({ icon, label, value, hint, title, tone = 'neutral' }: KpiCardP
   return (
     <article
       title={title}
-      className={`hud-card flex w-[168px] shrink-0 cursor-help items-center gap-2.5 px-3 py-2 transition-colors duration-500 ${flash ? 'border-forge/70 bg-forge/10' : ''}`}
+      className={`hud-card flex w-[150px] shrink-0 snap-start md:w-[168px] cursor-help items-center gap-2.5 px-3 py-2 transition-colors duration-500 ${flash ? 'border-forge/70 bg-forge/10' : ''}`}
     >
       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/5 text-fog">
         <Icon name={icon} size={18} />
@@ -62,7 +62,7 @@ export function KpiStrip() {
   const hint = `últimos ${periodDays} dias${squadName ? ` · ${squadName}` : ''}`;
 
   return (
-    <div role="list" aria-label="Indicadores" className="scroll-thin flex gap-2 overflow-x-auto pb-1">
+    <div role="list" aria-label="Indicadores" className="no-scrollbar flex snap-x snap-mandatory scroll-px-2 gap-2 overflow-x-auto px-2 pb-1 md:scroll-thin md:snap-none md:px-0">
       <div role="listitem">
         <KpiCard
           icon="merge"

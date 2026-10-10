@@ -4,6 +4,7 @@ import { useUiStore } from '../../state/uiStore';
 import { useRepoHealth } from '../../state/selectors';
 import { SIGNAL_LOOK } from '../../theme';
 import { StatusBadge } from '../kit/primitives';
+import { useCanHover } from '../kit/useMediaQuery';
 
 /** Follows the pointer and names whatever 3D entity is under it. */
 export function HoverTooltip() {
@@ -12,12 +13,14 @@ export function HoverTooltip() {
   const { index } = useReadyData();
   const health = useRepoHealth();
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const canHover = useCanHover();
 
   useEffect(() => {
+    if (!canHover) return;
     const onMove = (e: PointerEvent) => setPos({ x: e.clientX, y: e.clientY });
     window.addEventListener('pointermove', onMove);
     return () => window.removeEventListener('pointermove', onMove);
-  }, []);
+  }, [canHover]);
 
   const content = useMemo(() => {
     if (!hover) return null;
@@ -45,7 +48,7 @@ export function HoverTooltip() {
     }
   }, [hover, selection, index, health]);
 
-  if (!content || !pos) return null;
+  if (!canHover || !content || !pos) return null;
 
   return (
     <div

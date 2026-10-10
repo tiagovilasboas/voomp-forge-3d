@@ -13,7 +13,7 @@ export function ForgeLogo() {
   return (
     <div className="flex shrink-0 items-center gap-2">
       <ForgeMark />
-      <div className="leading-tight">
+      <div className="hidden leading-tight xl:block">
         <div className="font-display text-[15px] font-bold tracking-tight text-snow">Voomp Forge</div>
         <div className="hidden text-[11px] text-fog 2xl:block">From Code to Delivery</div>
       </div>

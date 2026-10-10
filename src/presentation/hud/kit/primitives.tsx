@@ -89,7 +89,7 @@ export function IconButton({
       title={label}
       onClick={onClick}
       aria-pressed={active || undefined}
-      className={`focus-ring grid h-8 w-8 place-items-center rounded-lg text-fog transition hover:bg-white/[0.08] hover:text-snow ${active ? 'bg-forge/15 text-forge-bright' : ''} ${className}`}
+      className={`focus-ring grid h-8 w-8 tap:h-11 tap:w-11 place-items-center rounded-lg text-fog transition hover:bg-white/[0.08] hover:text-snow ${active ? 'bg-forge/15 text-forge-bright' : ''} ${className}`}
     >
       <Icon name={icon} size={16} />
     </button>
@@ -118,7 +118,7 @@ export function Segmented<T extends string | number>({
           disabled={o.disabled}
           title={o.title}
           onClick={() => onChange(o.value)}
-          className={`focus-ring rounded-md px-2.5 py-1 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 ${
+          className={`focus-ring rounded-md px-2.5 py-1 whitespace-nowrap tap:min-h-10 tap:px-3.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 ${
             o.value === value ? 'bg-ink-700 text-snow shadow' : 'text-fog hover:text-snow'
           }`}
         >

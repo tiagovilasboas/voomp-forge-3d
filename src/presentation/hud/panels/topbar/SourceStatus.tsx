@@ -4,7 +4,7 @@ import { Chip, Segmented } from '@presentation/hud/kit/primitives';
 import { relativeTime } from '@presentation/hud/kit/format';
 
 /** Source pill: DEMO DATA flag, snapshot freshness and the data source switch. */
-export function SourceStatus() {
+export function SourceStatus({ expanded = false }: { expanded?: boolean }) {
   const { snapshot } = useReadyData();
   const sources = useDataStore((s) => s.sources);
   const load = useDataStore((s) => s.load);
@@ -17,11 +17,11 @@ export function SourceStatus() {
   });
 
   return (
-    <div className="flex shrink-0 items-center gap-2">
+    <div className={`flex items-center gap-2 ${expanded ? 'flex-wrap' : 'shrink-0'}`}>
       {isDemo && <Chip tone="demo">DEMO DATA</Chip>}
-      <span className="hidden text-[11px] whitespace-nowrap text-fog 2xl:inline">Snapshot · sincronizado {syncedAgo}</span>
+      <span className={`${expanded ? '' : 'hidden 2xl:inline'} text-[11px] whitespace-nowrap text-fog`}>Snapshot · sincronizado {syncedAgo}</span>
       {options.length > 1 && (
-        <div className="hidden 2xl:block">
+        <div className={expanded ? '' : 'hidden 2xl:block'}>
           <Segmented
             label="Fonte de dados"
             value={snapshot.source.kind}

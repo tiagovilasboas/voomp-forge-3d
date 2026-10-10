@@ -9,7 +9,7 @@ const MODE_EXPLANATION: Record<ViewMode, string> = {
   engineering: 'Engineering View: pipelines, bloqueios, revisões e commits para quem precisa agir.',
 };
 
-function ModeCard() {
+export function ModeCard() {
   const viewMode = useUiStore((s) => s.viewMode);
   const setViewMode = useUiStore((s) => s.setViewMode);
   return (

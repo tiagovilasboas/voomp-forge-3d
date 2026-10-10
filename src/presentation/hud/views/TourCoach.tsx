@@ -120,7 +120,7 @@ export function TourCoach() {
   const last = step === STEPS.length - 1;
 
   return (
-    <div className="absolute inset-x-3 bottom-3 z-40 md:inset-x-auto md:bottom-[88px] md:left-1/2 md:w-[440px] md:-translate-x-1/2">
+    <div className="absolute inset-x-3 bottom-[calc(var(--mobile-nav-h)+12px)] z-40 md:inset-x-auto md:bottom-[88px] md:left-1/2 md:w-[440px] md:-translate-x-1/2">
       <Card label="Tour guiado" className="p-4">
         <Eyebrow>
           Passo {step + 1} de {STEPS.length}

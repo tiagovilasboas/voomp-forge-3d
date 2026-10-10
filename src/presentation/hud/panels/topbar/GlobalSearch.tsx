@@ -5,7 +5,7 @@ import type { EntityRef } from '@presentation/world/worldModel';
 import type { IconName } from '@presentation/theme';
 import { Icon } from '@presentation/hud/kit/Icon';
 
-interface SearchItem {
+export interface SearchItem {
   ref: EntityRef;
   icon: IconName;
   kind: string;
@@ -35,9 +35,37 @@ function useSearchItems(): SearchItem[] {
   }, [snapshot, index]);
 }
 
+/** Items matching `query` (empty query: none). */
+export function useSearchResults(query: string): SearchItem[] {
+  const items = useSearchItems();
+  return useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return q ? items.filter((i) => i.haystack.includes(q)).slice(0, MAX_RESULTS) : [];
+  }, [items, query]);
+}
+
+export function searchKey(r: SearchItem): string {
+  return `${r.ref.kind}-${'id' in r.ref ? r.ref.id : ''}`;
+}
+
+/** Contents of one result row (icon, title, subtitle, kind). */
+export function SearchOptionBody({ r }: { r: SearchItem }) {
+  return (
+    <>
+      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-white/5 text-fog">
+        <Icon name={r.icon} size={13} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[13px] font-semibold text-snow">{r.title}</span>
+        <span className="block truncate text-[11px] text-fog">{r.sub}</span>
+      </span>
+      <span className="shrink-0 text-[10px] font-semibold tracking-wide text-fog uppercase">{r.kind}</span>
+    </>
+  );
+}
+
 /** Global search. Below `lg` it is an icon that expands on focus. Press "/" to focus. */
 export function GlobalSearch() {
-  const items = useSearchItems();
   const select = useUiStore((s) => s.select);
   const inputRef = useRef<HTMLInputElement>(null);
   const listId = useId();
@@ -45,10 +73,7 @@ export function GlobalSearch() {
   const [active, setActive] = useState(0);
   const [focused, setFocused] = useState(false);
 
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return q ? items.filter((i) => i.haystack.includes(q)).slice(0, MAX_RESULTS) : [];
-  }, [items, query]);
+  const results = useSearchResults(query);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -118,7 +143,7 @@ export function GlobalSearch() {
           {results.length === 0 && <li className="px-3 py-2 text-xs text-fog">Nada encontrado.</li>}
           {results.map((r, i) => (
             <li
-              key={`${r.ref.kind}-${'id' in r.ref ? r.ref.id : ''}`}
+              key={searchKey(r)}
               id={`${listId}-${i}`}
               role="option"
               aria-selected={i === active}
@@ -129,14 +154,7 @@ export function GlobalSearch() {
               onMouseEnter={() => setActive(i)}
               className={`flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 ${i === active ? 'bg-white/[0.08]' : ''}`}
             >
-              <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-white/5 text-fog">
-                <Icon name={r.icon} size={13} />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-semibold text-snow">{r.title}</span>
-                <span className="block truncate text-[11px] text-fog">{r.sub}</span>
-              </span>
-              <span className="shrink-0 text-[10px] font-semibold tracking-wide text-fog uppercase">{r.kind}</span>
+              <SearchOptionBody r={r} />
             </li>
           ))}
         </ul>

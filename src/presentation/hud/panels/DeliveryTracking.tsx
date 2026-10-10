@@ -77,14 +77,14 @@ export function DeliveryTracking() {
   };
 
   return (
-    <Card label="Delivery tracking">
+    <Card label="Delivery tracking" className="@container">
       {!current ? (
         <>
           <CardHeader title="Delivery tracking" />
           <EmptyState icon="rocket" title="Nenhuma entrega para acompanhar">Ajuste o período ou a squad.</EmptyState>
         </>
       ) : (
-        <div className="grid gap-x-4 px-4 pt-3 pb-3 lg:grid-cols-[minmax(0,1fr)_200px]">
+        <div className="grid gap-x-4 px-4 pt-3 pb-3 @md:grid-cols-[minmax(0,1fr)_200px]">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
               <div className="min-w-0">
@@ -111,7 +111,7 @@ export function DeliveryTracking() {
               <StageStepper stages={current.stages} />
             </div>
           </div>
-          <div className="mt-3 lg:mt-0">
+          <div className="mt-3 @md:mt-0">
             <DeliveryDetail delivery={current} />
           </div>
         </div>
