@@ -4,7 +4,7 @@ import { RoundedBox } from '@react-three/drei';
 import * as THREE from 'three';
 import type { Contributor, ContributorRole } from '@domain/entities';
 import { PALETTE } from '../../theme';
-import type { FigureLayout } from '../../world/worldModel';
+import type { FigureLayout, Vec2 } from '../../world/worldModel';
 import { sample, type CompiledScript } from '../../animation/script';
 import { rigPose } from '../../animation/rig';
 import { quirkAt, quirkOffsets, NO_QUIRK } from '../../animation/quirks';
@@ -15,9 +15,9 @@ import { Box, useCanvasTexture } from '../kit/Part';
 import { mat } from '../kit/materials';
 import { FONTS, roundRect } from '../kit/canvasTexture';
 import { faceTexture } from '../kit/faceTextures';
-import { ROBOT_STYLE, robotDesign, ROLE_TAG } from '../kit/robotDesign';
+import { ROBOT_STYLE, robotDesign, ROLE_TAG, type RobotDesign } from '../kit/robotDesign';
 
-interface RoleStyle {
+export interface RoleStyle {
   /** Accent light: joint rings, boot strips, chest emblem, tag dot. */
   accent: string;
   device: 'laptop' | 'tablet' | 'card' | null;
@@ -63,6 +63,26 @@ interface Props {
   reducedMotion: boolean;
 }
 
+export interface RobotBodyProps {
+  /** Stable id: seeds quirks/expressions and keys the live position (when `trackLive`). */
+  id: string;
+  design: RobotDesign;
+  style: RoleStyle;
+  script: CompiledScript;
+  /** Resting position/heading used when motion is reduced. */
+  home: Vec2;
+  restHeading?: number;
+  dimmed: boolean;
+  reducedMotion: boolean;
+  tagName: string;
+  tagRole: string;
+  hovered: boolean;
+  selected: boolean;
+  handlers: ReturnType<typeof useInteractive>['handlers'];
+  /** Publish the live position for the camera follow (people only). */
+  trackLive?: boolean;
+}
+
 function NameTag({ name, role, accent }: { name: string; role: string; accent: string }) {
   const tex = useCanvasTexture(
     512,
@@ -99,6 +119,29 @@ function NameTag({ name, role, accent }: { name: string; role: string; accent: s
  */
 export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: Props) {
   const { hovered, selected, handlers } = useInteractive({ kind: 'person', id: person.id });
+  const style = ROLE_STYLE[person.role ?? 'unknown'];
+  const design = useMemo(() => robotDesign(person.id), [person.id]);
+  return (
+    <RobotBody
+      id={person.id}
+      design={design}
+      style={style}
+      script={script}
+      home={layout.home}
+      dimmed={dimmed}
+      reducedMotion={reducedMotion}
+      tagName={person.displayName.split(' ')[0]}
+      tagRole={ROLE_TAG[person.role ?? 'unknown']}
+      hovered={hovered}
+      selected={selected}
+      handlers={handlers}
+      trackLive
+    />
+  );
+}
+
+/** The robot visual: pose comes from the compiled script, interaction state from the caller. */
+export function RobotBody({ id, design, style, script, home, restHeading = Math.PI, dimmed, reducedMotion, tagName, tagRole, hovered, selected, handlers, trackLive = false }: RobotBodyProps) {
   const root = useRef<THREE.Group>(null);
   const body = useRef<THREE.Group>(null);
   const head = useRef<THREE.Group>(null);
@@ -111,8 +154,6 @@ export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: 
   const tag = useRef<THREE.Sprite>(null);
   const expression = useRef<Expression>('neutral');
 
-  const style = ROLE_STYLE[person.role ?? 'unknown'];
-  const design = useMemo(() => robotDesign(person.id), [person.id]);
   const shell = useMemo(
     () => new THREE.MeshStandardMaterial({ color: design.finish.shell, roughness: design.finish.roughness, metalness: design.finish.metalness }),
     [design],
@@ -125,17 +166,16 @@ export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: 
 
   const accent = mat.glow(style.accent, dimmed ? 0.4 : 1.5);
   const cyan = mat.glow(ROBOT_STYLE.ringSecondary, dimmed ? 0.3 : 1.2);
-  const seed = person.id.length * 1.37;
-  const firstName = person.displayName.split(' ')[0];
+  const seed = id.length * 1.37;
 
   useFrame(({ clock, camera }) => {
     const time = clock.elapsedTime;
     const pose = reducedMotion
-      ? { position: layout.home, heading: Math.PI, action: 'idle' as const, elapsed: 0 }
+      ? { position: home, heading: restHeading, action: 'idle' as const, elapsed: 0 }
       : sample(script, time);
     const rig = rigPose(pose.action, pose.elapsed, reducedMotion ? 0 : time);
     const riding = pose.action === 'ride';
-    const q = reducedMotion || riding ? null : quirkAt(person.id, time, pose.action);
+    const q = reducedMotion || riding ? null : quirkAt(id, time, pose.action);
     const quirk = q ? quirkOffsets(q) : NO_QUIRK;
 
     if (root.current) {
@@ -144,7 +184,7 @@ export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: 
       const delta = Math.atan2(Math.sin(pose.heading - current), Math.cos(pose.heading - current));
       root.current.rotation.y = current + delta * (reducedMotion ? 1 : 0.18);
     }
-    livePositions.set(person.id, pose.position);
+    if (trackLive) livePositions.set(id, pose.position);
     if (body.current) {
       body.current.position.y = rig.bob + quirk.bob + (riding ? 0.08 : 0);
       body.current.rotation.set(quirk.bodyPitch + rig.lean, 0, quirk.bodyRoll);
@@ -319,7 +359,7 @@ export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: 
       </group>
 
       <sprite ref={tag} position={[0, 1.38, 0]} scale={[0.95, 0.245, 1]} renderOrder={10} visible={false}>
-        <NameTag name={firstName} role={ROLE_TAG[person.role ?? 'unknown']} accent={style.accent} />
+        <NameTag name={tagName} role={tagRole} accent={style.accent} />
       </sprite>
 
       {(hovered || selected) && (
