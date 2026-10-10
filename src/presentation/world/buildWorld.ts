@@ -61,6 +61,7 @@ export function buildWorld(squads: Squad[], repositories: Repository[], people: 
     stagingDock: [-5.5, LAYOUT.gateZ],
     weekBoard: [10.5, LAYOUT.gateZ - 0.4],
     creditPlaque: [-12, LAYOUT.gateZ + 0.6],
+    knowledgeVault: [-total / 2 + 4, LAYOUT.gateZ],
     bounds: { min: [-half, -depth / 2 - 3], max: [half, LAYOUT.gateZ + 4] },
   };
 }
@@ -82,6 +83,10 @@ export function focusFor(world: WorldModel, ref: EntityRef): FocusTarget | null 
     }
     case 'gate':
       return { center: [(world.gate[0] + world.stagingDock[0]) / 2, world.gate[1]], radius: 7 };
+    case 'document':
+      return { center: world.knowledgeVault, radius: 6 };
+    case 'whiteboard':
+      return { center: world.weekBoard, radius: 4.5 };
     default:
       return null;
   }

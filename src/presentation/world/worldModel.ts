@@ -10,9 +10,11 @@ export type EntityRef =
   | { kind: 'person'; id: ID }
   | { kind: 'cr'; id: ID }
   | { kind: 'initiative'; id: ID }
+  | { kind: 'document'; id: ID }
+  | { kind: 'whiteboard' }
   | { kind: 'gate' };
 
-export const refKey = (r: EntityRef) => (r.kind === 'gate' ? 'gate' : `${r.kind}:${r.id}`);
+export const refKey = (r: EntityRef) => ('id' in r ? `${r.kind}:${r.id}` : r.kind);
 
 export interface SectorLayout {
   squadId: ID;
@@ -52,6 +54,8 @@ export interface WorldModel {
   /** "Entregue esta semana" whiteboard next to the gate. */
   weekBoard: Vec2;
   creditPlaque: Vec2;
+  /** Knowledge base vault (Confluence, Notion, docs in repos…). */
+  knowledgeVault: Vec2;
   bounds: { min: Vec2; max: Vec2 };
 }
 
