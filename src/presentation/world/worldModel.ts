@@ -16,6 +16,10 @@ export type EntityRef =
   | { kind: 'board'; id: string }
   /** A person's workstation (holographic desk monitor). id = personId. */
   | { kind: 'desk'; id: ID }
+  /** Hub IA objects. */
+  | { kind: 'hub' }
+  | { kind: 'terminal' }
+  | { kind: 'pinball' }
   | { kind: 'gate' };
 
 export const refKey = (r: EntityRef) => ('id' in r ? `${r.kind}:${r.id}` : r.kind);
@@ -58,7 +62,9 @@ export interface WorldModel {
   /** "Entregue esta semana" whiteboard next to the gate. */
   weekBoard: Vec2;
   creditPlaque: Vec2;
-  /** Knowledge base vault (Confluence, Notion, docs in repos…). */
+  /** Hub IA room: knowledge base, terminal and holographic pinball. */
+  aiHub: { center: Vec2; size: Vec2; terminal: Vec2; pinball: Vec2 };
+  /** Knowledge base vault (Confluence, Notion, docs in repos…), inside the Hub IA. */
   knowledgeVault: Vec2;
   bounds: { min: Vec2; max: Vec2 };
 }

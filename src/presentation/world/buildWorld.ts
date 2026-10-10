@@ -51,7 +51,11 @@ export function buildWorld(squads: Squad[], repositories: Repository[], people: 
     });
   });
 
+  // Hub IA sits to the left of the first sector, sharing the corridor.
+  const hubSize: Vec2 = [16, depth];
+  const hubCenter: Vec2 = [-total / 2 - LAYOUT.sectorGap - hubSize[0] / 2, 0];
   const half = total / 2 + 3;
+  const minX = hubCenter[0] - hubSize[0] / 2 - 3;
   return {
     sectors,
     racks,
@@ -61,8 +65,14 @@ export function buildWorld(squads: Squad[], repositories: Repository[], people: 
     stagingDock: [-5.5, LAYOUT.gateZ],
     weekBoard: [10.5, LAYOUT.gateZ - 0.4],
     creditPlaque: [-12, LAYOUT.gateZ + 0.6],
-    knowledgeVault: [-total / 2 + 4, LAYOUT.gateZ],
-    bounds: { min: [-half, -depth / 2 - 3], max: [half, LAYOUT.gateZ + 4] },
+    aiHub: {
+      center: hubCenter,
+      size: hubSize,
+      terminal: [hubCenter[0] - 4.5, 3.6],
+      pinball: [hubCenter[0] + 4.5, 3.6],
+    },
+    knowledgeVault: [hubCenter[0], -2.2],
+    bounds: { min: [minX, -depth / 2 - 3], max: [half, LAYOUT.gateZ + 4] },
   };
 }
 
@@ -85,6 +95,12 @@ export function focusFor(world: WorldModel, ref: EntityRef): FocusTarget | null 
       return { center: [(world.gate[0] + world.stagingDock[0]) / 2, world.gate[1]], radius: 7 };
     case 'document':
       return { center: world.knowledgeVault, radius: 6 };
+    case 'hub':
+      return { center: [world.aiHub.center[0], world.aiHub.center[1] + 1], radius: Math.max(...world.aiHub.size) * 0.55 };
+    case 'terminal':
+      return { center: world.aiHub.terminal, radius: 3.5 };
+    case 'pinball':
+      return { center: world.aiHub.pinball, radius: 3.5 };
     case 'whiteboard':
       return { center: world.weekBoard, radius: 4.5 };
     case 'board': {
