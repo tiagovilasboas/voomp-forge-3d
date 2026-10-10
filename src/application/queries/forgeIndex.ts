@@ -5,6 +5,7 @@ import type {
   Deployment,
   ForgeSnapshot,
   ID,
+  KnowledgeDocument,
   PipelineRun,
   ProductInitiative,
   Repository,
@@ -34,6 +35,10 @@ export interface ForgeIndex {
   runsBySha: Map<string, PipelineRun[]>;
   deploymentsByRepo: Map<ID, Deployment[]>;
   deploymentsByCr: Map<ID, Deployment[]>;
+  document: Map<ID, KnowledgeDocument>;
+  docsByInitiative: Map<ID, KnowledgeDocument[]>;
+  docsByRepo: Map<ID, KnowledgeDocument[]>;
+  docsBySquad: Map<ID, KnowledgeDocument[]>;
 }
 
 function groupBy<T>(items: T[], keys: (t: T) => (ID | null)[], date: (t: T) => string): Map<ID, T[]> {
@@ -74,6 +79,10 @@ export function buildIndex(s: ForgeSnapshot): ForgeIndex {
     runsBySha: groupBy(s.pipelineRuns, (r) => [r.headSha], (r) => r.startedAt),
     deploymentsByRepo: groupBy(s.deployments, (d) => [d.repositoryId], (d) => d.createdAt),
     deploymentsByCr: groupBy(s.deployments, (d) => d.changeRequestIds, (d) => d.createdAt),
+    document: byId(s.documents),
+    docsByInitiative: groupBy(s.documents, (d) => d.initiativeIds, (d) => d.updatedAt),
+    docsByRepo: groupBy(s.documents, (d) => d.repositoryIds, (d) => d.updatedAt),
+    docsBySquad: groupBy(s.documents, (d) => [d.squadId], (d) => d.updatedAt),
   };
 }
 
