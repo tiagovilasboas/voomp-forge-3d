@@ -31,44 +31,44 @@
     {
       "id": "squad-atelie",
       "code": "A",
-      "name": "Ateliê",
-      "description": "Bancada de pedidos, fichas de serviço e agenda da oficina."
+      "name": "Interface",
+      "description": "Telas web, fluxos de usuário e o console do produto."
     },
     {
       "id": "squad-farol",
       "code": "F",
-      "name": "Farol",
-      "description": "Plantão da oficina, sinais de falha e correções no chão."
+      "name": "Confiabilidade",
+      "description": "Incidentes, sinais de falha e correções em produção."
     },
     {
       "id": "squad-rotas",
       "code": "R",
-      "name": "Rotas",
-      "description": "Rotas de coleta, janelas de visita e mapas da frota."
+      "name": "Integrações",
+      "description": "APIs de parceiros, contratos de evento e conectores."
     },
     {
       "id": "squad-almoxarifado",
       "code": "M",
-      "name": "Almoxarifado",
-      "description": "Estoque de peças, requisições e prateleiras da oficina."
+      "name": "Dados",
+      "description": "Pipelines, modelos analíticos e catálogos de dados."
     },
     {
       "id": "squad-ponte",
       "code": "P",
-      "name": "Ponte",
-      "description": "Mensagens entre bancadas, avisos de rádio e fila de recados."
+      "name": "Mensageria",
+      "description": "Filas, notificações e contratos entre serviços."
     },
     {
       "id": "squad-vitrine",
       "code": "V",
-      "name": "Vitrine",
-      "description": "Mostruário de lanternas, fichas de modelo e vitrines sazonais."
+      "name": "Catálogo",
+      "description": "Cadastro de itens, busca e a vitrine do produto."
     },
     {
       "id": "squad-trilho",
       "code": "T",
-      "name": "Trilho",
-      "description": "Ferramentas internas, trilhos de build e peças compartilhadas."
+      "name": "Plataforma",
+      "description": "CI, design system e ferramentas compartilhadas."
     }
   ],
   "repositories": [],

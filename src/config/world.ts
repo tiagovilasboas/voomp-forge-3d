@@ -15,9 +15,9 @@ export interface SectorTheme {
 }
 
 export const SECTOR_THEMES: Record<string, SectorTheme> = {
-  'sq-admin': { feature: 'coordination-desk', accent: '#FF6A00', tagline: 'Pedidos, fichas e a bancada' },
-  'sq-n3': { feature: 'monitoring-room', accent: '#FF8C32', tagline: 'Plantão, sinais e correções' },
-  'sq-enable': { feature: 'architecture-room', accent: '#F6B94D', tagline: 'Ferramentas e trilhos do ateliê' },
+  'sq-admin': { feature: 'coordination-desk', accent: '#FF6A00', tagline: 'Telas, fluxos e o console' },
+  'sq-n3': { feature: 'monitoring-room', accent: '#FF8C32', tagline: 'Incidentes, sinais e correções' },
+  'sq-enable': { feature: 'architecture-room', accent: '#F6B94D', tagline: 'CI, design system e ferramentas' },
 };
 
 export const THEME_CYCLE: SectorTheme[] = Object.values(SECTOR_THEMES);

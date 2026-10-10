@@ -56,13 +56,13 @@ const ctId = (handle: string) => `ct-${handle}`;
 // ---------------------------------------------------------------------------
 
 const SQUADS: Squad[] = [
-  { id: 'sq-admin',  code: 'A', name: 'Ateliê',               description: 'Bancada de pedidos, fichas de serviço e agenda da oficina.' },
-  { id: 'sq-n3',     code: 'F', name: 'Farol',                description: 'Plantão da oficina, sinais de falha e correções no chão.' },
-  { id: 'sq-enable', code: 'T', name: 'Trilho',               description: 'Ferramentas internas, trilhos de build e peças compartilhadas.' },
-  { id: 'sq-vmpg',   code: 'R', name: 'Rotas',                description: 'Rotas de coleta, janelas de visita e mapas da frota.' },
-  { id: 'sq-vgfe',   code: 'M', name: 'Almoxarifado',         description: 'Estoque de peças, requisições e prateleiras da oficina.' },
-  { id: 'sq-vgat',   code: 'P', name: 'Ponte',                description: 'Mensagens entre bancadas, avisos de rádio e fila de recados.' },
-  { id: 'sq-vply',   code: 'V', name: 'Vitrine',              description: 'Mostruário de lanternas, fichas de modelo e vitrines sazonais.' },
+  { id: 'sq-admin',  code: 'I', name: 'Interface',        description: 'Telas web, fluxos de usuário e o console do produto.' },
+  { id: 'sq-n3',     code: 'C', name: 'Confiabilidade',   description: 'Incidentes, sinais de falha e correções em produção.' },
+  { id: 'sq-enable', code: 'P', name: 'Plataforma',       description: 'CI, design system e ferramentas compartilhadas.' },
+  { id: 'sq-vmpg',   code: 'N', name: 'Integrações',      description: 'APIs de parceiros, contratos de evento e conectores.' },
+  { id: 'sq-vgfe',   code: 'D', name: 'Dados',            description: 'Pipelines, modelos analíticos e catálogos de dados.' },
+  { id: 'sq-vgat',   code: 'M', name: 'Mensageria',       description: 'Filas, notificações e contratos entre serviços.' },
+  { id: 'sq-vply',   code: 'K', name: 'Catálogo',         description: 'Cadastro de itens, busca e a vitrine do produto.' },
 ];
 
 // [name, squad, language, description]
@@ -638,7 +638,7 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
     },
     {
       id: 'ws-sustentacao-n3',
-      name: 'Plantão do Farol',
+      name: 'Operação da Confiabilidade',
       category: 'sustaining',
       squadIds: ['sq-n3'],
       initiativeId: 'ini-payment-stability',

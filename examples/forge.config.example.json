@@ -26,8 +26,8 @@
         {
           "id": "sq-atelie",
           "code": "A",
-          "name": "Ateliê",
-          "description": "Bancada de pedidos, fichas de serviço e agenda da oficina.",
+          "name": "Interface",
+          "description": "Telas web, fluxos de usuário e o console do produto.",
           "repositories": [
             {
               "path": "../clones/bancada-web",

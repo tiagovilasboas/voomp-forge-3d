@@ -18,7 +18,7 @@ export const WS_STATUS_ORDER: WorkstreamStatus[] = ['blocked', 'at_risk', 'in_pr
 export const CATEGORY_LABEL: Record<WorkstreamCategory, string> = {
   sprint_priority: 'Prioridades da sprint',
   closing: 'Fechamentos',
-  sustaining: 'Plantão',
+  sustaining: 'Operação',
   open_topic: 'Temas abertos',
 };
 export const CATEGORY_ORDER: WorkstreamCategory[] = ['sprint_priority', 'closing', 'sustaining', 'open_topic'];
@@ -72,7 +72,7 @@ export function summarize(v: WorkstreamView): string {
       parts.push(`Planejada${p.target ? ` para ${shortDate(p.target)}` : ''}; ainda sem movimento no Jira ou no Git.`);
       break;
     case 'on_demand':
-      parts.push('Plantão sob demanda, sem data comprometida.');
+      parts.push('Operação sob demanda, sem data comprometida.');
       break;
   }
   if (p.status !== 'at_risk' && p.status !== 'blocked' && p.waitingOn.length) parts.push(`Aguardando ${p.waitingOn.join('; ')}.`);
