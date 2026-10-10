@@ -38,13 +38,11 @@ const R = ROBOT_STYLE.proportions.headRadius;
 const HEAD_Y = 1.0;
 
 // Shared geometries: one GPU buffer for every robot.
-const SPHERE = new THREE.SphereGeometry(1, 28, 20);
-const CAPSULE = new THREE.CapsuleGeometry(1, 1, 6, 16);
 const RING = new THREE.TorusGeometry(1, 0.16, 10, 32);
 const CYL = new THREE.CylinderGeometry(1, 1, 1, 24);
 /** Curved screen patch on the front of the helmet (UVs span the whole patch). */
-const SCREEN = new THREE.SphereGeometry(1, 32, 16, Math.PI / 2 - 0.85, 1.7, Math.PI / 2 - 0.62, 1.18);
-const JOINT_DARK = new THREE.MeshStandardMaterial({ color: '#15171C', roughness: 0.28, metalness: 0.95 });
+const SCREEN = new THREE.PlaneGeometry(1, 1);
+const JOINT_DARK = new THREE.MeshStandardMaterial({ color: '#16181D', roughness: 0.55, metalness: 0.45 });
 
 interface Props {
   layout: FigureLayout;
@@ -153,8 +151,9 @@ export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: 
     if (tag.current) tag.current.visible = selected || hovered || (camera as THREE.OrthographicCamera).zoom > TAG_ZOOM;
   });
 
+  /** Chamfered block limb segment (faceted look, no capsules). */
   const capsule = (r: number, len: number, y: number, m: THREE.Material) => (
-    <mesh geometry={CAPSULE} material={m} position={[0, y, 0]} scale={[r, len / 2, r]} castShadow />
+    <RoundedBox args={[r * 2, len + r * 1.6, r * 1.8]} radius={0.018} smoothness={2} position={[0, y, 0]} material={m} castShadow />
   );
   const ring = (r: number, y: number, m: THREE.Material, rot: [number, number, number] = [Math.PI / 2, 0, 0]) => (
     <mesh geometry={RING} material={m} position={[0, y, 0]} rotation={rot} scale={r} />
@@ -181,19 +180,22 @@ export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: 
           { ref: legR, x: 0.1 },
         ].map(({ ref, x }) => (
           <group key={x} ref={ref} position={[x, 0.42, 0]}>
-            <mesh geometry={SPHERE} material={JOINT_DARK} scale={0.07} />
+            <Box position={[0, 0, 0]} size={[0.12, 0.08, 0.12]} material={JOINT_DARK} />
             {capsule(0.07, 0.07, -0.08, shell)}
             {ring(0.07, -0.16, cyan)}
             {capsule(0.078, 0.06, -0.24, shell)}
-            <RoundedBox args={[0.17, 0.11, 0.25]} radius={0.045} smoothness={3} position={[0, -0.355, 0.03]} material={shell} castShadow />
+            <RoundedBox args={[0.17, 0.11, 0.25]} radius={0.02} smoothness={2} position={[0, -0.355, 0.03]} material={shell} castShadow />
             <Box position={[0, -0.38, 0.157]} size={[0.11, 0.022, 0.01]} material={accent} shadows={false} />
             <Box position={[0, -0.405, 0.03]} size={[0.15, 0.012, 0.22]} material={JOINT_DARK} shadows={false} />
           </group>
         ))}
 
         {/* torso: compact armour with emblem and signature LEDs */}
-        <RoundedBox args={[0.26, 0.09, 0.19]} radius={0.04} smoothness={3} position={[0, 0.47, 0]} material={JOINT_DARK} />
-        <RoundedBox args={[0.36, 0.32, 0.26]} radius={0.1} smoothness={4} position={[0, 0.64, 0]} material={shell} castShadow />
+        <RoundedBox args={[0.26, 0.09, 0.19]} radius={0.02} smoothness={2} position={[0, 0.47, 0]} material={JOINT_DARK} />
+        <RoundedBox args={[0.36, 0.32, 0.26]} radius={0.035} smoothness={2} position={[0, 0.64, 0]} material={shell} castShadow />
+        {/* asymmetric side panel stripe (left side only) */}
+        <Box position={[-0.181, 0.66, 0.02]} size={[0.006, 0.2, 0.12]} material={accent} shadows={false} />
+        <Box position={[0.12, 0.76, 0.1]} size={[0.08, 0.025, 0.06]} material={JOINT_DARK} />
         <RoundedBox args={[0.14, 0.12, 0.03]} radius={0.03} smoothness={2} position={[0, 0.68, 0.125]} material={JOINT_DARK} />
         {/* forge emblem: an anvil-ish chevron of light */}
         <Box position={[0, 0.7, 0.142]} size={[0.08, 0.016, 0.004]} material={accent} shadows={false} />
@@ -214,13 +216,18 @@ export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: 
           { ref: armR, x: 0.235, right: true },
         ].map(({ ref, x, right }) => (
           <group key={x} ref={ref} position={[x, 0.73, 0]}>
-            <mesh geometry={SPHERE} material={shell} scale={0.075} castShadow />
-            {ring(0.07, 0, accent, [0, 0, Math.PI / 2])}
+            <RoundedBox args={[0.13, 0.12, 0.13]} radius={0.025} smoothness={2} material={shell} castShadow />
+            {!right && (
+              <>
+                <RoundedBox args={[0.16, 0.05, 0.17]} radius={0.015} smoothness={2} position={[-0.015, 0.075, 0]} rotation={[0, 0, 0.25]} material={JOINT_DARK} castShadow />
+                <Box position={[-0.02, 0.1, 0.087]} size={[0.11, 0.012, 0.004]} material={accent} shadows={false} />
+              </>
+            )}
             {capsule(0.05, 0.06, -0.09, shell)}
             {ring(0.052, -0.16, cyan)}
             <group position={[0, -0.16, 0]} rotation={[-0.2, 0, 0]}>
               {capsule(0.06, 0.05, -0.08, shell)}
-              <RoundedBox args={[0.1, 0.1, 0.085]} radius={0.035} smoothness={3} position={[0, -0.17, 0.01]} material={JOINT_DARK} castShadow />
+              <RoundedBox args={[0.1, 0.1, 0.085]} radius={0.018} smoothness={2} position={[0, -0.17, 0.01]} material={JOINT_DARK} castShadow />
               {right && (
                 <group ref={device} position={[-0.11, -0.2, 0.11]} rotation={[-0.45, 0, 0]} visible={false}>
                   {style.device === 'tablet' && (
@@ -240,15 +247,23 @@ export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: 
         {/* neck + helmet */}
         <mesh geometry={CYL} material={JOINT_DARK} position={[0, 0.8, 0]} scale={[0.07, 0.06, 0.07]} />
         <group ref={head} position={[0, HEAD_Y, 0]}>
-          <mesh geometry={SPHERE} material={shell} scale={[R * 1.08, R * 0.95, R]} castShadow />
-          <mesh geometry={SCREEN} material={screen} scale={[R * 1.085, R * 0.955, R * 1.012]} />
-          {/* screen bezel ring */}
-          <mesh geometry={RING} material={JOINT_DARK} position={[0, 0, R * 0.62]} scale={[R * 0.86, R * 0.7, R * 0.5]} />
+          <RoundedBox args={[R * 2.05, R * 1.7, R * 1.75]} radius={0.06} smoothness={3} material={shell} castShadow />
+          {/* forehead plate, slightly off-centre for character */}
+          <RoundedBox args={[R * 0.9, R * 0.22, 0.03]} radius={0.01} smoothness={2} position={[R * 0.25, R * 0.72, R * 0.875]} material={JOINT_DARK} />
+          {/* bezel + flat LED screen */}
+          <RoundedBox args={[R * 1.78, R * 1.22, 0.03]} radius={0.04} smoothness={2} position={[0, -0.02, R * 0.875]} material={JOINT_DARK} />
+          <mesh geometry={SCREEN} material={screen} position={[0, -0.02, R * 0.875 + 0.017]} scale={[R * 1.62, R * 1.08, 1]} />
+          {/* side antenna (right only) */}
+          <group position={[R * 0.78, R * 0.85, -R * 0.3]} rotation={[0, 0, -0.35]}>
+            <Box position={[0, 0.07, 0]} size={[0.018, 0.14, 0.018]} material={JOINT_DARK} />
+            <Box position={[0, 0.15, 0]} size={[0.035, 0.035, 0.035]} material={accent} shadows={false} />
+          </group>
           {design.crest && (
-            <RoundedBox args={[0.08, 0.05, R * 1.5]} radius={0.02} smoothness={2} position={[0, R * 0.92, -0.02]} material={shell} />
+            <RoundedBox args={[0.08, 0.04, R * 1.4]} radius={0.012} smoothness={2} position={[-R * 0.35, R * 0.86, -0.02]} material={JOINT_DARK} />
           )}
           {/* ear modules */}
-          {[-1, 1].map((side) => (
+          <Box position={[R * 1.04, -0.02, 0]} size={[0.025, R * 0.8, R * 0.9]} material={JOINT_DARK} />
+          {[-1].map((side) => (
             <group key={side} position={[side * R * 1.06, -0.01, 0]} rotation={[0, 0, (side * Math.PI) / 2]}>
               {design.ear === 'ring' && (
                 <>

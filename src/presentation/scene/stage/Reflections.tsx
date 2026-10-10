@@ -7,7 +7,7 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
  * Procedural studio reflections (no HDR download): gives metals something to
  * reflect. Kept dim so the data center stays dark and the glows read first.
  */
-export function Reflections({ intensity = 0.35 }: { intensity?: number }) {
+export function Reflections({ intensity = 0.2 }: { intensity?: number }) {
   const { gl, scene } = useThree();
   useEffect(() => {
     const pmrem = new THREE.PMREMGenerator(gl);
