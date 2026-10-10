@@ -31,6 +31,9 @@ function exists(index: ForgeIndex, ref: EntityRef): boolean {
     case 'whiteboard':
     case 'board':
     case 'desk':
+    case 'hub':
+    case 'terminal':
+    case 'pinball':
       return true;
   }
 }
@@ -52,6 +55,9 @@ function Variant({ selection }: { selection: EntityRef }) {
     case 'whiteboard':
     case 'board':
     case 'desk':
+    case 'hub':
+    case 'terminal':
+    case 'pinball':
       return null; // shown as an Object Screen instead
     case 'gate':
       return (

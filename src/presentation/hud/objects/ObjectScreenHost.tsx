@@ -1,7 +1,10 @@
 import { useUiStore } from '../../state/uiStore';
 import { BoardScreen } from './BoardScreen';
 import { DeskScreen } from './DeskScreen';
+import { HubScreen } from './HubScreen';
 import { isObjectRef } from './objectRefs';
+import { PinballScreen } from './pinball/PinballScreen';
+import { TerminalScreen } from './terminal/TerminalScreen';
 import { WhiteboardScreen } from './WhiteboardScreen';
 
 /** Renders the Object Screen for the current selection, if it is an interactive 3D object. */
@@ -15,5 +18,11 @@ export function ObjectScreenHost() {
       return <BoardScreen key={selection.id} id={selection.id} />;
     case 'desk':
       return <DeskScreen key={selection.id} id={selection.id} />;
+    case 'hub':
+      return <HubScreen />;
+    case 'terminal':
+      return <TerminalScreen />;
+    case 'pinball':
+      return <PinballScreen />;
   }
 }
