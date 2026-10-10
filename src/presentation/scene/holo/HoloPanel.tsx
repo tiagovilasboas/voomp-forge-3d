@@ -4,10 +4,10 @@ import * as THREE from 'three';
 import { useCanvasTexture } from '../kit/Part';
 import { drawPanelBase } from './holoDraw';
 import type { Draw } from '../kit/canvasTexture';
+import { SIGN_YAW } from '../kit/orientation';
 
 const CW = 640;
 const CH = 400;
-const YAW = 0.62;
 
 /**
  * Floating holographic panel: translucent canvas plane with a glowing frame.
@@ -56,7 +56,7 @@ export function HoloPanel({
   });
 
   return (
-    <group ref={group} position={position} rotation={[0, YAW, 0]} renderOrder={10}>
+    <group ref={group} position={position} rotation={[0, SIGN_YAW, 0]} renderOrder={10}>
       <mesh scale={[width, height, 1]}>
         <planeGeometry args={[1, 1]} />
         <meshBasicMaterial ref={matRef} map={tex} transparent opacity={reducedMotion ? 1 : 0} toneMapped={false} depthWrite={false} side={THREE.DoubleSide} />
