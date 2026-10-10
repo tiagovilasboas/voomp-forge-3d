@@ -11,6 +11,7 @@ import { Chip, StatTile, StatusBadge } from '../../kit/primitives';
 import { relativeTime, shortSha } from '../../kit/format';
 import { ENVIRONMENT_LABEL } from '../../views/deliveryLabels';
 import { useSnapshotNow, useVocabulary } from '../../views/viewHooks';
+import { DocumentsSection } from './DocumentsSection';
 import { InspectorHeader } from './InspectorHeader';
 import { Chips, deploymentStatusLook, ListRow, Muted, pipelineStatusLook, Section, TileGrid, repoSignal } from './inspectorParts';
 
@@ -51,6 +52,8 @@ export function RepoInspector({ id }: { id: string }) {
         <StatTile icon="commit" label="Commits" value={commitsInPeriod} hint={`últimos ${scope.periodDays} dias`} />
         <StatTile icon="pulse" label="Última atividade" value={<span className="text-sm">{relativeTime(health?.lastActivityAt, now)}</span>} />
       </TileGrid>
+
+      <DocumentsSection docs={index.docsByRepo.get(id)} />
 
       <Section title="Saúde do repositório">
         {(health?.modules ?? []).map((m) => (

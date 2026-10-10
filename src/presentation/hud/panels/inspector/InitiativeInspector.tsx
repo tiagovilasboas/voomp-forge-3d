@@ -8,6 +8,7 @@ import { STATUS_LOOK } from '../../../theme';
 import { Chip, EmptyState, StatTile, StatusBadge } from '../../kit/primitives';
 import { STATUS_GROUP_LABEL, STATUS_GROUP_ORDER } from '../../views/deliveryLabels';
 import { useVocabulary } from '../../views/viewHooks';
+import { DocumentsSection } from './DocumentsSection';
 import { InspectorHeader } from './InspectorHeader';
 import { Chips, ListRow, Notice, Section, TileGrid } from './inspectorParts';
 
@@ -67,6 +68,7 @@ export function InitiativeInspector({ id }: { id: string }) {
           ))}
         </>
       )}
+      <DocumentsSection docs={index.docsByInitiative.get(id)} />
       <div className="pb-3" />
     </>
   );

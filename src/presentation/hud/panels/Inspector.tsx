@@ -5,11 +5,13 @@ import { useReadyData } from '../../state/dataStore';
 import { useUiStore } from '../../state/uiStore';
 import { Card, EmptyState } from '../kit/primitives';
 import { ChangeInspector } from './inspector/ChangeInspector';
+import { DocumentInspector } from './inspector/DocumentInspector';
 import { InitiativeInspector } from './inspector/InitiativeInspector';
 import { InspectorHeader } from './inspector/InspectorHeader';
 import { PersonInspector } from './inspector/PersonInspector';
 import { RepoInspector } from './inspector/RepoInspector';
 import { SquadInspector } from './inspector/SquadInspector';
+import { WhiteboardInspector } from './inspector/WhiteboardInspector';
 
 function exists(index: ForgeIndex, ref: EntityRef): boolean {
   switch (ref.kind) {
@@ -23,8 +25,9 @@ function exists(index: ForgeIndex, ref: EntityRef): boolean {
       return index.cr.has(ref.id);
     case 'initiative':
       return index.initiative.has(ref.id);
-    case 'gate':
     case 'document':
+      return index.document.has(ref.id);
+    case 'gate':
     case 'whiteboard':
       return true;
   }
@@ -43,18 +46,9 @@ function Variant({ selection }: { selection: EntityRef }) {
     case 'initiative':
       return <InitiativeInspector id={selection.id} />;
     case 'document':
+      return <DocumentInspector id={selection.id} />;
     case 'whiteboard':
-      return (
-        <>
-          <InspectorHeader
-            icon="draft"
-            eyebrow={selection.kind === 'document' ? 'Documento' : 'Quadro da equipe'}
-            title={selection.kind === 'document' ? 'Documento' : 'Quadro branco'}
-            target={selection}
-          />
-          <div className="pb-4" />
-        </>
-      );
+      return <WhiteboardInspector />;
     case 'gate':
       return (
         <>

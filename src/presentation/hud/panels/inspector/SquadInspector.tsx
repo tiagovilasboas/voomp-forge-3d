@@ -7,6 +7,7 @@ import { SIGNAL_LOOK, STATUS_LOOK } from '../../../theme';
 import { Chip, StatTile, StatusBadge } from '../../kit/primitives';
 import { relativeTime } from '../../kit/format';
 import { useSnapshotNow } from '../../views/viewHooks';
+import { DocumentsSection } from './DocumentsSection';
 import { InspectorHeader } from './InspectorHeader';
 import { Chips, ListRow, Muted, repoSignal, Section, TileGrid } from './inspectorParts';
 
@@ -50,6 +51,7 @@ export function SquadInspector({ id }: { id: string }) {
           );
         })}
       </Section>
+      <DocumentsSection docs={index.docsBySquad.get(id)} />
       <Section title="Entregas recentes">
         {recentDeliveries.length === 0 && <Muted>Nenhuma entrega integrada no período.</Muted>}
         {recentDeliveries.map((d) => (

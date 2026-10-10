@@ -33,7 +33,7 @@ export function DeliveryCard({ delivery, onOpen }: { delivery: Delivery; onOpen:
         <p className="mt-0.5 text-[11px] text-fog">
           {squad.name} · {repo.name} · {author}
         </p>
-        <div className="mt-2">{initiative ? <Chip tone="forge">{`${initiative.key} · ${initiative.name}`}</Chip> : <Chip>{NO_INITIATIVE}</Chip>}</div>
+        <div className="mt-2 flex flex-wrap gap-1.5">{cr.workItems[0] && <Chip>{cr.workItems[0].key}</Chip>}{initiative ? <Chip tone="forge">{`${initiative.key} · ${initiative.name}`}</Chip> : <Chip>{NO_INITIATIVE}</Chip>}</div>
       </button>
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.06] px-3 py-2">
         <StageMiniStepper stages={delivery.stages} />

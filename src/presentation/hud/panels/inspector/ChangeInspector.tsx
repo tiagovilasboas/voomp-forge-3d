@@ -71,6 +71,20 @@ export function ChangeInspector({ id }: { id: string }) {
         )}
       </Section>
 
+      <Section title="Tarefas">
+        {cr.workItems.length === 0 ? (
+          <Muted>Nenhuma tarefa referenciada</Muted>
+        ) : (
+          <ul className="flex flex-wrap gap-1.5 px-2 py-1">
+            {cr.workItems.map((w) => (
+              <li key={w.key}>
+                <Chip tone="forge">{w.url ? <EvidenceLink href={w.url}>{w.key}</EvidenceLink> : w.key}</Chip>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
       <Section title="Resumo para Produto">
         <p className="px-2 py-1 text-xs leading-snug text-snow">{cr.productSummary ?? <span className="text-fog">{NO_PRODUCT_SUMMARY}</span>}</p>
       </Section>
