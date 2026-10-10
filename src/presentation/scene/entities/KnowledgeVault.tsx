@@ -55,12 +55,15 @@ function Crystal({ placed, lit, dimmed, reducedMotion }: { placed: Placed; lit: 
  */
 export function KnowledgeVault({
   position,
+  yaw = 0,
   documents,
   litDocIds,
   racks,
   reducedMotion,
 }: {
   position: Vec2;
+  /** Room rotation (0 or π). */
+  yaw?: number;
   documents: KnowledgeDocument[];
   /** Null = no focus (everything at rest). */
   litDocIds: Set<string> | null;
@@ -68,6 +71,7 @@ export function KnowledgeVault({
   reducedMotion: boolean;
 }) {
   const [vx, vz] = position;
+  const cosYaw = Math.round(Math.cos(yaw));
 
   const { towers, placed } = useMemo(() => {
     const spaces = [...new Set(documents.map((d) => d.space))].sort();
@@ -110,19 +114,19 @@ export function KnowledgeVault({
           .map((repoId) => racks.find((r) => r.repoId === repoId))
           .filter((r): r is RackLayout => Boolean(r))
           .map((rack) => {
-            const from = new THREE.Vector3(vx + p.local[0], p.local[1], vz + p.local[2]);
+            const from = new THREE.Vector3(vx + p.local[0] * cosYaw, p.local[1], vz + p.local[2] * cosYaw);
             const to = new THREE.Vector3(rack.position[0], 3.2, rack.position[1]);
             const mid = from.clone().lerp(to, 0.5).setY(Math.max(from.y, to.y) + 2.5);
             return { key: `${p.doc.id}-${repoId(rack)}`, points: new THREE.QuadraticBezierCurve3(from, mid, to).getPoints(32) };
           }),
       );
-  }, [litDocIds, placed, racks, vx, vz]);
+  }, [litDocIds, placed, racks, vx, vz, cosYaw]);
 
   const dimmed = litDocIds !== null;
 
   return (
     <group>
-      <group position={[vx, 0, vz]}>
+      <group position={[vx, 0, vz]} rotation={[0, yaw, 0]}>
         {/* round plinth with a glowing rim */}
         <mesh position={[0, 0.06, 0]} receiveShadow material={mat.platform()}>
           <cylinderGeometry args={[3.1, 3.2, 0.12, 48]} />

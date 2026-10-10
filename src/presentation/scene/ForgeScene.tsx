@@ -17,6 +17,8 @@ import { CalendarWall } from './entities/CalendarWall';
 import { AiHubRoom } from './entities/AiHubRoom';
 import { InfoTotem } from './entities/holoProps';
 import { RepoHologram } from './holo/RepoHologram';
+import { yawFor } from '../world/frame';
+import { LAYOUT } from '@config/world';
 
 const PLATFORM_H = 0.14;
 
@@ -104,17 +106,17 @@ export function ForgeScene() {
     for (const r of world.racks) if (health.get(r.repoId)?.alert) set.add(r.squadId);
     return set;
   }, [world, health]);
-  /** Info totems along the main corridor, each labelled with the nearest sector. */
-  const totems = useMemo(() => {
-    const { min, max } = world.bounds;
-    const n = 3;
-    return Array.from({ length: n }, (_, i) => {
-      const x = min[0] + ((max[0] - min[0]) * (i + 1)) / (n + 1);
-      let best = world.sectors[0];
-      for (const s of world.sectors) if (Math.abs(s.center[0] - x) < Math.abs(best.center[0] - x)) best = s;
-      return { code: best.code, name: best.name, accent: best.theme.accent, position: [x, 2.3, world.corridorZ] as [number, number, number] };
-    });
-  }, [world]);
+  /** One info totem per sector, on the corridor edge in front of its room. */
+  const totems = useMemo(
+    () =>
+      world.sectors.map((s) => ({
+        code: s.code,
+        name: s.name,
+        accent: s.theme.accent,
+        position: [s.center[0], 2.3, world.corridorZ - s.facing * (LAYOUT.corridorWidth / 2 - 0.6)] as [number, number, number],
+      })),
+    [world],
+  );
   const dimmedSquad = (squadId: string) => squadFilter !== null && squadFilter !== squadId;
 
   return (
@@ -173,7 +175,7 @@ export function ForgeScene() {
       <CalendarWall position={world.calendarWall} reducedMotion={reducedMotion} />
       <AiHubRoom world={world} reducedMotion={reducedMotion} />
       <group position={[0, PLATFORM_H, 0]}>
-        <KnowledgeVault position={world.knowledgeVault} documents={snapshot.documents} litDocIds={litDocIds} racks={world.racks} reducedMotion={reducedMotion} />
+        <KnowledgeVault position={world.knowledgeVault} yaw={yawFor(world.aiHub.facing)} documents={snapshot.documents} litDocIds={litDocIds} racks={world.racks} reducedMotion={reducedMotion} />
       </group>
       <CreditPlaque position={world.creditPlaque} />
       <RepoHologram />

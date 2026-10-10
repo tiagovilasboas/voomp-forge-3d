@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import { Edges } from '@react-three/drei';
 import * as THREE from 'three';
 import type { WorldModel } from '../../world/worldModel';
+import { yawFor } from '../../world/frame';
 import { useInteractive } from '../../interaction/useInteractive';
 import { Box, Decal, useCanvasTexture } from '../kit/Part';
 import { mat } from '../kit/materials';
@@ -141,7 +142,7 @@ function Floaters({ reducedMotion }: { reducedMotion: boolean }) {
 }
 
 /** Terminal kiosk: pedestal, tilted holographic screen with scrolling prompt, holographic keyboard. */
-function TerminalKiosk({ position, reducedMotion }: { position: [number, number, number]; reducedMotion: boolean }) {
+function TerminalKiosk({ position, yaw, reducedMotion }: { position: [number, number, number]; yaw: number; reducedMotion: boolean }) {
   const { hovered, selected, handlers } = useInteractive({ kind: 'terminal' });
   const glow = selected ? 1 : hovered ? 0.75 : 0.35;
   const scroll = useMemo(() => {
@@ -197,7 +198,7 @@ function TerminalKiosk({ position, reducedMotion }: { position: [number, number,
   });
 
   return (
-    <group position={position} rotation={[0, 0.45, 0]} {...handlers}>
+    <group position={position} rotation={[0, 0.45 + yaw, 0]} {...handlers}>
       {/* base + pedestal */}
       <mesh position={[0, 0.06, 0]} material={mat.rackMetal()} scale={[1.9, 0.12, 1.5]} geometry={once('boxg', () => new THREE.BoxGeometry(1, 1, 1))} receiveShadow />
       <Box position={[0, 0.58, -0.25]} size={[0.32, 0.9, 0.26]} material={mat.steel()} />
@@ -230,7 +231,7 @@ function TerminalKiosk({ position, reducedMotion }: { position: [number, number,
 }
 
 /** Classic pinball silhouette with hologram playfield and backbox. */
-function PinballCabinet({ position, reducedMotion }: { position: [number, number, number]; reducedMotion: boolean }) {
+function PinballCabinet({ position, yaw, reducedMotion }: { position: [number, number, number]; yaw: number; reducedMotion: boolean }) {
   const { hovered, selected, handlers } = useInteractive({ kind: 'pinball' });
   const glow = selected ? 1 : hovered ? 0.7 : 0.3;
   const ball = useRef<THREE.Mesh>(null);
@@ -322,7 +323,7 @@ function PinballCabinet({ position, reducedMotion }: { position: [number, number
 
   const tilt = -0.32;
   return (
-    <group position={position} rotation={[0, -0.45, 0]} {...handlers}>
+    <group position={position} rotation={[0, -0.45 + yaw, 0]} {...handlers}>
       {/* legs + body */}
       {[-1, 1].flatMap((sx) => [-1, 1].map((sz) => <Box key={`${sx}${sz}`} position={[sx * (FW / 2 + 0.02), 0.45, sz * (FL / 2 - 0.1)]} size={[0.1, 0.9, 0.1]} material={mat.steel()} />))}
       <Box position={[-(FW / 2 + 0.05), 1.0, 0]} size={[0.1, 0.3, FL]} material={mat.rackMetal()} />
@@ -368,7 +369,8 @@ function PinballCabinet({ position, reducedMotion }: { position: [number, number
 
 /** HUB IA: knowledge vault, terminal and holographic pinball inside a glass-walled room. */
 export function AiHubRoom({ world, reducedMotion }: { world: WorldModel; reducedMotion: boolean }) {
-  const { center, size, terminal, pinball, automation } = world.aiHub;
+  const { center, size, terminal, pinball, automation, facing } = world.aiHub;
+  const yaw = yawFor(facing);
   const [cx, cz] = center;
   const [w, d] = size;
   const { hovered, selected, handlers } = useInteractive({ kind: 'hub' });
@@ -401,7 +403,7 @@ export function AiHubRoom({ world, reducedMotion }: { world: WorldModel; reduced
 
   return (
     <group>
-      <group position={[cx, 0, cz]} {...handlers}>
+      <group position={[cx, 0, cz]} rotation={[0, yaw, 0]} {...handlers}>
         <mesh position={[0, PLATFORM_H / 2, 0]} scale={[w, PLATFORM_H, d]} receiveShadow material={mat.platform()}>
           <boxGeometry />
           {(hovered || selected) && <Edges color={trim} lineWidth={selected ? 2 : 1} />}
@@ -417,10 +419,12 @@ export function AiHubRoom({ world, reducedMotion }: { world: WorldModel; reduced
           <meshBasicMaterial map={hex} transparent opacity={0.4} toneMapped={false} depthWrite={false} blending={THREE.AdditiveBlending} />
         </mesh>
         {/* painted sign */}
-        <Decal texture={sign} position={[0, PLATFORM_H + 0.01, d / 2 - 1.5]} size={[8.4, 2.1]} rotation={[-Math.PI / 2, 0, 0]} opacity={0.95} />
+        <group position={[0, PLATFORM_H + 0.01, d / 2 - 1.5]} rotation={[0, yaw, 0]}>
+          <Decal texture={sign} position={[0, 0, 0]} size={[8.4, 2.1]} rotation={[-Math.PI / 2, 0, 0]} opacity={0.95} />
+        </group>
       </group>
 
-      <group position={[cx, PLATFORM_H, cz]}>
+      <group position={[cx, PLATFORM_H, cz]} rotation={[0, yaw, 0]}>
         <GlassWall position={[0, 0, -d / 2 + 0.1]} length={w} />
         <GlassWall position={[-w / 2 + 0.1, 0, 0]} length={d} rotY={Math.PI / 2} />
         <GlassWall position={[w / 2 - 0.1, 0, 0]} length={d} rotY={Math.PI / 2} />
@@ -429,9 +433,9 @@ export function AiHubRoom({ world, reducedMotion }: { world: WorldModel; reduced
       </group>
 
       <group position={[0, PLATFORM_H, 0]}>
-        <TerminalKiosk position={[terminal[0], 0, terminal[1]]} reducedMotion={reducedMotion} />
-        <PinballCabinet position={[pinball[0], 0, pinball[1]]} reducedMotion={reducedMotion} />
-        <N8nDesk position={[automation[0], 0, automation[1]]} reducedMotion={reducedMotion} />
+        <TerminalKiosk position={[terminal[0], 0, terminal[1]]} yaw={yaw} reducedMotion={reducedMotion} />
+        <PinballCabinet position={[pinball[0], 0, pinball[1]]} yaw={yaw} reducedMotion={reducedMotion} />
+        <N8nDesk position={[automation[0], 0, automation[1]]} yaw={yaw} reducedMotion={reducedMotion} />
         <NpcBot world={world} reducedMotion={reducedMotion} />
       </group>
     </group>

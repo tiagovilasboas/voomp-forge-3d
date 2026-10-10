@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { LAYOUT } from '@config/world';
 import { PALETTE } from '../../theme';
 import type { WorldModel } from '../../world/worldModel';
 import { makeFloorTexture } from '../kit/canvasTexture';
@@ -20,6 +21,8 @@ export function Environment({ world, shadows }: { world: WorldModel; shadows: bo
   const corridorLen = max[0] - min[0] - 2;
   const corridorX = (min[0] + max[0]) / 2;
   const [hubX, hubZ] = world.aiHub.center;
+  const corridorW = LAYOUT.corridorWidth;
+  const shadowHalf = Math.max(max[0] - min[0], max[1] - min[1]) * 0.62;
 
   return (
     <>
@@ -36,12 +39,12 @@ export function Environment({ world, shadows }: { world: WorldModel; shadows: bo
         shadow-mapSize={[2048, 2048]}
         shadow-bias={-0.0004}
         shadow-normalBias={0.03}
-        shadow-camera-left={-45}
-        shadow-camera-right={45}
-        shadow-camera-top={30}
-        shadow-camera-bottom={-30}
+        shadow-camera-left={-shadowHalf}
+        shadow-camera-right={shadowHalf}
+        shadow-camera-top={shadowHalf}
+        shadow-camera-bottom={-shadowHalf}
         shadow-camera-near={1}
-        shadow-camera-far={110}
+        shadow-camera-far={140}
       />
       {/* cool rim light from the back for silhouette separation */}
       <directionalLight position={[-20, 14, -26]} intensity={0.7} color="#7F95C9" />
@@ -59,9 +62,13 @@ export function Environment({ world, shadows }: { world: WorldModel; shadows: bo
       </mesh>
 
       {/* main corridor: the shared integration line all sectors flow into */}
-      <Box position={[corridorX, 0.03, cz]} size={[corridorLen, 0.06, 2.2]} material={mat.platform()} />
-      <Box position={[corridorX, 0.065, cz - 1.05]} size={[corridorLen, 0.01, 0.05]} material={mat.glow(PALETTE.forge, 0.5)} shadows={false} />
-      <Box position={[corridorX, 0.065, cz + 1.05]} size={[corridorLen, 0.01, 0.05]} material={mat.glow(PALETTE.forge, 0.5)} shadows={false} />
+      <Box position={[corridorX, 0.03, cz]} size={[corridorLen, 0.06, corridorW]} material={mat.platform()} />
+      <Box position={[corridorX, 0.065, cz - corridorW / 2 + 0.1]} size={[corridorLen, 0.01, 0.05]} material={mat.glow(PALETTE.forge, 0.5)} shadows={false} />
+      <Box position={[corridorX, 0.065, cz + corridorW / 2 - 0.1]} size={[corridorLen, 0.01, 0.05]} material={mat.glow(PALETTE.forge, 0.5)} shadows={false} />
+      {/* one scooter lane per row */}
+      {[-1, 1].map((side) => (
+        <Box key={side} position={[corridorX, 0.065, cz + side * LAYOUT.laneOffset]} size={[corridorLen, 0.01, 0.04]} material={mat.glow(PALETTE.fog, 0.18)} shadows={false} />
+      ))}
       {Array.from({ length: Math.floor(corridorLen / 2) }, (_, i) => (
         <Box
           key={i}
