@@ -27,7 +27,8 @@ provider vocabulary from `snapshot.source.provider.vocabulary`
 - `state/uiStore.ts` → `useUiStore` (period, squad, viewMode, selection, select(ref), trackedCrId, track, overlay, openOverlay, highlightInitiative, reducedMotion, quality, commandCamera…).
 - `state/selectors.ts` → `useScope()`, `useKpis()`, `useEvents()`, `useRepoHealth()`.
 - Queries in `src/application/queries/*` (`listDeliveries`, `toDelivery`, `squadSummary`, `personSummary`, `initiativeSummary(ies)`, `repositoryHealth`, `STATUS_GROUP`). Call them inside `useMemo`.
-- Selecting anything: `select({ kind: 'squad'|'repo'|'person'|'cr'|'initiative', id })`. Closing: `select(null)`.
+- Selecting anything: `select({ kind: 'squad'|'repo'|'person'|'cr'|'initiative'|'document'|'workstream'|'board'|'desk', id })` or an id-less object ref (`gate`, `whiteboard`, `hub`, `terminal`, `pinball`, `automation`, `fronts`, `calendar`). Closing: `select(null)`.
+- Object refs (`hud/objects/objectRefs.ts`) open an Object Screen instead of the inspector; see the Object Screens section.
 
 ## Regions
 
@@ -35,7 +36,7 @@ provider vocabulary from `snapshot.source.provider.vocabulary`
 One `hud-card` row, h-[52px], items centered, gap-2, px-3:
 1. Logo: small orange forge mark (inline SVG) + "Voomp Forge" (display, bold) + tagline "From Code to Delivery" (11px fog, hidden < xl).
 2. Org/squad selector (WareTrack site selector): chip with squad code (e.g. `SQ-A`) + name + sub-line "N repositórios · M pessoas"; native `<select>` styled, options "Todas as squads" + squads → `setSquad`.
-3. Source status pill (WareTrack "Shift" pill): `DEMO DATA` warn chip + "Snapshot · sincronizado há X" (relativeTime of `generatedAt` vs real `new Date()`), with a data source `Segmented` [Demo Mode | Conectado] where "Conectado" is disabled with title = RemoteDataSource availability reason.
+3. Source status pill (WareTrack "Shift" pill): `DEMO DATA` warn chip + "Snapshot · sincronizado há X" (relativeTime of `generatedAt` vs real `new Date()`), with a data source `Segmented` [Demo Mode | Snapshot importado (only when the page opens with `?snapshot=`) | Conectado], where "Conectado" is disabled with title = RemoteDataSource availability reason.
 4. Period `Segmented` 7d / 14d / 30d (WareTrack speed control) → `setPeriod`.
 5. View toggle (WareTrack Town/Build buttons): "Product View" / "Engineering View" → `setViewMode`.
 6. Global search (input, `/` shortcut focuses it): searches repos, change requests (title/#number), people, initiatives, squads; dropdown results (max 8) with icon + kind; Enter/click → `select(ref)`. Keyboard navigable (arrow keys).
@@ -49,12 +50,13 @@ Row of 5 small `hud-card`s (w-[168px], px-3 py-2, horizontal scroll on small scr
 `useKpis()`: "PRs integrados" (merged), "Aguardando revisão" (awaitingReview), "Falhas de pipeline" (pipelineFailures, red when > 0), "Deploys em produção" (productionDeploys, green), "Entregas c/ iniciativa" (initiativeDeliveries). Hint "últimos N dias" + squad name if filtered. Use vocabulary for "PRs". Animate value change (brief orange flash) for filter feedback. Each card has a `title` tooltip explaining the metric in plain language (e.g. "Integrado ≠ em produção").
 
 ### LeftColumn (`panels/LeftColumn.tsx`) — WareTrack Shift goals / Missions / Actions
-Flex column gap-3, scroll-thin overflow-auto, three cards:
+Flex column gap-3, scroll-thin overflow-auto. Product View shows four cards; Engineering View replaces the questions card with "Saúde técnica" and hides "Frentes":
 1. **Product View → "Perguntas da semana"** (WareTrack Shift goals): list of business questions, each row = question + count on the right; click applies the answer: opens Delivery Explorer pre-filtered OR selects. Questions:
    "O que chegou em produção?" (status production), "O que ainda não chegou à produção?" (staging+integrated), "O que aguarda revisão?" (review), "Há bloqueios técnicos?" (blocked), "Mudanças sem iniciativa identificada" (initiative none). Use `listDeliveries`. Pass prefilter to the explorer via a tiny exported zustand store in `views/DeliveryExplorer.tsx` (e.g. `useExplorerFilters`) — keep it simple.
    In **Engineering View** this card becomes "Saúde técnica": repos with failing pipeline, blocked CRs, repos without pipeline data, idle repos (from `useRepoHealth`), each clickable → select repo.
 2. **Iniciativas** (WareTrack Missions): each initiative row: key chip + name, mini progress bar = inProduction / total deliveries, sub-line headline from `initiativeSummary`. Click → `select({kind:'initiative'})` (store also highlights racks). Selected row has orange left border.
 3. **Modo** (WareTrack Actions): segmented Product/Engineering + 1-line explanation of what each mode shows, and a disclaimer: "Personagens são ilustrativos: não indicam presença, carga ou produtividade."
+4. **Frentes** (Product View only): the four fronts that need attention first, sorted by status, with the count of all fronts. Click opens the front in the Mural de Frentes (`select({kind:'workstream'})`).
 
 ### Inspector (`panels/Inspector.tsx`) — WareTrack inspector (top-right)
 `Card` max-h-full overflow-auto scroll-thin. Header like WareTrack: icon tile (40px rounded-xl bg-forge/15 text-forge) + Eyebrow (entity type · code) + title (display 18px) + subline; header buttons: "Centralizar" (`commandCamera({type:'focus', ref})`) and close (`select(null)`); Esc closes. Below: status chips row, 2×2 `StatTile` grid, then lists with `SectionLabel`. Variants by `selection.kind`:
@@ -64,6 +66,24 @@ Flex column gap-3, scroll-thin overflow-auto, three cards:
 - **cr** (Interaction D): "#number title", repo, author, initiative (or "Iniciativa não identificada"), productSummary (or "Sem resumo para Produto"), StatusBadge, **vertical timeline** of the 6 stages (`toDelivery().stages`): done = orange/green check with date; blocked = red alert with note; pending = hollow grey circle with note "Sem evidência ainda"; not_applicable = dashed. Engineering View adds head sha, target branch, reviews list, pipeline runs on head, deployments with env/status/sha. EvidenceLink to the CR. Button "Acompanhar" → `track(id)`.
 - **initiative**: key, name, summary, headline (plain language), counts tiles (em produção / aguardando produção / em revisão / bloqueadas), repos involved (click → repo), deliveries grouped by status group. If no deliveries: EmptyState.
 Unknown/missing ids → EmptyState "Item não encontrado nos dados atuais".
+
+### Object Screens (`objects/`)
+
+Interactive 3D objects open a flat, readable screen built on `ObjectScreen` (centred holographic panel, full-screen on phones, `Esc` or the close button deselects and returns the camera). `ObjectScreenHost` maps the selection to the screen:
+
+| Selection | Screen | Content |
+|-----------|--------|---------|
+| `whiteboard` | `WhiteboardScreen` ("Quadro do time") | Sticky notes, local to the browser (`notesStore`); week deliveries and reminders |
+| `board` (`<squadId>:changes` or `:deliveries`) | `BoardScreen` | The squad's board, with tabs "Mudanças" and "Entregas" |
+| `desk` | `DeskScreen` | The person's workstation: changes they authored and reviews done (a list, never a score) |
+| `hub` | `HubScreen` | Hub IA overview: three entry points to explore the data |
+| `terminal` | `TerminalScreen` | Deterministic terminal over the loaded snapshot (`ajuda`, `status`, `prs`, `entregas`, `docs`, `task`…); no AI |
+| `pinball` | `PinballScreen` | Holographic pinball with puzzles; best score in `localStorage` |
+| `automation` | `AutomationScreen` | Documents the suggested n8n flow that runs `npm run ingest` daily; nothing runs from the Forge |
+| `fronts`, `workstream` | `FrontsScreen` | Mural de Frentes (tabs Mural, Roadmap, Alocação) with squad, status and category filters; a front opens its detail |
+| `calendar` | `CalendarScreen` | Delivery calendar grouped by day; a cell opens the change, or the repository if there is none |
+
+Adding an object: a ref kind in `EntityRef`, a focus target in `focusFor`, a screen component, and a case in `ObjectScreenHost`.
 
 ### MapControls (`panels/MapControls.tsx`) — WareTrack zoom stack
 Vertical `hud-card` p-1 with `IconButton`s: plus (`commandCamera({type:'zoom', factor:1.25})`), minus (0.8), rotate (`{type:'rotate', radians: Math.PI/8}`), compass/home → `{type:'overview'}` + `setSquad(null)` NOT required (just overview), and table icon → openOverlay('table').
@@ -85,4 +105,4 @@ Props `{ embedded?: boolean; notice?: string }`. As overlay (not embedded): full
 
 ### WelcomeModal (`views/WelcomeModal.tsx`) — WareTrack site-select + training
 Centered modal like `site-select.jpg`: title "Voomp Forge", subtitle "From Code to Delivery — veja o que as squads constroem, integram e entregam.", DEMO DATA notice ("Dados fictícios de demonstração. Nenhum dado real da Voomp."). Highlight box "Primeira vez aqui? Faça o tour guiado" + orange button "Iniciar tour" → `setTourStep(0)` + close. Grid of squad cards (code chip `SQ-A`, name, description, chips "N repositórios", "N pessoas", health mini badge) → click: setSquad + close. Bottom two boxes: "Como ler o data center" (setor = squad, rack = repositório, personagem = pessoa (ilustrativo), fluxo de luz = evento, portão = produção confirmada) and "Integrado ≠ Em produção" explanation.
-**Guided tour** (same file, exported `TourCoach` component rendered by WelcomeModal module? No — render it from HudLayout is not allowed for you; instead export `TourCoach` and the main agent will mount it). Steps (tourStep 0..5): 1 data center overview (commandCamera overview), 2 highlight a squad (setSquad('sq-admin')), 3 select a rack (select repo `repo-admin-console-web`), 4 open CR history (select cr = most recent CR of that repo), 5 a delivery confirmed in production (select a cr with status in_production), 6 Product View (setViewMode('product'), select(null), highlight first initiative). Coach card bottom-center: step n/6, title, 1–2 sentences, buttons "Pular tour" / "Voltar" / "Próximo" (last: "Concluir"). Esc ends the tour.
+**Guided tour** (`TourCoach`, exported from `WelcomeModal.tsx` and mounted by `HudLayout`). Steps (tourStep 0..5): 1 data center overview (commandCamera overview), 2 highlight a squad (setSquad('sq-admin')), 3 select a rack (select repo `repo-admin-console-web`), 4 open CR history (select cr = most recent CR of that repo), 5 a delivery confirmed in production (select a cr with status in_production), 6 Product View (setViewMode('product'), select(null), highlight first initiative). Coach card bottom-center: step n/6, title, 1–2 sentences, buttons "Pular tour" / "Voltar" / "Próximo" (last: "Concluir"). Esc ends the tour.

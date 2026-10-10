@@ -9,6 +9,8 @@ O Voomp Forge **não consulta nenhuma fonte ao vivo**. Ele lê um arquivo JSON (
 3. O JSON é publicado em qualquer hospedagem estática.
 4. O app abre com `?snapshot=<url-do-json>`. A fonte "Demo Mode" continua disponível no seletor.
 
+O agendamento pode ser um job de CI ou um fluxo no n8n (a tela Automações do Hub IA descreve o fluxo sugerido). Segredos ficam nas credenciais de quem executa o job, nunca no JSON nem no navegador. Nada é executado a partir do Forge.
+
 ## Rodando o CLI
 
 ```bash
@@ -55,10 +57,10 @@ Campos descritos em [Configuração](#configuração). Sem segredos (lê clones 
 
 Lê a planilha exportada em CSV no layout matriz: linhas de título opcionais (`FECHAMENTOS`, `PRIORIDADES DE ENTREGA NA SPRINT`, `TEMAS ABERTOS`, `SUSTENTAÇÃO`) definem a categoria (padrão: prioridade da sprint); uma linha de cabeçalho com os nomes das frentes; e linhas cujo primeiro campo é o papel (`TL`, `DEV`, `QA`, `PM`, `N2`), `Entrega` ou `Obs`.
 
-- Pessoas: `A/ B`, `Nome - Back`, `Nome (Front)`, `Nome (Reserva)`. O nome vira `displayName`; a especialidade vem do sufixo. `personId` só é preenchido se o nome casar com `people[].displayName` (e-mail → contribuidor).
-- `Entrega`: rótulo do plano. A data-alvo vem de `dd/mm`, `(dd)` ou `Semana N` (+ dia da semana) relativo a `sprintStart`. `Sob demanda` não tem data. `Finalizado`/`Entregue` marca `declaredDone`.
+- Pessoas: células separadas por `/`, `,`, `;` ou quebra de linha. Especialidade entre parênteses (`Nome (Front)`) ou após ` - ` (`Nome - Back`). O nome vira `displayName`. `personId` só é preenchido se o nome casar com `people[].displayName`; o id do contribuidor vem do e-mail.
+- `Entrega`: rótulo do plano. A data-alvo vem de `dd/mm`, `(dd)` ou `Semana N` (+ dia da semana) relativo a `sprintStart`; sem `sprintStart`, `Semana N` não gera data. Sem data reconhecível, a frente fica sem alvo. Na categoria Sustentação, sem alvo, ela aparece como "sob demanda". `Finalizado`/`Entregue` marca `declaredDone`, que é só declaração.
 - `Obs`: contendo "depend"/"bloque" vira bloqueio; "aguard"/"retorno" vira espera; o restante vira nota.
-- `previous`: exports anteriores (do mais antigo ao mais novo; data = data do arquivo, ou `{ "path", "date" }`). Um novo plano entra no histórico só se rótulo ou data-alvo mudaram (replanejamento).
+- `previous`: exports anteriores, do mais antigo ao mais novo (data = data do arquivo, ou `{ "path", "date" }`). Um novo plano entra no histórico só se rótulo ou data-alvo mudaram (replanejamento).
 - `fronts`: vínculo opcional por nome da frente com épicos, links, iniciativa e squads. Sem segredos.
 
 ### `confluence`
@@ -92,8 +94,11 @@ Lê a planilha exportada em CSV no layout matriz: linhas de título opcionais (`
 |------|----------|------|
 | Mudanças (PR/MR) | **inferido** | Commits de merge/squash: GitHub (`Merge pull request #12`, `Título (#123)`), GitLab (`Merge branch 'x' into 'main'` + `See merge request g/p!34`), Bitbucket (`Merged in x (pull request #7)`), Azure DevOps (`Merged PR 45: título`). Sempre `state: merged`, `origin: merge-commit`. Commits da branch = alcançáveis pelo 2º pai e não pelo 1º |
 | Autor / criação | inferido | Autor e data do primeiro commit da branch |
-| Deploys | **inferido** se houver `deployments`, senão indisponível | Uma tag que casa com a regra = deploy bem-sucedido naquele commit. As mudanças ligadas são as mergeadas até a tag e não incluídas na tag anterior do mesmo ambiente |
-| Reviews, pipelines, documentos | **indisponível** | O Git puro não sabe. A interface mostra "sem dados", nunca "0" |
+| Deploys | **inferido** se houver `deployments`, senão indisponível | Uma tag que casa com a regra = deploy bem-sucedido naquele commit. As mudanças ligadas são as mergeadas até a tag e não incluídas na tag anterior do mesmo ambiente. O Git não informa quem disparou: `triggeredById` fica vazio e nenhuma scooter de deploy aparece no mapa |
+| Tarefas (work items) | **inferido** no Git (chaves no título ou na branch, `workItemPattern`); **nativo** com `jira` | Git: o padrão é `[A-Z][A-Z0-9]+-\d+`. Jira: tipo, status, épico, sprint e data de produção vêm do tracker |
+| Frentes (fronts) | **nativo** com `plan-csv` | Declaração da planilha: plano, time, dependências. Produção continua vindo só de tarefas (Jira) ou de deploys (Git) |
+| Documentos | **nativo** com `confluence` | Tipo e vínculos pelos rótulos mapeados |
+| Reviews, pipelines | **indisponível** | O Git puro não sabe. A interface mostra "sem dados", nunca "0". Documentos ficam indisponíveis sem o conector `confluence` |
 | Mudanças abertas, rascunhos, fechadas sem merge | indisponível | Só existem no provedor |
 
 Pessoas são deduplicadas pelo e-mail em minúsculas. IDs são determinísticos: rodar duas vezes sobre o mesmo histórico gera o mesmo conteúdo (exceto `generatedAt`).

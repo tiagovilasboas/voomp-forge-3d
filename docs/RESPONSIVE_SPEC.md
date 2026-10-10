@@ -3,12 +3,14 @@
 Voomp Forge is **mobile-first**: every capability reachable on desktop must be
 reachable on a phone, with layouts adapted — not hidden.
 
+**Status (v0.1.0):** implemented. The three layouts are `PhoneHud`, `TabletHud` and `DesktopHud`, chosen by `useBreakpoint()`. Icons are in `public/icons/`. Where this spec and the code differ, the code is the reference; update this file when that happens.
+
 ## Breakpoints (Tailwind)
 
 | Range | Name | Layout |
 |---|---|---|
 | < 768px (`base`) | Phone | 3D full-bleed + compact top bar + KPI carousel + **bottom navigation** + **bottom sheets** |
-| 768–1279px (`md`, `lg`) | Tablet | Top bar + KPI strip + **left drawer** (toggle) + inspector side panel (320px) + bottom tracking card |
+| 768–1279px (`md`, `lg`) | Tablet | Top bar + KPI strip + **left drawer** (300px, toggle; open by default in landscape from 1024px) + inspector side panel (320px) + delivery tracking card |
 | ≥ 1280px (`xl`) | Desktop | Current WareTrack-style arrangement (`HudLayout.tsx` diagram) |
 
 Use the viewport's safe areas: `env(safe-area-inset-*)` on the top bar, bottom
@@ -36,8 +38,8 @@ navigation and sheets (the page sets `viewport-fit=cover`).
 - Manifest: name "Voomp Forge", short_name "Forge", description "From Code to Delivery", `display: standalone`, `orientation: any`, `background_color` / `theme_color` `#090B10`, `lang: pt-BR`, start_url `./`, scope `./`.
 - Icons generated from an SVG forge mark (orange on black): 192, 512, 512 maskable, apple-touch-icon 180. Generate PNGs with a small script (e.g. `sharp` or the Playwright Chromium already on the machine) and commit the PNGs under `public/icons/`.
 - Demo Mode is bundled, so the app works fully offline after the first visit.
-- `index.html`: `viewport-fit=cover`, `apple-mobile-web-app-capable`, status bar style `black-translucent`, manifest link, apple-touch-icon.
+- `index.html`: `viewport-fit=cover`, `apple-mobile-web-app-capable`, status bar style `black-translucent`, apple-touch-icon. The manifest link is added at build time by `vite-plugin-pwa`.
 
-## Out of scope for the HUD agent
+## Out of scope for this spec
 
-- Camera framing in portrait and touch gestures (`presentation/scene/`) are owned by the scene.
+- Camera framing in portrait and touch gestures live in `presentation/scene/stage/CameraRig.tsx`. This spec covers only the HUD and the PWA.
