@@ -28,10 +28,16 @@ export const LAYOUT = {
   sectorGap: 4.5,
   rackSpacing: 2.8,
   deskSpacing: 2.6,
-  /** z of the shared front corridor, relative to sector centres. */
-  corridorZ: 10.5,
-  /** Production gate and staging dock, in front of the corridor. */
-  gateZ: 15,
+  /** Centre line (z) of the shared central corridor; rooms sit in two rows facing each other across it. */
+  corridorZ: 0,
+  /** Corridor width: room front edge to room front edge. */
+  corridorWidth: 8,
+  /** Distance from the corridor centre line to a row's scooter lane. */
+  laneOffset: 2.6,
+  /** Hub IA footprint width. */
+  hubWidth: 16,
+  /** Empty margin around the rooms, inside the world bounds. */
+  margin: 3,
 } as const;
 
 export function themeFor(squadId: string, order: number): SectorTheme {

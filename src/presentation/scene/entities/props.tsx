@@ -13,11 +13,11 @@ import { FONTS } from '../kit/canvasTexture';
 /** Static set dressing. Purely decorative, reused by every sector. */
 
 /** Standing workstation with a holographic screen (facing +z). Clickable. */
-export function Desk({ position, personId, seed, reducedMotion }: { position: Vec2; personId: string; seed: number; reducedMotion: boolean }) {
+export function Desk({ position, personId, seed, reducedMotion, yaw = 0 }: { position: Vec2; personId: string; seed: number; reducedMotion: boolean; yaw?: number }) {
   const { hovered, selected, handlers } = useInteractive({ kind: 'desk', id: personId });
   const [x, z] = position;
   return (
-    <group position={[x, 0, z]} {...handlers}>
+    <group position={[x, 0, z]} rotation={[0, yaw, 0]} {...handlers}>
       <Box position={[0, 0.98, 0]} size={[1.5, 0.05, 0.75]} material={mat.deskTop()} />
       <Box
         position={[0, 1.005, 0.3]}
@@ -38,8 +38,11 @@ export function Board({
   title,
   rows,
   state = 'idle',
+  yaw = 0,
 }: {
   position: Vec2;
+  /** Room rotation. Rotated boards also print their face on the back so they stay readable from the default camera. */
+  yaw?: number;
   state?: 'idle' | 'hover' | 'selected';
   title: string;
   rows: { label: string; value: number; color: string }[];
@@ -77,9 +80,10 @@ export function Board({
   const edgeGlow = state === 'selected' ? 1.6 : state === 'hover' ? 1.0 : 0.3;
   const [x, z] = position;
   return (
-    <group position={[x, 0, z]}>
+    <group position={[x, 0, z]} rotation={[0, yaw, 0]}>
       <Box position={[0, 2.05, -0.06]} size={[3.3, 2.0, 0.08]} material={mat.rackMetal()} />
       <Decal texture={tex} position={[0, 2.05, -0.01]} size={[3.1, 1.82]} glow opacity={0.96} />
+      {yaw !== 0 && <Decal texture={tex} position={[0, 2.05, -0.11]} size={[3.1, 1.82]} rotation={[0, Math.PI, 0]} glow opacity={0.96} />}
       <Box position={[0, 0.95, -0.06]} size={[0.08, 0.3, 0.08]} material={mat.steel()} />
       {/* frame glow: orange, stronger on hover / selection */}
       {[
@@ -189,9 +193,9 @@ function CoordinationDesk({ reducedMotion }: { reducedMotion: boolean }) {
   );
 }
 
-export function FeatureProp({ feature, position, alert, reducedMotion }: { feature: SectorFeature; position: Vec2; alert: boolean; reducedMotion: boolean }) {
+export function FeatureProp({ feature, position, alert, reducedMotion, yaw = 0 }: { feature: SectorFeature; position: Vec2; alert: boolean; reducedMotion: boolean; yaw?: number }) {
   return (
-    <group position={[position[0], 0, position[1]]}>
+    <group position={[position[0], 0, position[1]]} rotation={[0, yaw, 0]}>
       {feature === 'monitoring-room' && <MonitoringRoom alert={alert} reducedMotion={reducedMotion} />}
       {feature === 'architecture-room' && <ArchitectureRoom />}
       {feature === 'coordination-desk' && <CoordinationDesk reducedMotion={reducedMotion} />}

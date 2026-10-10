@@ -15,18 +15,16 @@ export function flowPath(world: WorldModel, repoId: string, kind: DeliveryEventK
   if (!rack || !sector) return null;
 
   const [rx, rz] = rack.position;
-  const exitX = sector.center[0] - sector.size[0] / 2 + 0.7;
-  const aisleZ = 1.1;
-  const cz = world.corridorZ;
+  const { exitX, aisleZ, laneZ } = sector;
   const base: Vec2[] = [
-    [rx, rz + 0.8],
+    [rx, rz + 0.8 * sector.facing],
     [rx, aisleZ],
     [exitX, aisleZ],
-    [exitX, cz],
+    [exitX, laneZ],
   ];
-  if (kind === 'merged') return [...base, [exitX + 2.2, cz]];
+  if (kind === 'merged') return [...base, [exitX + 2.2, laneZ]];
   const target = kind === 'deployed_production' ? world.gate : world.stagingDock;
-  return [...base, [target[0], cz], target];
+  return [...base, [target[0], laneZ], target];
 }
 
 export function pathLength(path: Vec2[]): number {

@@ -1,3 +1,4 @@
+import { toWorld } from '../world/frame';
 import type { Vec2, WorldModel } from '../world/worldModel';
 import type { Script, Step } from './script';
 
@@ -11,21 +12,23 @@ type Hub = WorldModel['aiHub'];
 /** Where someone stands to face the n8n desk. */
 export function automationStand(hub: Hub): Vec2 {
   const [x, z] = hub.automation;
-  return [x + Math.sin(AUTOMATION_YAW) * STAND_DISTANCE, z + Math.cos(AUTOMATION_YAW) * STAND_DISTANCE];
+  const f = hub.facing;
+  return [x + Math.sin(AUTOMATION_YAW) * STAND_DISTANCE * f, z + Math.cos(AUTOMATION_YAW) * STAND_DISTANCE * f];
 }
 
 /**
  * "Forge Bot" patrol: an NPC (not a contributor) that inspects the n8n desk, then
  * walks a loop around the vault, pinball and terminal before returning. Pure and
- * deterministic; every waypoint stays inside the hub.
+ * deterministic; every waypoint stays inside the hub (either facing).
  */
 export function planNpcPatrol(hub: Hub): Script {
-  const [cx, cz] = hub.center;
+  const f = hub.facing;
   const stand = automationStand(hub);
-  const lane: Vec2 = [cx - 4.2, cz + 1.0]; // clear of the vault, heading east
-  const aroundVault: Vec2 = [cx + 3.8, cz + 1.0];
-  const nearPinball: Vec2 = [hub.pinball[0] - 1.5, hub.pinball[1] - 1.7];
-  const nearTerminal: Vec2 = [hub.terminal[0] + 1.5, hub.terminal[1] - 1.7];
+  const local = (l: Vec2) => toWorld(hub.center, f, l);
+  const lane = local([-4.2, 1.0]); // clear of the vault, heading east (in the room's own frame)
+  const aroundVault = local([3.8, 1.0]);
+  const nearPinball: Vec2 = [hub.pinball[0] - 1.5 * f, hub.pinball[1] - 1.7 * f];
+  const nearTerminal: Vec2 = [hub.terminal[0] + 1.5 * f, hub.terminal[1] - 1.7 * f];
   const steps: Step[] = [
     { action: 'inspect', duration: 4, face: hub.automation },
     { action: 'tablet', duration: 3, face: hub.automation },

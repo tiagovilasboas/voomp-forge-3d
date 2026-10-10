@@ -2,6 +2,7 @@ import { cloneElement, useMemo } from 'react';
 import { Edges } from '@react-three/drei';
 import { PALETTE } from '../../theme';
 import type { FigureLayout, RackLayout, SectorLayout } from '../../world/worldModel';
+import { toWorld, yawFor } from '../../world/frame';
 import { useInteractive } from '../../interaction/useInteractive';
 import { Box, Decal, useCanvasTexture } from '../kit/Part';
 import { mat } from '../kit/materials';
@@ -42,6 +43,7 @@ export function SectorEntity({ layout, racks, figures, boards, dimmed, alert, re
   const [cx, cz] = layout.center;
   const [w, d] = layout.size;
   const accent = layout.theme.accent;
+  const yaw = yawFor(layout.facing);
 
   const floorSign = useCanvasTexture(
     1024,
@@ -70,12 +72,13 @@ export function SectorEntity({ layout, racks, figures, boards, dimmed, alert, re
     return t;
   }, [accent, w]);
 
+  const wallH = layout.facing < 0 ? 0.7 : 3.3;
   const trimColor = selected ? PALETTE.forgeBright : hovered ? PALETTE.snow : accent;
 
   return (
     <group>
       {/* platform: clicking empty floor selects the squad */}
-      <group position={[cx, 0, cz]} {...handlers}>
+      <group position={[cx, 0, cz]} rotation={[0, yaw, 0]} {...handlers}>
         <mesh position={[0, PLATFORM_H / 2, 0]} scale={[w, PLATFORM_H, d]} receiveShadow material={mat.platform()}>
           <boxGeometry />
           {(hovered || selected) && <Edges color={trimColor} lineWidth={selected ? 2 : 1} />}
@@ -87,18 +90,15 @@ export function SectorEntity({ layout, racks, figures, boards, dimmed, alert, re
         {/* hazard hatch along the front edge */}
         <Decal texture={hatch} position={[0, PLATFORM_H + 0.006, d / 2 - 0.35]} size={[w - 0.3, 0.4]} rotation={[-Math.PI / 2, 0, 0]} opacity={dimmed ? 0.15 : 0.35} />
         {/* painted sector sign */}
-        <Decal
-          texture={floorSign}
-          position={[-w / 2 + 5.2, PLATFORM_H + 0.008, d / 2 - 1.55]}
-          size={[9.6, 2.4]}
-          rotation={[-Math.PI / 2, 0, 0]}
-          opacity={dimmed ? 0.3 : 0.92}
-        />
-        {/* back wall */}
-        <Box position={[0, 1.65, -d / 2 + 0.12]} size={[w, 3.3, 0.24]} material={mat.wall()} />
-        <Box position={[0, 3.32, -d / 2 + 0.12]} size={[w, 0.05, 0.26]} material={mat.glow(accent, dimmed ? 0.2 : 0.7)} shadows={false} />
+        {/* counter-rotated so the text reads upright from the default camera in either row */}
+        <group position={[-w / 2 + 5.2, PLATFORM_H + 0.008, d / 2 - 1.55]} rotation={[0, yaw, 0]}>
+          <Decal texture={floorSign} position={[0, 0, 0]} size={[9.6, 2.4]} rotation={[-Math.PI / 2, 0, 0]} opacity={dimmed ? 0.3 : 0.92} />
+        </group>
+        {/* back wall — low on the camera side (south row) so it never hides the room */}
+        <Box position={[0, wallH / 2, -d / 2 + 0.12]} size={[w, wallH, 0.24]} material={mat.wall()} />
+        <Box position={[0, wallH + 0.02, -d / 2 + 0.12]} size={[w, 0.05, 0.26]} material={mat.glow(accent, dimmed ? 0.2 : 0.7)} shadows={false} />
         {Array.from({ length: Math.floor(w / 2.4) }, (_, i) => (
-          <Box key={i} position={[-w / 2 + 1.2 + i * 2.4, 1.65, -d / 2 + 0.26]} size={[0.1, 3.3, 0.06]} material={mat.steel()} shadows={false} />
+          <Box key={i} position={[-w / 2 + 1.2 + i * 2.4, wallH / 2, -d / 2 + 0.26]} size={[0.1, wallH, 0.06]} material={mat.steel()} shadows={false} />
         ))}
       </group>
 
@@ -106,6 +106,7 @@ export function SectorEntity({ layout, racks, figures, boards, dimmed, alert, re
         <BoardHit id={`${layout.squadId}:changes`}>
         <Board
           position={layout.boards.changes}
+          yaw={yaw}
           title="Mudanças"
           rows={[
             { label: 'Abertas', value: boards.open, color: PALETTE.forgeBright },
@@ -117,6 +118,7 @@ export function SectorEntity({ layout, racks, figures, boards, dimmed, alert, re
         <BoardHit id={`${layout.squadId}:deliveries`}>
         <Board
           position={layout.boards.deliveries}
+          yaw={yaw}
           title="Entregas"
           rows={[
             { label: 'Em produção', value: boards.production, color: PALETTE.ok },
@@ -126,11 +128,11 @@ export function SectorEntity({ layout, racks, figures, boards, dimmed, alert, re
         />
         </BoardHit>
         {figures.map((f, i) => (
-          <Desk key={f.personId} personId={f.personId} reducedMotion={reducedMotion} position={f.desk} seed={i * 97 + layout.code.charCodeAt(0)} />
+          <Desk key={f.personId} personId={f.personId} reducedMotion={reducedMotion} position={f.desk} yaw={yaw} seed={i * 97 + layout.code.charCodeAt(0)} />
         ))}
-        <FeatureProp feature={layout.theme.feature} position={layout.feature} alert={alert} reducedMotion={reducedMotion} />
+        <FeatureProp feature={layout.theme.feature} position={layout.feature} yaw={yaw} alert={alert} reducedMotion={reducedMotion} />
         {racks.map((r) => (
-          <CableTray key={r.repoId} from={[r.position[0], r.position[1]]} to={[r.position[0], cz - d / 2 + 0.3]} />
+          <CableTray key={r.repoId} from={[r.position[0], r.position[1]]} to={[r.position[0], toWorld(layout.center, layout.facing, [0, -d / 2 + 0.3])[1]]} />
         ))}
       </group>
     </group>

@@ -6,6 +6,7 @@ import type { Repository } from '@domain/entities';
 import type { RepositoryHealth } from '@application/queries/repositoryHealth';
 import { PALETTE, SIGNAL_LOOK } from '../../theme';
 import type { RackLayout } from '../../world/worldModel';
+import { yawFor } from '../../world/frame';
 import { useInteractive } from '../../interaction/useInteractive';
 import { Box, Decal, useCanvasTexture } from '../kit/Part';
 import { mat } from '../kit/materials';
@@ -107,7 +108,7 @@ export function RackEntity({ layout, repo, health, highlighted, dimmed, reducedM
   const frontZ = D / 2;
 
   return (
-    <group position={[x, 0, z]} {...handlers}>
+    <group position={[x, 0, z]} rotation={[0, yawFor(layout.facing), 0]} {...handlers}>
       {/* plinth + frame */}
       <Box position={[0, 0.06, 0]} size={[W + 0.12, 0.12, D + 0.12]} material={mat.rubber()} />
       <Box position={[0, H / 2 + 0.12, 0]} size={[W, H, D]} material={mat.rackMetal()} />
@@ -140,6 +141,7 @@ export function RackEntity({ layout, repo, health, highlighted, dimmed, reducedM
 
       {/* name plate on the header */}
       <Decal texture={plate} position={[0, H + 0.36, frontZ + 0.01]} size={[W, W * (96 / 512)]} />
+      {layout.facing < 0 && <Decal texture={plate} position={[0, H + 0.36, -frontZ - 0.01]} size={[W, W * (96 / 512)]} rotation={[0, Math.PI, 0]} />}
       <Box position={[0, H + 0.36, 0]} size={[W, 0.3, D]} material={mat.rackMetal()} />
 
       {/* beacon */}

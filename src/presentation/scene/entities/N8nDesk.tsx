@@ -203,7 +203,7 @@ const pulseGeo = new THREE.SphereGeometry(1, 10, 8);
 const PULSE_MAT = new THREE.MeshBasicMaterial({ color: new THREE.Color('#FFFFFF').multiplyScalar(1.6), toneMapped: false, depthWrite: false });
 
 /** n8n workstation: a sleek desk with a floating workflow graph and data pulses along its edges. */
-export function N8nDesk({ position, reducedMotion }: { position: [number, number, number]; reducedMotion: boolean }) {
+export function N8nDesk({ position, reducedMotion, yaw = 0 }: { position: [number, number, number]; reducedMotion: boolean; yaw?: number }) {
   const { hovered, selected, handlers } = useInteractive({ kind: 'automation' });
   const glow = selected ? 1 : hovered ? 0.75 : 0.35;
   const graph = useCanvasTexture(CW, CH, drawGraph, []);
@@ -222,7 +222,7 @@ export function N8nDesk({ position, reducedMotion }: { position: [number, number
   const edge = selected || hovered ? '#FFFFFF' : CYAN;
   const lit = useMemo(() => mat.glow(edge, glow * 1.3 + 0.3), [edge, glow]);
   return (
-    <group position={position} rotation={[0, AUTOMATION_YAW, 0]} {...handlers}>
+    <group position={position} rotation={[0, AUTOMATION_YAW + yaw, 0]} {...handlers}>
       {/* invisible, generous hit volume */}
       <mesh position={[0, 1.2, 0]}>
         <boxGeometry args={[3.1, 2.4, 1.3]} />
