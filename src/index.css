@@ -73,3 +73,42 @@ html, body, #root {
     transition-duration: 1ms !important;
   }
 }
+
+/* ---- Responsive (docs/RESPONSIVE_SPEC.md) ---- */
+
+/* Touch layouts: phones, or any coarse pointer. Used to enlarge targets to >= 44px. */
+@custom-variant tap {
+  @media (pointer: coarse) {
+    @slot;
+  }
+  @media (max-width: 767.98px) {
+    @slot;
+  }
+}
+
+:root {
+  --mobile-nav-h: calc(64px + env(safe-area-inset-bottom, 0px));
+}
+
+@theme {
+  --animate-sheet-in: sheet-in 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-drawer-in: drawer-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes sheet-in {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes drawer-in {
+  from { transform: translateX(-16px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+html, body {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
