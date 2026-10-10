@@ -18,6 +18,8 @@ export function Environment({ world, shadows }: { world: WorldModel; shadows: bo
 
   const cz = world.corridorZ;
   const corridorLen = max[0] - min[0] - 2;
+  const corridorX = (min[0] + max[0]) / 2;
+  const [hubX, hubZ] = world.aiHub.center;
 
   return (
     <>
@@ -47,6 +49,8 @@ export function Environment({ world, shadows }: { world: WorldModel; shadows: bo
       {world.sectors.map((s) => (
         <pointLight key={s.squadId} position={[s.center[0], 6, s.center[1]]} intensity={30} distance={18} decay={1.6} color={PALETTE.forgeBright} />
       ))}
+      <pointLight position={[hubX, 6, hubZ]} intensity={30} distance={20} decay={1.6} color={PALETTE.forgeBright} />
+      <pointLight position={[hubX, 3.5, hubZ + 2]} intensity={14} distance={14} decay={1.6} color="#38E1FF" />
       <pointLight position={[world.gate[0], 4, world.gate[1] + 1]} intensity={10} distance={12} decay={1.6} color={PALETTE.ok} />
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[(min[0] + max[0]) / 2, 0, (min[1] + max[1]) / 2]} receiveShadow>
@@ -55,13 +59,13 @@ export function Environment({ world, shadows }: { world: WorldModel; shadows: bo
       </mesh>
 
       {/* main corridor: the shared integration line all sectors flow into */}
-      <Box position={[0, 0.03, cz]} size={[corridorLen, 0.06, 2.2]} material={mat.platform()} />
-      <Box position={[0, 0.065, cz - 1.05]} size={[corridorLen, 0.01, 0.05]} material={mat.glow(PALETTE.forge, 0.5)} shadows={false} />
-      <Box position={[0, 0.065, cz + 1.05]} size={[corridorLen, 0.01, 0.05]} material={mat.glow(PALETTE.forge, 0.5)} shadows={false} />
+      <Box position={[corridorX, 0.03, cz]} size={[corridorLen, 0.06, 2.2]} material={mat.platform()} />
+      <Box position={[corridorX, 0.065, cz - 1.05]} size={[corridorLen, 0.01, 0.05]} material={mat.glow(PALETTE.forge, 0.5)} shadows={false} />
+      <Box position={[corridorX, 0.065, cz + 1.05]} size={[corridorLen, 0.01, 0.05]} material={mat.glow(PALETTE.forge, 0.5)} shadows={false} />
       {Array.from({ length: Math.floor(corridorLen / 2) }, (_, i) => (
         <Box
           key={i}
-          position={[-corridorLen / 2 + 1 + i * 2, 0.065, cz]}
+          position={[corridorX - corridorLen / 2 + 1 + i * 2, 0.065, cz]}
           size={[0.8, 0.01, 0.06]}
           material={mat.glow(PALETTE.fog, 0.25)}
           shadows={false}
