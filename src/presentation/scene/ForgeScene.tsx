@@ -12,6 +12,8 @@ import { ProductionGate } from './entities/ProductionGate';
 import { WeekBoard } from './entities/WeekBoard';
 import { CreditPlaque } from './entities/CreditPlaque';
 import { KnowledgeVault } from './entities/KnowledgeVault';
+import { FrontsWall } from './entities/FrontsWall';
+import { CalendarWall } from './entities/CalendarWall';
 import { AiHubRoom } from './entities/AiHubRoom';
 import { InfoTotem } from './entities/holoProps';
 import { RepoHologram } from './holo/RepoHologram';
@@ -167,6 +169,8 @@ export function ForgeScene() {
         reducedMotion={reducedMotion}
       />
       <WeekBoard position={world.weekBoard} deliveries={weekDeliveries} notes={notes} vocabularyShort={snapshot.source.provider.vocabulary.changeRequestShort} />
+      <FrontsWall position={world.frontsWall} reducedMotion={reducedMotion} />
+      <CalendarWall position={world.calendarWall} reducedMotion={reducedMotion} />
       <AiHubRoom world={world} reducedMotion={reducedMotion} />
       <group position={[0, PLATFORM_H, 0]}>
         <KnowledgeVault position={world.knowledgeVault} documents={snapshot.documents} litDocIds={litDocIds} racks={world.racks} reducedMotion={reducedMotion} />
