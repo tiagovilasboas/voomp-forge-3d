@@ -55,12 +55,12 @@ const hexTexture = () =>
       ctx.clearRect(0, 0, w, h);
       const r = 32;
       const hh = Math.sqrt(3) * r;
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 1;
       for (let row = -1; row * hh < h + hh; row++) {
         for (let col = -1; col * r * 1.5 < w + r * 2; col++) {
           const x = col * r * 1.5;
           const y = row * hh + (col % 2 ? hh / 2 : 0);
-          ctx.strokeStyle = (row * 7 + col * 3) % 11 === 0 ? 'rgba(255,140,50,0.55)' : 'rgba(56,225,255,0.28)';
+          ctx.strokeStyle = 'rgba(56,225,255,0.12)';
           ctx.beginPath();
           for (let k = 0; k < 6; k++) {
             const a = (Math.PI / 3) * k;
@@ -112,33 +112,14 @@ function GlassWall({ position, length, rotY = 0 }: { position: [number, number, 
   );
 }
 
-/** Slow drifting rings and particles over the hub. */
+/** Slow drifting particles over the hub. The floor rings were removed. */
 function Floaters({ reducedMotion }: { reducedMotion: boolean }) {
-  const rings = useRef<THREE.Group>(null);
   const points = useRef<THREE.Points>(null);
   useFrame(({ clock }) => {
     if (reducedMotion) return;
-    const t = clock.elapsedTime;
-    const g = rings.current;
-    if (g) {
-      const c = g.children;
-      for (let i = 0; i < c.length; i++) {
-        c[i].rotation.z = t * (0.25 + i * 0.12) * (i % 2 ? -1 : 1);
-        c[i].position.y = 3.1 + i * 0.35 + Math.sin(t * 0.7 + i * 2) * 0.08;
-      }
-    }
-    if (points.current) points.current.rotation.y = t * 0.03;
+    if (points.current) points.current.rotation.y = clock.elapsedTime * 0.03;
   });
-  return (
-    <>
-      <group ref={rings} position={[0, 0, 0.5]}>
-        {[2.6, 1.9, 1.3].map((r, i) => (
-          <mesh key={r} geometry={torusGeo(r, 0.015)} material={holoMat(i === 1 ? ORANGE : CYAN, 0.55)} position={[0, 3.1 + i * 0.35, 0]} rotation={[Math.PI / 2 + (i - 1) * 0.12, 0, 0]} raycast={noRaycast} />
-        ))}
-      </group>
-      <points ref={points} geometry={particleGeo()} material={particleMat()} raycast={noRaycast} />
-    </>
-  );
+  return <points ref={points} geometry={particleGeo()} material={particleMat()} raycast={noRaycast} />;
 }
 
 /** Terminal kiosk: pedestal, tilted holographic screen with scrolling prompt, holographic keyboard. */
@@ -406,7 +387,7 @@ export function AiHubRoom({ world, reducedMotion }: { world: WorldModel; reduced
         <Box position={[0, PLATFORM_H + 0.005, -d / 2 + 0.04]} size={[w, 0.012, 0.06]} material={mat.glow(trim, 0.8)} shadows={false} />
         {/* hex holographic floor */}
         <mesh position={[0, PLATFORM_H + 0.007, 0]} rotation={[-Math.PI / 2, 0, 0]} scale={[w - 0.6, d - 0.6, 1]} geometry={planeGeo()} raycast={noRaycast}>
-          <meshBasicMaterial map={hex} transparent opacity={0.4} toneMapped={false} depthWrite={false} blending={THREE.AdditiveBlending} />
+          <meshBasicMaterial map={hex} transparent opacity={0.22} toneMapped={false} depthWrite={false} blending={THREE.AdditiveBlending} />
         </mesh>
         {/* painted sign */}
         <group position={[0, PLATFORM_H + 0.01, d / 2 - 1.5]} rotation={[0, yaw, 0]}>

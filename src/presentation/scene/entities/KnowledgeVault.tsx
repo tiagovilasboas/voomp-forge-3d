@@ -160,7 +160,7 @@ export function KnowledgeVault({
         ))}
       </group>
       {beams.map((b) => (
-        <Line key={b.key} points={b.points} color={KNOWLEDGE} lineWidth={0.8} transparent opacity={0.22} toneMapped={false} dashed dashSize={0.3} gapSize={0.35} />
+        <Line key={b.key} points={b.points} color={KNOWLEDGE} lineWidth={0.6} transparent opacity={0.1} toneMapped={false} dashed dashSize={0.18} gapSize={0.55} />
       ))}
     </group>
   );
