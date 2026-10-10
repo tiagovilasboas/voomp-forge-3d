@@ -237,7 +237,7 @@ function PinballCabinet({ position, yaw, reducedMotion }: { position: [number, n
   const ball = useRef<THREE.Mesh>(null);
   const flipL = useRef<THREE.Mesh>(null);
   const flipR = useRef<THREE.Mesh>(null);
-  const bumpers = useRef<THREE.Group>(null);
+  // bumpers ref removed
   const FW = 1.3;
   const FL = 2.3;
 
@@ -315,10 +315,7 @@ function PinballCabinet({ position, yaw, reducedMotion }: { position: [number, n
     const flip = reducedMotion ? 0 : Math.max(0, Math.sin(t * 2.2)) ** 6;
     if (flipL.current) flipL.current.rotation.z = 0.5 - flip * 0.6;
     if (flipR.current) flipR.current.rotation.z = -0.5 + flip * 0.6;
-    const g = bumpers.current;
-    if (g && !reducedMotion) {
-      for (let i = 0; i < g.children.length; i++) g.children[i].scale.setScalar(1 + Math.max(0, Math.sin(t * 3 + i * 2.1)) ** 8 * 0.18);
-    }
+    // bumpers animation removed
   });
 
   const tilt = -0.32;
@@ -341,14 +338,7 @@ function PinballCabinet({ position, yaw, reducedMotion }: { position: [number, n
         </mesh>
         <lineSegments geometry={planeEdges()} material={lineMat(CYAN, 1)} scale={[FW, FL, 1]} />
         {/* playfield local: +y is toward the backbox */}
-        <group ref={bumpers} >
-          {[[-0.26, 0.55], [0.26, 0.55], [0, 0.18]].map(([x, y], i) => (
-            <group key={i} position={[x, y, 0.02]}>
-              <mesh geometry={torusGeo(0.1, 0.015)} material={holoMat(i === 2 ? ORANGE : CYAN, 1)} />
-              <mesh geometry={sphereGeo()} material={holoMat(i === 2 ? ORANGE : CYAN, 0.55)} scale={0.065} />
-            </group>
-          ))}
-        </group>
+        {/* bumpers removed */}
         <mesh ref={flipL} geometry={once('boxg', () => new THREE.BoxGeometry(1, 1, 1))} material={mat.glow(ORANGE, 1.4)} position={[-0.2, -0.82, 0.02]} rotation={[0, 0, 0.5]} scale={[0.34, 0.06, 0.04]} />
         <mesh ref={flipR} geometry={once('boxg', () => new THREE.BoxGeometry(1, 1, 1))} material={mat.glow(ORANGE, 1.4)} position={[0.2, -0.82, 0.02]} rotation={[0, 0, -0.5]} scale={[0.34, 0.06, 0.04]} />
         <mesh ref={ball} geometry={sphereGeo()} material={mat.glow('#FFFFFF', 2)} position={[0, 0, 0.05]} scale={0.04} />
