@@ -11,6 +11,8 @@ import { FlowStreams } from './entities/FlowStreams';
 import { ProductionGate } from './entities/ProductionGate';
 import { WeekBoard } from './entities/WeekBoard';
 import { CreditPlaque } from './entities/CreditPlaque';
+import { KnowledgeVault } from './entities/KnowledgeVault';
+import { RepoHologram } from './holo/RepoHologram';
 
 const PLATFORM_H = 0.14;
 
@@ -69,6 +71,30 @@ export function ForgeScene() {
     () => listDeliveries(index, { ...scope, periodDays: 7, squadId: null }, { status: 'production' }),
     [index, scope],
   );
+  /** Documents linked to the current focus; null = nothing in focus. */
+  const litDocIds = useMemo(() => {
+    const ids = (docs: { id: string }[] | undefined) => (docs ?? []).map((d) => d.id);
+    if (!selection) {
+      return highlightInitiativeId ? new Set(ids(index.docsByInitiative.get(highlightInitiativeId))) : null;
+    }
+    switch (selection.kind) {
+      case 'document':
+        return new Set([selection.id]);
+      case 'initiative':
+        return new Set(ids(index.docsByInitiative.get(selection.id)));
+      case 'repo':
+        return new Set(ids(index.docsByRepo.get(selection.id)));
+      case 'squad':
+        return new Set(ids(index.docsBySquad.get(selection.id)));
+      case 'cr': {
+        const cr = index.cr.get(selection.id);
+        if (!cr) return null;
+        return new Set([...ids(index.docsByRepo.get(cr.repositoryId)), ...ids(cr.initiativeId ? index.docsByInitiative.get(cr.initiativeId) : undefined)]);
+      }
+      default:
+        return null;
+    }
+  }, [selection, highlightInitiativeId, index]);
   const dimmedSquad = (squadId: string) => squadFilter !== null && squadFilter !== squadId;
 
   return (
@@ -117,7 +143,9 @@ export function ForgeScene() {
         reducedMotion={reducedMotion}
       />
       <WeekBoard position={world.weekBoard} deliveries={weekDeliveries} notes={notes} vocabularyShort={snapshot.source.provider.vocabulary.changeRequestShort} />
+      <KnowledgeVault position={world.knowledgeVault} documents={snapshot.documents} litDocIds={litDocIds} racks={world.racks} reducedMotion={reducedMotion} />
       <CreditPlaque position={world.creditPlaque} />
+      <RepoHologram />
       {/* snapshot marker for debugging in devtools */}
       <group name={`forge:${snapshot.source.kind}`} />
     </>
