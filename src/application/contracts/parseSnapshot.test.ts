@@ -46,6 +46,33 @@ describe('parseSnapshot', () => {
     expect(issues.some((i) => i.startsWith('source.capabilities.reviews'))).toBe(true);
   });
 
+  it('validates work items and workstreams', () => {
+    const s = fresh();
+    s.workItems[0].productionAt = 'ontem';
+    s.workItems[1].epicKey = 'NOPE-1';
+    s.workstreams[0].squadIds = ['sq-x'];
+    s.workstreams[0].initiativeId = 'ini-x';
+    s.workstreams[0].repositoryIds = ['repo-x'];
+    s.workstreams[0].team[0].personId = 'ct-x';
+    s.workstreams[0].team[0].role = 'chefe';
+    s.source.capabilities.workstreams = 'maybe';
+    const issues = issuesOf(s);
+    expect(issues.some((i) => i.startsWith('workItems[0].productionAt'))).toBe(true);
+    expect(issues).toContain('workItems[1].epicKey: "NOPE-1" não existe em workItems.');
+    expect(issues).toContain('workstreams[0].squadIds: "sq-x" não existe em squads.');
+    expect(issues.some((i) => i.startsWith('workstreams[0].initiativeId'))).toBe(true);
+    expect(issues).toContain('workstreams[0].repositoryIds: "repo-x" não existe em repositories.');
+    expect(issues).toContain('workstreams[0].team[0].personId: "ct-x" não existe em contributors.');
+    expect(issues.some((i) => i.startsWith('workstreams[0].team[0].role'))).toBe(true);
+    expect(issues.some((i) => i.startsWith('source.capabilities.workstreams'))).toBe(true);
+  });
+
+  it('accepts a work item without epic', () => {
+    const s = fresh();
+    s.workItems[0].epicKey = null;
+    expect(() => parseSnapshot(s)).not.toThrow();
+  });
+
   it('reports broken references', () => {
     const s = fresh();
     s.repositories[0].squadId = 'sq-x';
