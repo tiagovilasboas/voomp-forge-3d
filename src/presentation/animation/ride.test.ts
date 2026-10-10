@@ -4,9 +4,9 @@ import { compile, sample } from './script';
 import { rigPose } from './rig';
 import type { FigureLayout, SectorLayout, WorldModel } from '../world/worldModel';
 
-const sector = { squadId: 'sq-a', center: [0, 0], size: [17, 15], boards: { deliveries: [0, 0], changes: [0, 0] } } as unknown as SectorLayout;
-const world = { sectors: [sector], racks: [], figures: [], corridorZ: 10.5, gate: [3.5, 15] } as unknown as WorldModel;
-const figure: FigureLayout = { personId: 'ct-a', squadId: 'sq-a', role: 'developer', desk: [-2, 3.4], home: [-2, 4.4] };
+const sector = { squadId: 'sq-a', center: [0, -11.5], size: [17, 15], facing: 1, aisleZ: -10.4, exitX: -7.8, laneZ: -2.6, boards: { deliveries: [0, 0], changes: [0, 0] } } as unknown as SectorLayout;
+const world = { sectors: [sector], racks: [], figures: [], corridorZ: 0, gate: [3.5, 0] } as unknown as WorldModel;
+const figure: FigureLayout = { personId: 'ct-a', squadId: 'sq-a', facing: 1, role: 'developer', desk: [-2, -8.1], home: [-2, -7.1] };
 const facts = (ride: ActivityFacts['ride']): ActivityFacts => ({ authoringRepoIds: [], reviewingRepoIds: [], celebrates: false, ride });
 
 describe('production ride', () => {
@@ -38,7 +38,7 @@ describe('production ride', () => {
     const walk = c.segments.find((s) => s.action === 'walk')!;
     const speed = (s: typeof ride) => Math.hypot(s.to[0] - s.from[0], s.to[1] - s.from[1]) / s.duration;
     expect(speed(ride)).toBeGreaterThan(speed(walk) * 2);
-    expect(ride.from[1]).toBe(world.corridorZ);
+    expect(ride.from[1]).toBe(sector.laneZ);
     const inspect = c.segments.find((s) => s.action === 'inspect')!;
     expect(Math.hypot(inspect.from[0] - world.gate[0], inspect.from[1] - world.gate[1])).toBeLessThan(2);
     const pose = sample({ ...c, offset: 0 }, ride.start + ride.duration / 2);
