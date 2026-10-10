@@ -7,7 +7,7 @@
  */
 
 export const ROBOT_STYLE = {
-  proportions: { height: 1.32, headRadius: 0.27, torso: [0.36, 0.32, 0.26], hipY: 0.42 },
+  proportions: { height: 1.32, headRadius: 0.2, torso: [0.36, 0.32, 0.26], hipY: 0.42 },
   /** LED eyes on the face screen. Cyan is reserved for robots: no status uses it. */
   eyeColor: '#38E1FF',
   ringSecondary: '#38BDF8',

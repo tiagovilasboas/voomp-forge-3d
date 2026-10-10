@@ -35,7 +35,7 @@ const ROLE_STYLE: Record<ContributorRole | 'unknown', RoleStyle> = {
 /** Name tags appear once the camera is close enough to read them. */
 const TAG_ZOOM = 34;
 const R = ROBOT_STYLE.proportions.headRadius;
-const HEAD_Y = 1.0;
+const HEAD_Y = 0.97;
 
 // Shared geometries: one GPU buffer for every robot.
 const RING = new THREE.TorusGeometry(1, 0.16, 10, 32);
@@ -247,7 +247,7 @@ export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: 
         {/* neck + helmet */}
         <mesh geometry={CYL} material={JOINT_DARK} position={[0, 0.8, 0]} scale={[0.07, 0.06, 0.07]} />
         <group ref={head} position={[0, HEAD_Y, 0]}>
-          <RoundedBox args={[R * 2.05, R * 1.7, R * 1.75]} radius={0.06} smoothness={3} material={shell} castShadow />
+          <RoundedBox args={[R * 1.95, R * 1.75, R * 1.75]} radius={0.085} smoothness={4} material={shell} castShadow />
           {/* forehead plate, slightly off-centre for character */}
           <RoundedBox args={[R * 0.9, R * 0.22, 0.03]} radius={0.01} smoothness={2} position={[R * 0.25, R * 0.72, R * 0.875]} material={JOINT_DARK} />
           {/* bezel + flat LED screen */}
@@ -288,7 +288,7 @@ export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: 
         </group>
       </group>
 
-      <sprite ref={tag} position={[0, 1.52, 0]} scale={[0.95, 0.245, 1]} renderOrder={10} visible={false}>
+      <sprite ref={tag} position={[0, 1.38, 0]} scale={[0.95, 0.245, 1]} renderOrder={10} visible={false}>
         <NameTag name={firstName} role={ROLE_TAG[person.role ?? 'unknown']} accent={style.accent} />
       </sprite>
 
