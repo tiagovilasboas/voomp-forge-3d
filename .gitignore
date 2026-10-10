@@ -2,3 +2,6 @@ node_modules
 dist
 .vitest
 *.tsbuildinfo
+
+# snapshots com dados reais — nunca commitar
+public/snapshot*.json

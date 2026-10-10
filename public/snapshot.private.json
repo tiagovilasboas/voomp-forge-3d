@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "kind": "imported",
+    "generatedAt": "2026-10-10T12:00:00Z",
+    "provider": {
+      "id": "azure-devops",
+      "name": "Azure DevOps",
+      "vocabulary": {
+        "changeRequest": "Pull Request",
+        "changeRequestShort": "PR",
+        "pipeline": "Pipelines"
+      }
+    },
+    "capabilities": {
+      "changeRequests": "unavailable",
+      "reviews": "unavailable",
+      "pipelines": "unavailable",
+      "deployments": "unavailable",
+      "documents": "unavailable",
+      "workItems": "unavailable",
+      "workstreams": "unavailable"
+    }
+  },
+  "organization": {
+    "id": "cogna-voomp",
+    "name": "Voomp Creators",
+    "slug": "voomp"
+  },
+  "squads": [
+    {
+      "id": "squad-vadm",
+      "code": "A",
+      "name": "Admin",
+      "description": "Painel do seller, KYC, vendas, contratos, BDR e Minhas Compras."
+    },
+    {
+      "id": "squad-vsus",
+      "code": "S",
+      "name": "Sustentação",
+      "description": "Bugfix em produção, investigação de incidentes e observabilidade cross-squad."
+    },
+    {
+      "id": "squad-vmpg",
+      "code": "P",
+      "name": "Meios de Pagamento",
+      "description": "Fluxo de checkout, payment flows e integração com PSPs."
+    },
+    {
+      "id": "squad-vgfe",
+      "code": "F",
+      "name": "Gestão Financeira",
+      "description": "Financeiro, ERP, saques, Celcoin e backoffice."
+    },
+    {
+      "id": "squad-vgat",
+      "code": "G",
+      "name": "Gateway",
+      "description": "Pagamentos, assinaturas, split, PagarMe e pipeline-templates."
+    },
+    {
+      "id": "squad-vply",
+      "code": "L",
+      "name": "Play",
+      "description": "Plataforma de cursos, membros, WhatsApp e certificados."
+    },
+    {
+      "id": "squad-enablement",
+      "code": "E",
+      "name": "Enablement",
+      "description": "Especialistas transversais: observabilidade, AppSec, agentic AI, CI/CD e enablement de plataforma."
+    }
+  ],
+  "repositories": [],
+  "contributors": [],
+  "changeRequests": [],
+  "reviews": [],
+  "commits": [],
+  "pipelineRuns": [],
+  "deployments": [],
+  "initiatives": [],
+  "documents": [],
+  "workItems": [],
+  "workstreams": []
+}
