@@ -12,7 +12,10 @@ type DataState =
 
 interface DataStore {
   state: DataState;
+  /** Sources offered to the user, registered by the composition root. */
+  sources: DeliveryDataSource[];
   source: DeliveryDataSource | null;
+  registerSources: (sources: DeliveryDataSource[]) => void;
   load: (source: DeliveryDataSource) => Promise<void>;
 }
 
@@ -21,7 +24,9 @@ const EMPTY = { snapshot: null, index: null, world: null, error: null } as const
 /** Owns the loaded snapshot and everything derived once per snapshot (index, world layout). */
 export const useDataStore = create<DataStore>((set) => ({
   state: { status: 'idle', ...EMPTY },
+  sources: [],
   source: null,
+  registerSources: (sources) => set({ sources }),
   async load(source) {
     const availability = source.availability();
     if (!availability.available) {
