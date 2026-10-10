@@ -88,12 +88,12 @@ export interface Contributor {
 
 export type ChangeRequestState = 'open' | 'closed' | 'merged';
 
-/** How a change request is known: from the provider, or inferred from a merge/squash commit. */
-export type ChangeRequestEvidence = 'provider' | 'merge-commit';
+/** Where a change request comes from: the provider, or inferred from a merge/squash commit. */
+export type ChangeRequestOrigin = 'provider' | 'merge-commit';
 
 export interface ChangeRequest {
   id: ID;
-  evidence: ChangeRequestEvidence;
+  origin: ChangeRequestOrigin;
   number: number;
   repositoryId: ID;
   title: string;

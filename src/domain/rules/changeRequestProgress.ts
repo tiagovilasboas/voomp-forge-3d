@@ -1,4 +1,4 @@
-import type { ChangeRequest, Deployment, ISODate, PipelineRun, Review } from '@domain/entities';
+import type { ChangeRequest, Deployment, ISODate, PipelineRun, Review, SourceCapabilities } from '@domain/entities';
 
 /**
  * Evidence rules for a change request. The single source of truth for
@@ -13,10 +13,13 @@ export interface ChangeRequestEvidence {
   headRuns: PipelineRun[];
   /** Deployments that list this change request in `changeRequestIds`. */
   deployments: Deployment[];
+  /** What the source can know. Missing knowledge yields `unknown`, never `pending` or `done`. */
+  capabilities: SourceCapabilities;
 }
 
 export type StageId = 'opened' | 'in_review' | 'approved' | 'merged' | 'deployed' | 'production';
-export type StageState = 'done' | 'blocked' | 'pending' | 'not_applicable';
+/** `unknown` = the source cannot tell (e.g. plain Git has no reviews or deployments). */
+export type StageState = 'done' | 'blocked' | 'pending' | 'not_applicable' | 'unknown';
 
 export interface Stage {
   id: StageId;
@@ -95,14 +98,21 @@ export function timeline(e: ChangeRequestEvidence): Stage[] {
 
   const pendingOrNA = (note: string): Pick<Stage, 'state' | 'note'> =>
     closedUnmerged ? { state: 'not_applicable', note: 'Fechado sem integração.' } : { state: 'pending', note };
+  const unknown = (id: StageId, note: string): Stage => ({ id, state: 'unknown', at: null, note });
+  const knowsReviews = e.capabilities.reviews !== 'unavailable';
+  const knowsDeployments = e.capabilities.deployments !== 'unavailable';
 
-  const inReview: Stage = firstReviewAt
+  const inReview: Stage = !knowsReviews
+    ? unknown('in_review', 'A fonte de dados não informa revisões.')
+    : firstReviewAt
     ? { id: 'in_review', state: 'done', at: firstReviewAt, note: `${e.reviews.length} revisão(ões) registrada(s).` }
     : cr.requestedReviewerIds.length
       ? { id: 'in_review', state: 'pending', at: null, note: 'Revisão solicitada, nenhuma resposta ainda.' }
       : { id: 'in_review', at: null, ...pendingOrNA('Nenhuma revisão solicitada.') };
 
-  const approvedStage: Stage = approved
+  const approvedStage: Stage = !knowsReviews
+    ? unknown('approved', 'A fonte de dados não informa aprovações.')
+    : approved
     ? { id: 'approved', state: 'done', at: earliest(approvals.map((r) => r.submittedAt)), note: 'Aprovação registrada.' }
     : hasChangesRequested(e.reviews)
       ? { id: 'approved', state: 'blocked', at: null, note: 'Alterações solicitadas pela revisão.' }
@@ -114,7 +124,9 @@ export function timeline(e: ChangeRequestEvidence): Stage[] {
       ? { id: 'merged', state: 'blocked', at: null, note: 'Pipeline falhando na última versão.' }
       : { id: 'merged', at: null, ...pendingOrNA('Ainda não integrado.') };
 
-  const deployedStage: Stage = anyDeploy.length
+  const deployedStage: Stage = !knowsDeployments
+    ? unknown('deployed', 'A fonte de dados não informa deploys.')
+    : anyDeploy.length
     ? {
         id: 'deployed',
         state: 'done',
@@ -123,14 +135,21 @@ export function timeline(e: ChangeRequestEvidence): Stage[] {
       }
     : { id: 'deployed', at: null, ...pendingOrNA('Nenhum deploy contendo esta mudança foi encontrado.') };
 
-  const productionStage: Stage = prodDeploy.length
+  const productionStage: Stage = !knowsDeployments
+    ? unknown('production', 'Sem dados de deploy: não é possível confirmar produção.')
+    : prodDeploy.length
     ? { id: 'production', state: 'done', at: earliest(prodDeploy.map((d) => d.createdAt)), note: 'Deploy em produção com sucesso.' }
     : e.deployments.some((d) => d.environment === 'production' && d.status === 'failure')
       ? { id: 'production', state: 'blocked', at: null, note: 'Deploy em produção falhou.' }
       : { id: 'production', at: null, ...pendingOrNA('Sem evidência de produção.') };
 
   return [
-    { id: 'opened', state: 'done', at: cr.createdAt, note: cr.draft ? 'Aberto como rascunho.' : 'Aberto.' },
+    {
+      id: 'opened',
+      state: 'done',
+      at: cr.createdAt,
+      note: cr.origin === 'merge-commit' ? 'Inferido do histórico Git (primeiro commit).' : cr.draft ? 'Aberto como rascunho.' : 'Aberto.',
+    },
     inReview,
     approvedStage,
     mergedStage,
