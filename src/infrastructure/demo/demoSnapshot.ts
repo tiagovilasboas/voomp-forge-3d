@@ -280,7 +280,7 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
     }
 
     return {
-      evidence: 'provider',
+      origin: 'provider',
       id,
       number: row.n,
       repositoryId: repoId(row.repo),
