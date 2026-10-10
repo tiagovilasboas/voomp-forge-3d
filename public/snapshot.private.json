@@ -47,24 +47,6 @@
       "description": "Partner APIs, event contracts and connectors."
     },
     {
-      "id": "squad-almoxarifado",
-      "code": "M",
-      "name": "Data",
-      "description": "Pipelines, analytical models and data catalogs."
-    },
-    {
-      "id": "squad-ponte",
-      "code": "P",
-      "name": "Messaging",
-      "description": "Queues, notifications and service contracts."
-    },
-    {
-      "id": "squad-vitrine",
-      "code": "V",
-      "name": "Discovery",
-      "description": "Search, item records and the product storefront."
-    },
-    {
       "id": "squad-trilho",
       "code": "T",
       "name": "Platform",
