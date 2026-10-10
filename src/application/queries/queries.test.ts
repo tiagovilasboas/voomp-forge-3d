@@ -74,10 +74,10 @@ describe('listDeliveries', () => {
   });
 
   it('searches text case-insensitively over title, repo and number', () => {
-    const byTitle = listDeliveries(idx, scope(), { text: 'CIRCUIT BREAKER' });
+    const byTitle = listDeliveries(idx, scope(), { text: 'RÁDIO AUXILIAR' });
     expect(byTitle.map((d) => d.cr.number)).toEqual([312]);
     const byNumber = listDeliveries(idx, scope(), { text: '#312' });
-    expect(byNumber.map((d) => d.cr.id)).toContain('cr-incident-gateway-312');
+    expect(byNumber.map((d) => d.cr.id)).toContain('cr-plantao-ponte-312');
     expect(listDeliveries(idx, scope(), { text: 'zzz-no-match' })).toEqual([]);
   });
 
@@ -88,8 +88,8 @@ describe('listDeliveries', () => {
 });
 
 describe('repositoryHealth', () => {
-  it('legacy checkout is idle with unknown pipeline', () => {
-    const h = repositoryHealth(idx, 'repo-legacy-checkout', scope());
+  it('old catalog is idle with unknown pipeline', () => {
+    const h = repositoryHealth(idx, 'repo-catalogo-antigo', scope());
     expect(h.idle).toBe(true);
     expect(h.hot).toBe(false);
     expect(h.pipeline.signal).toBe('unknown');
@@ -97,23 +97,23 @@ describe('repositoryHealth', () => {
   });
 
   it('a repository with a failing latest run raises an alert', () => {
-    const h = repositoryHealth(idx, 'repo-admin-console-web', scope());
+    const h = repositoryHealth(idx, 'repo-bancada-web', scope());
     expect(h.pipeline.signal).toBe('error');
     expect(h.alert).toBe(true);
   });
 
   it('a repository with a blocked change raises an alert', () => {
-    const h = repositoryHealth(idx, 'repo-admin-permissions-svc', scope());
+    const h = repositoryHealth(idx, 'repo-crachas-svc', scope());
     expect(h.blockedChanges).toBeGreaterThan(0);
     expect(h.alert).toBe(true);
   });
 
   it('a repository with a failed production deployment raises an alert', () => {
-    expect(repositoryHealth(idx, 'repo-incident-gateway', scope()).alert).toBe(true);
+    expect(repositoryHealth(idx, 'repo-plantao-ponte', scope()).alert).toBe(true);
   });
 
   it('a healthy repository has no alert', () => {
-    const h = repositoryHealth(idx, 'repo-platform-observability', scope());
+    const h = repositoryHealth(idx, 'repo-sinais-plataforma', scope());
     expect(h.alert).toBe(false);
     expect(h.idle).toBe(false);
   });

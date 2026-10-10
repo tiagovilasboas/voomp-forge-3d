@@ -4,12 +4,12 @@
     "kind": "imported",
     "generatedAt": "2026-10-10T12:00:00Z",
     "provider": {
-      "id": "azure-devops",
-      "name": "Azure DevOps",
+      "id": "git-demo",
+      "name": "Git demo",
       "vocabulary": {
-        "changeRequest": "Pull Request",
-        "changeRequestShort": "PR",
-        "pipeline": "Pipelines"
+        "changeRequest": "Merge request",
+        "changeRequestShort": "MR",
+        "pipeline": "Pipeline"
       }
     },
     "capabilities": {
@@ -23,52 +23,52 @@
     }
   },
   "organization": {
-    "id": "cogna-voomp",
-    "name": "Voomp Creators",
-    "slug": "voomp"
+    "id": "lanterna-norte",
+    "name": "Lanterna Norte",
+    "slug": "lanterna-norte"
   },
   "squads": [
     {
-      "id": "squad-vadm",
+      "id": "squad-atelie",
       "code": "A",
-      "name": "Admin",
-      "description": "Painel do seller, KYC, vendas, contratos, BDR e Minhas Compras."
+      "name": "Ateliê",
+      "description": "Bancada de pedidos, fichas de serviço e agenda da oficina."
     },
     {
-      "id": "squad-vsus",
-      "code": "S",
-      "name": "Sustentação",
-      "description": "Bugfix em produção, investigação de incidentes e observabilidade cross-squad."
-    },
-    {
-      "id": "squad-vmpg",
-      "code": "P",
-      "name": "Meios de Pagamento",
-      "description": "Fluxo de checkout, payment flows e integração com PSPs."
-    },
-    {
-      "id": "squad-vgfe",
+      "id": "squad-farol",
       "code": "F",
-      "name": "Gestão Financeira",
-      "description": "Financeiro, ERP, saques, Celcoin e backoffice."
+      "name": "Farol",
+      "description": "Plantão da oficina, sinais de falha e correções no chão."
     },
     {
-      "id": "squad-vgat",
-      "code": "G",
-      "name": "Gateway",
-      "description": "Pagamentos, assinaturas, split, PagarMe e pipeline-templates."
+      "id": "squad-rotas",
+      "code": "R",
+      "name": "Rotas",
+      "description": "Rotas de coleta, janelas de visita e mapas da frota."
     },
     {
-      "id": "squad-vply",
-      "code": "L",
-      "name": "Play",
-      "description": "Plataforma de cursos, membros, WhatsApp e certificados."
+      "id": "squad-almoxarifado",
+      "code": "M",
+      "name": "Almoxarifado",
+      "description": "Estoque de peças, requisições e prateleiras da oficina."
     },
     {
-      "id": "squad-enablement",
-      "code": "E",
-      "name": "Enablement",
-      "description": "Especialistas transversais: observabilidade, AppSec, agentic AI, CI/CD e enablement de plataforma."
+      "id": "squad-ponte",
+      "code": "P",
+      "name": "Ponte",
+      "description": "Mensagens entre bancadas, avisos de rádio e fila de recados."
+    },
+    {
+      "id": "squad-vitrine",
+      "code": "V",
+      "name": "Vitrine",
+      "description": "Mostruário de lanternas, fichas de modelo e vitrines sazonais."
+    },
+    {
+      "id": "squad-trilho",
+      "code": "T",
+      "name": "Trilho",
+      "description": "Ferramentas internas, trilhos de build e peças compartilhadas."
     }
   ],
   "repositories": [],

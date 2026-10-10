@@ -81,7 +81,7 @@ function categoryFromTitle(text: string): WorkstreamCategory | null {
   if (t.includes('fechament')) return 'closing';
   if (t.includes('priorid')) return 'sprint_priority';
   if (t.includes('aberto')) return 'open_topic';
-  if (t.includes('sustent')) return 'sustaining';
+  if (t.includes('sustent') || t.includes('plantao')) return 'sustaining';
   return null;
 }
 

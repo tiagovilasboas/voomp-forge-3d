@@ -26,7 +26,7 @@ describe('workstream queries', () => {
 
   it('links changes by initiative restricted to declared repositories', () => {
     const v = view('ws-painel-financeiro');
-    expect(v.changes.every((d) => d.repo.name === 'admin-console-web')).toBe(true);
+    expect(v.changes.every((d) => d.repo.name === 'bancada-web')).toBe(true);
     expect(v.changes.some((d) => d.cr.initiativeId === 'ini-financial-panel')).toBe(true);
   });
 
@@ -42,7 +42,7 @@ describe('workstream queries', () => {
     expect(tracker.changes).toHaveLength(0);
     expect(tracker.progress.status).toBe('delivered');
     expect(tracker.progress.evidence).toEqual(['tracker']);
-    const diverging = view('ws-saque-antecipacao');
+    const diverging = view('ws-retirada-pecas');
     expect(diverging.progress.divergence).toBe(true);
     expect(diverging.progress.status).not.toBe('delivered');
   });
@@ -55,8 +55,8 @@ describe('workstream queries', () => {
 
   it('squad filter is many-to-many (declared squads or team members)', () => {
     const names = (squadId: string) => listWorkstreams(idx, scope, { squadId }).map((v) => v.workstream.id);
-    expect(names('sq-enable')).toContain('ws-saque-antecipacao'); // declared squad
-    expect(names('sq-admin')).toContain('ws-saque-antecipacao');
+    expect(names('sq-enable')).toContain('ws-retirada-pecas'); // declared squad
+    expect(names('sq-admin')).toContain('ws-retirada-pecas');
     expect(names('sq-n3')).toContain('ws-verificacao-identidade'); // declared + member
     expect(names('sq-n3')).toContain('ws-painel-financeiro'); // only via a member (QA from N3)
     expect(names('sq-enable')).not.toContain('ws-gateway-v2');
@@ -90,6 +90,6 @@ describe('workstream queries', () => {
     expect(compras.plans).toHaveLength(3);
     expect(compras.plans.filter((p) => p.current)).toHaveLength(1);
     expect(compras.deliveredAt).not.toBeNull();
-    expect(r.find((e) => e.workstream.id === 'ws-fraude-checkout')!.deliveredAt).toBeNull();
+    expect(r.find((e) => e.workstream.id === 'ws-fichas-sem-dono')!.deliveredAt).toBeNull();
   });
 });

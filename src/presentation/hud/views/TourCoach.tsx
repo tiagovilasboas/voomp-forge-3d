@@ -19,7 +19,7 @@ interface TourContext {
 }
 
 const DEMO_SQUAD_ID = 'sq-admin';
-const DEMO_REPO_ID = 'repo-admin-console-web';
+const DEMO_REPO_ID = 'repo-bancada-web';
 
 const ui = () => useUiStore.getState();
 

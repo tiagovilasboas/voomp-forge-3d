@@ -19,9 +19,9 @@ function commit(sha: string, parents: string[], day: number, email: string, subj
 const commits: RawGitCommit[] = [
   commit('c1', [], 1, 'Ana@x.com', 'init'),
   commit('c2', ['c1'], 2, 'ana@x.com', 'more'),
-  commit('f1', ['c1'], 3, 'Bob@x.com', 'PAY-7 start INI-1'),
+  commit('f1', ['c1'], 3, 'Bob@x.com', 'ATL-7 start INI-1'),
   commit('f2', ['f1'], 4, 'bob@x.com', 'finish'),
-  commit('m1', ['c2', 'f2'], 5, 'ana@x.com', 'Merge pull request #1 from org/feat/PAY-7-retry', 'Retry payments INI-1'),
+  commit('m1', ['c2', 'f2'], 5, 'ana@x.com', 'Merge pull request #1 from org/feat/ATL-7-retry', 'Retry radio INI-1'),
   commit('c5', ['m1'], 6, 'ana@x.com', 'tweak'),
   commit('sq', ['c5'], 8, 'carl@x.com', 'Add reports (#2)'),
   commit('c9', ['sq'], 12, 'ana@x.com', 'docs'),
@@ -31,7 +31,7 @@ const config: ForgeIngestConfig = {
   organization: { name: 'Acme Corp' },
   squads: [{ id: 'sq-a', code: 'A', name: 'Alpha', repositories: [{ path: '/r/api', webUrl: 'https://git.example/acme/api' }] }],
   people: [{ email: 'ANA@x.com', displayName: 'Ana Souza', role: 'tech-lead' }],
-  initiatives: [{ key: 'INI-1', name: 'Pagamentos' }],
+  initiatives: [{ key: 'INI-1', name: 'Rotas da oficina' }],
   initiativePattern: 'INI-\\d+',
   workItemUrlTemplate: 'https://tracker/browse/{key}',
   deployments: [{ environment: 'production', tagPattern: '^v\\d+' }],
@@ -61,11 +61,11 @@ describe('buildSnapshotFromGit', () => {
   it('infers merge and squash change requests', () => {
     const [merge, squash] = build().changeRequests;
     expect(merge).toMatchObject({
-      id: 'cr-repo-api-1', origin: 'merge-commit', state: 'merged', number: 1, title: 'Retry payments INI-1',
+      id: 'cr-repo-api-1', origin: 'merge-commit', state: 'merged', number: 1, title: 'Retry radio INI-1',
       headSha: 'f2', mergeCommitSha: 'm1', createdAt: '2026-01-03T10:00:00Z', mergedAt: '2026-01-05T10:00:00Z',
       authorId: 'ct-bob-x-com', initiativeId: 'ini-ini-1',
     });
-    expect(merge.workItems).toEqual([{ key: 'PAY-7', url: 'https://tracker/browse/PAY-7' }]);
+    expect(merge.workItems).toEqual([{ key: 'ATL-7', url: 'https://tracker/browse/ATL-7' }]);
     expect(merge.webUrl).toBe('https://git.example/acme/api/commit/m1');
     expect(squash).toMatchObject({ number: 2, title: 'Add reports', authorId: 'ct-carl-x-com', headSha: 'sq', initiativeId: null });
   });

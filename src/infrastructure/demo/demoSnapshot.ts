@@ -30,7 +30,7 @@ import type {
 } from '@domain/entities';
 import { SNAPSHOT_SCHEMA_VERSION } from '@domain/entities';
 
-const BASE_URL = 'https://git.demo.voomp.invalid/voomp-demo';
+const BASE_URL = 'https://git.demo.lanterna.invalid/lanterna-norte';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -56,26 +56,26 @@ const ctId = (handle: string) => `ct-${handle}`;
 // ---------------------------------------------------------------------------
 
 const SQUADS: Squad[] = [
-  { id: 'sq-admin',  code: 'A', name: 'Admin',                description: 'Painel do seller, KYC, vendas, contratos, BDR e Minhas Compras.' },
-  { id: 'sq-n3',     code: 'S', name: 'Sustentação',          description: 'Bugfix em produção, investigação de incidentes e observabilidade cross-squad.' },
-  { id: 'sq-enable', code: 'E', name: 'Enablement',           description: 'Especialistas transversais: observabilidade, AppSec, agentic AI e CI/CD.' },
-  { id: 'sq-vmpg',   code: 'P', name: 'Meios de Pagamento',   description: 'Fluxo de checkout, payment flows e integração com PSPs.' },
-  { id: 'sq-vgfe',   code: 'F', name: 'Gestão Financeira',    description: 'Financeiro, ERP, saques, Celcoin e backoffice.' },
-  { id: 'sq-vgat',   code: 'G', name: 'Gateway',              description: 'Pagamentos, assinaturas, split, PagarMe e pipeline-templates.' },
-  { id: 'sq-vply',   code: 'L', name: 'Play',                 description: 'Plataforma de cursos, membros, WhatsApp e certificados.' },
+  { id: 'sq-admin',  code: 'A', name: 'Ateliê',               description: 'Bancada de pedidos, fichas de serviço e agenda da oficina.' },
+  { id: 'sq-n3',     code: 'F', name: 'Farol',                description: 'Plantão da oficina, sinais de falha e correções no chão.' },
+  { id: 'sq-enable', code: 'T', name: 'Trilho',               description: 'Ferramentas internas, trilhos de build e peças compartilhadas.' },
+  { id: 'sq-vmpg',   code: 'R', name: 'Rotas',                description: 'Rotas de coleta, janelas de visita e mapas da frota.' },
+  { id: 'sq-vgfe',   code: 'M', name: 'Almoxarifado',         description: 'Estoque de peças, requisições e prateleiras da oficina.' },
+  { id: 'sq-vgat',   code: 'P', name: 'Ponte',                description: 'Mensagens entre bancadas, avisos de rádio e fila de recados.' },
+  { id: 'sq-vply',   code: 'V', name: 'Vitrine',              description: 'Mostruário de lanternas, fichas de modelo e vitrines sazonais.' },
 ];
 
 // [name, squad, language, description]
 const REPOS: Array<[string, string, string, string]> = [
-  ['admin-console-web', 'sq-admin', 'TypeScript', 'Console web de administração para a operação e o time financeiro.'],
-  ['admin-billing-api', 'sq-admin', 'TypeScript', 'API de cobrança, saldo e repasses para produtores.'],
-  ['admin-permissions-svc', 'sq-admin', 'Go', 'Serviço de papéis e permissões por equipe.'],
-  ['incident-gateway', 'sq-n3', 'Go', 'Gateway que isola falhas de provedores externos durante incidentes.'],
-  ['payments-reconciler', 'sq-n3', 'Kotlin', 'Conciliação diária entre pagamentos, estornos e extratos bancários.'],
-  ['legacy-checkout', 'sq-n3', 'PHP', 'Checkout legado, mantido apenas em modo de leitura.'],
+  ['bancada-web', 'sq-admin', 'TypeScript', 'Painel da bancada para pedidos, fichas e a agenda do dia.'],
+  ['fichas-api', 'sq-admin', 'TypeScript', 'API das fichas de serviço, prazos e peças usadas.'],
+  ['crachas-svc', 'sq-admin', 'Go', 'Serviço de crachás e o que cada bancada pode abrir.'],
+  ['plantao-ponte', 'sq-n3', 'Go', 'Ponte que isola uma bancada quando o sinal de rádio cai.'],
+  ['pecas-conferencia', 'sq-n3', 'Kotlin', 'Conferência diária entre peças pedidas, usadas e devolvidas.'],
+  ['catalogo-antigo', 'sq-n3', 'PHP', 'Catálogo antigo de modelos, mantido apenas para consulta.'],
   ['forge-ci-templates', 'sq-enable', 'YAML', 'Templates compartilhados de pipeline de integração contínua.'],
   ['design-system', 'sq-enable', 'TypeScript', 'Biblioteca de componentes e tokens visuais usada pelos produtos.'],
-  ['platform-observability', 'sq-enable', 'Go', 'Coletores, painéis e alertas de observabilidade da plataforma.'],
+  ['sinais-plataforma', 'sq-enable', 'Go', 'Coletores, painéis e alertas dos sinais da oficina.'],
 ];
 
 const squadOf = (repo: string) => REPOS.find(([name]) => name === repo)?.[1] ?? '';
@@ -97,23 +97,23 @@ const PEOPLE: Array<[string, string, string, ContributorRole | null]> = [
 ];
 
 const INITIATIVES: ProductInitiative[] = [
-  { id: 'ini-financial-panel', key: 'INI-101', name: 'Painel financeiro do produtor', summary: 'Dar ao produtor uma visão clara de vendas, saldo e repasses em um só lugar.', ownerSquadId: 'sq-admin', status: 'in_delivery' },
-  { id: 'ini-team-permissions', key: 'INI-102', name: 'Permissões por equipe', summary: 'Permitir que produtores convidem equipes e controlem o que cada pessoa pode fazer.', ownerSquadId: 'sq-admin', status: 'in_delivery' },
-  { id: 'ini-payment-stability', key: 'INI-103', name: 'Estabilidade de pagamentos', summary: 'Reduzir falhas e divergências nos pagamentos e na conciliação.', ownerSquadId: 'sq-n3', status: 'in_delivery' },
+  { id: 'ini-financial-panel', key: 'INI-101', name: 'Quadro de pedidos da bancada', summary: 'Mostrar pedidos abertos, peças e prazos da oficina em um só quadro.', ownerSquadId: 'sq-admin', status: 'in_delivery' },
+  { id: 'ini-team-permissions', key: 'INI-102', name: 'Permissões por equipe', summary: 'Permitir que a oficina convide bancadas e controle o que cada crachá abre.', ownerSquadId: 'sq-admin', status: 'in_delivery' },
+  { id: 'ini-payment-stability', key: 'INI-103', name: 'Estabilidade do plantão', summary: 'Reduzir falhas e divergências entre peças pedidas e peças usadas.', ownerSquadId: 'sq-n3', status: 'in_delivery' },
   { id: 'ini-unified-ci', key: 'INI-104', name: 'Pipeline unificado de CI', summary: 'Padronizar a integração contínua em todos os repositórios.', ownerSquadId: 'sq-enable', status: 'discovery' },
 ];
 // Knowledge base pages: [id, title, kind, space, squad, initiatives, repos, updated days ago]
 const DOCS: Array<[string, string, DocumentKind, string, string | null, string[], string[], number]> = [
-  ['doc-fin-spec', 'Especificação: painel financeiro do produtor', 'spec', 'Produto', 'sq-admin', ['ini-financial-panel'], ['admin-console-web', 'admin-billing-api'], 9],
-  ['doc-fin-adr', 'ADR-014: saldo calculado no billing, não no front', 'adr', 'ENG', 'sq-admin', ['ini-financial-panel'], ['admin-billing-api'], 20],
-  ['doc-perm-spec', 'Especificação: permissões por equipe', 'spec', 'Produto', 'sq-admin', ['ini-team-permissions'], ['admin-permissions-svc', 'design-system'], 6],
-  ['doc-perm-adr', 'ADR-017: modelo de papéis baseado em políticas', 'adr', 'ENG', 'sq-admin', ['ini-team-permissions'], ['admin-permissions-svc'], 15],
-  ['doc-pay-runbook', 'Runbook: falha do adquirente', 'runbook', 'Operação', 'sq-n3', ['ini-payment-stability'], ['incident-gateway'], 4],
-  ['doc-pay-pm', 'Post-mortem: divergência na conciliação de setembro', 'postmortem', 'Operação', 'sq-n3', ['ini-payment-stability'], ['payments-reconciler'], 11],
-  ['doc-legacy-guide', 'Guia: checkout legado em modo leitura', 'guide', 'Operação', 'sq-n3', [], ['legacy-checkout'], 52],
+  ['doc-fin-spec', 'Especificação: quadro de pedidos da bancada', 'spec', 'Produto', 'sq-admin', ['ini-financial-panel'], ['bancada-web', 'fichas-api'], 9],
+  ['doc-fin-adr', 'ADR-014: prazo calculado na ficha, não no quadro', 'adr', 'ENG', 'sq-admin', ['ini-financial-panel'], ['fichas-api'], 20],
+  ['doc-perm-spec', 'Especificação: permissões por equipe', 'spec', 'Produto', 'sq-admin', ['ini-team-permissions'], ['crachas-svc', 'design-system'], 6],
+  ['doc-perm-adr', 'ADR-017: modelo de papéis baseado em políticas', 'adr', 'ENG', 'sq-admin', ['ini-team-permissions'], ['crachas-svc'], 15],
+  ['doc-pay-runbook', 'Runbook: falha do adquirente', 'runbook', 'Operação', 'sq-n3', ['ini-payment-stability'], ['plantao-ponte'], 4],
+  ['doc-pay-pm', 'Post-mortem: divergência na conferência de setembro', 'postmortem', 'Operação', 'sq-n3', ['ini-payment-stability'], ['pecas-conferencia'], 11],
+  ['doc-legacy-guide', 'Guia: catálogo antigo só para consulta', 'guide', 'Operação', 'sq-n3', [], ['catalogo-antigo'], 52],
   ['doc-ci-adr', 'ADR-021: templates únicos de pipeline', 'adr', 'Plataforma', 'sq-enable', ['ini-unified-ci'], ['forge-ci-templates'], 8],
   ['doc-ds-guide', 'Guia de contribuição do design system', 'guide', 'Plataforma', 'sq-enable', [], ['design-system'], 26],
-  ['doc-obs-runbook', 'Runbook: alertas de latência', 'runbook', 'Plataforma', 'sq-enable', [], ['platform-observability'], 13],
+  ['doc-obs-runbook', 'Runbook: alertas de latência', 'runbook', 'Plataforma', 'sq-enable', [], ['sinais-plataforma'], 13],
 ];
 
 const INI: Record<string, string> = {
@@ -147,33 +147,33 @@ const TASK_PREFIX: Record<string, string> = { 'sq-admin': 'ADM', 'sq-n3': 'SUS',
 const taskRefs = (squadId: string, index: number): WorkItemRef[] => {
   if (index % 5 === 4) return [];
   const key = `${TASK_PREFIX[squadId] ?? 'TSK'}-${140 + index * 7}`;
-  return [{ key, url: `https://tracker.demo.voomp.invalid/browse/${key}` }];
+  return [{ key, url: `https://tracker.demo.lanterna.invalid/browse/${key}` }];
 };
 
 const CRS: CrRow[] = [
-  // admin-console-web
-  { repo: 'admin-console-web', n: 412, title: 'Adiciona tabela de repasses ao painel financeiro', summary: 'O produtor passa a ver cada repasse recebido, com data e valor.', author: 'zelia-k', state: 'merged', created: 22, end: 18, ini: '101', commits: 3 },
-  { repo: 'admin-console-web', n: 418, title: 'Filtro por período nos relatórios de vendas', summary: 'Relatórios de vendas podem ser filtrados por semana, mês ou datas personalizadas.', author: 'bento-m', state: 'merged', created: 12, end: 9, ini: '101', commits: 2 },
-  { repo: 'admin-console-web', n: 425, title: 'Corrige paginação da lista de produtores', summary: 'A lista de produtores não pula mais registros ao trocar de página.', author: 'zelia-k', state: 'merged', created: 6, end: 3, commits: 2 },
-  { repo: 'admin-console-web', n: 429, title: 'Gráfico de receita mensal do produtor', summary: 'Novo gráfico mostra como a receita do produtor evolui mês a mês.', author: 'zelia-k', state: 'open', created: 2, reviewers: ['bento-m', 'iara-v'], ini: '101', commits: 3 },
-  { repo: 'admin-console-web', n: 431, title: 'Rascunho: exportação CSV de repasses', summary: 'Permite baixar os repasses em planilha. Ainda em construção.', author: 'bento-m', state: 'open', draft: true, created: 1, ini: '101', commits: 2 },
-  // admin-billing-api
-  { repo: 'admin-billing-api', n: 208, title: 'Endpoint de saldo disponível para saque', summary: 'O painel consegue mostrar quanto o produtor pode sacar agora.', author: 'iara-v', state: 'merged', created: 20, end: 15, ini: '101', commits: 3 },
-  { repo: 'admin-billing-api', n: 214, title: 'Ajusta arredondamento de taxas na liquidação', summary: 'Centavos de taxa deixam de divergir entre extrato e liquidação.', author: 'zelia-k', state: 'merged', created: 8, end: 5, commits: 2 },
-  { repo: 'admin-billing-api', n: 217, title: 'Cálculo de comissão por coprodutor', summary: 'A comissão de cada coprodutor é calculada automaticamente a cada venda.', author: 'iara-v', state: 'open', created: 4, ini: '101', commits: 3 },
-  { repo: 'admin-billing-api', n: 219, title: 'Cache de extrato por produtor (substituída por #217)', summary: 'Tentativa de acelerar o extrato; descartada em favor de outra abordagem.', author: 'zelia-k', state: 'closed', created: 14, end: 11, commits: 2 },
-  // admin-permissions-svc
-  { repo: 'admin-permissions-svc', n: 77, title: 'Modelo de papéis por equipe', summary: 'Define os papéis (administrador, financeiro, suporte) que uma equipe pode ter.', author: 'iara-v', state: 'merged', created: 25, end: 19, ini: '102', commits: 3 },
-  { repo: 'admin-permissions-svc', n: 83, title: 'API de convite de membros da equipe', summary: 'Produtores poderão convidar pessoas para a equipe por e-mail.', author: 'zelia-k', state: 'open', created: 5, reviewers: ['bento-m'], ini: '102', commits: 3 },
-  { repo: 'admin-permissions-svc', n: 85, title: 'Trilha de auditoria para mudanças de permissão', summary: null, author: 'bento-m', state: 'open', created: 1, reviewers: ['iara-v', 'zelia-k'], commits: 2 },
-  // incident-gateway
-  { repo: 'incident-gateway', n: 301, title: 'Retry com backoff exponencial nas chamadas ao adquirente', summary: 'Falhas momentâneas do adquirente deixam de derrubar pagamentos.', author: 'nilo-q', state: 'merged', created: 16, end: 12, ini: '103', commits: 3 },
-  { repo: 'incident-gateway', n: 309, title: 'Corrige timeout em webhooks duplicados', summary: 'Clientes não recebem mais a mesma notificação de pagamento duas vezes.', author: 'maira-t', state: 'merged', created: 5, end: 2, ini: '103', commits: 2 },
-  { repo: 'incident-gateway', n: 312, title: 'Circuit breaker para o provedor de antifraude', summary: 'Se o antifraude ficar fora do ar, os pagamentos seguem com análise reduzida.', author: 'tupa-r', state: 'open', created: 2, reviewers: ['maira-t', 'nilo-q'], ini: '103', commits: 2 },
-  // payments-reconciler
-  { repo: 'payments-reconciler', n: 145, title: 'Conciliação de estornos parciais', summary: 'Estornos parciais passam a aparecer corretamente na conciliação diária.', author: 'nilo-q', state: 'merged', created: 27, end: 21, ini: '103', commits: 3 },
-  { repo: 'payments-reconciler', n: 151, title: 'Ignora lançamentos duplicados na conciliação', summary: 'Evita contar duas vezes o mesmo lançamento bancário.', author: 'maira-t', state: 'open', created: 3, commits: 2 },
-  { repo: 'payments-reconciler', n: 153, title: 'Corrige fuso horário no fechamento diário', summary: null, author: 'tupa-r', state: 'merged', created: 3, end: 0.8, commits: 2 },
+  // bancada-web
+  { repo: 'bancada-web', n: 412, title: 'Adiciona a lista de peças entregues ao quadro', summary: 'A bancada passa a ver cada peça entregue, com data e quantidade.', author: 'zelia-k', state: 'merged', created: 22, end: 18, ini: '101', commits: 3 },
+  { repo: 'bancada-web', n: 418, title: 'Filtro por período na agenda de serviços', summary: 'A agenda pode ser filtrada por semana, mês ou datas escolhidas.', author: 'bento-m', state: 'merged', created: 12, end: 9, ini: '101', commits: 2 },
+  { repo: 'bancada-web', n: 425, title: 'Corrige paginação da lista de clientes da oficina', summary: 'A lista de clientes não pula mais fichas ao trocar de página.', author: 'zelia-k', state: 'merged', created: 6, end: 3, commits: 2 },
+  { repo: 'bancada-web', n: 429, title: 'Gráfico de serviços concluídos no mês', summary: 'Novo gráfico mostra quantos serviços a oficina conclui mês a mês.', author: 'zelia-k', state: 'open', created: 2, reviewers: ['bento-m', 'iara-v'], ini: '101', commits: 3 },
+  { repo: 'bancada-web', n: 431, title: 'Rascunho: exportação CSV das peças', summary: 'Permite baixar as peças em planilha. Ainda em construção.', author: 'bento-m', state: 'open', draft: true, created: 1, ini: '101', commits: 2 },
+  // fichas-api
+  { repo: 'fichas-api', n: 208, title: 'Endpoint de peças disponíveis na prateleira', summary: 'O quadro consegue mostrar quantas peças a bancada pode retirar agora.', author: 'iara-v', state: 'merged', created: 20, end: 15, ini: '101', commits: 3 },
+  { repo: 'fichas-api', n: 214, title: 'Ajusta a contagem de parafusos na ficha', summary: 'A contagem deixa de divergir entre a ficha e a prateleira.', author: 'zelia-k', state: 'merged', created: 8, end: 5, commits: 2 },
+  { repo: 'fichas-api', n: 217, title: 'Rateio de horas por bancada parceira', summary: 'As horas de cada bancada parceira entram automaticamente em cada serviço.', author: 'iara-v', state: 'open', created: 4, ini: '101', commits: 3 },
+  { repo: 'fichas-api', n: 219, title: 'Cache da ficha por cliente (substituída por #217)', summary: 'Tentativa de acelerar o extrato; descartada em favor de outra abordagem.', author: 'zelia-k', state: 'closed', created: 14, end: 11, commits: 2 },
+  // crachas-svc
+  { repo: 'crachas-svc', n: 77, title: 'Modelo de papéis por equipe', summary: 'Define os crachás (chefe de bancada, almoxarife, plantão) que uma equipe pode ter.', author: 'iara-v', state: 'merged', created: 25, end: 19, ini: '102', commits: 3 },
+  { repo: 'crachas-svc', n: 83, title: 'API de convite de membros da equipe', summary: 'A oficina poderá convidar pessoas para a bancada por e-mail.', author: 'zelia-k', state: 'open', created: 5, reviewers: ['bento-m'], ini: '102', commits: 3 },
+  { repo: 'crachas-svc', n: 85, title: 'Trilha de auditoria para mudanças de permissão', summary: null, author: 'bento-m', state: 'open', created: 1, reviewers: ['iara-v', 'zelia-k'], commits: 2 },
+  // plantao-ponte
+  { repo: 'plantao-ponte', n: 301, title: 'Nova tentativa com espera crescente nas chamadas ao rádio', summary: 'Falhas momentâneas do rádio deixam de derrubar o plantão.', author: 'nilo-q', state: 'merged', created: 16, end: 12, ini: '103', commits: 3 },
+  { repo: 'plantao-ponte', n: 309, title: 'Corrige aviso duplicado no rádio', summary: 'A bancada não recebe mais o mesmo aviso duas vezes.', author: 'maira-t', state: 'merged', created: 5, end: 2, ini: '103', commits: 2 },
+  { repo: 'plantao-ponte', n: 312, title: 'Corte de sinal quando o rádio auxiliar cai', summary: 'Se o rádio auxiliar cair, o plantão segue com o canal principal.', author: 'tupa-r', state: 'open', created: 2, reviewers: ['maira-t', 'nilo-q'], ini: '103', commits: 2 },
+  // pecas-conferencia
+  { repo: 'pecas-conferencia', n: 145, title: 'Conferência de devoluções parciais', summary: 'Devoluções parciais passam a aparecer na conferência diária.', author: 'nilo-q', state: 'merged', created: 27, end: 21, ini: '103', commits: 3 },
+  { repo: 'pecas-conferencia', n: 151, title: 'Ignora peças contadas duas vezes', summary: 'Evita contar duas vezes a mesma peça.', author: 'maira-t', state: 'open', created: 3, commits: 2 },
+  { repo: 'pecas-conferencia', n: 153, title: 'Corrige fuso horário no fechamento diário', summary: null, author: 'tupa-r', state: 'merged', created: 3, end: 0.8, commits: 2 },
   // forge-ci-templates
   { repo: 'forge-ci-templates', n: 34, title: 'Template único de build e teste', summary: 'Todos os repositórios passam a usar o mesmo roteiro de build e testes.', author: 'caetano-u', state: 'merged', created: 19, end: 14, ini: '104', commits: 3 },
   { repo: 'forge-ci-templates', n: 39, title: 'Cache de dependências nos templates', summary: 'Pipelines ficam mais rápidos ao reaproveitar dependências já baixadas.', author: 'dalva-p', state: 'open', created: 2, reviewers: ['caetano-u', 'anselmo-j'], ini: '104', commits: 2 },
@@ -181,64 +181,64 @@ const CRS: CrRow[] = [
   { repo: 'design-system', n: 260, title: 'Componente de seletor de equipe', summary: 'Novo componente para escolher a equipe ao gerenciar permissões.', author: 'dalva-p', state: 'merged', created: 10, end: 6, ini: '102', commits: 3 },
   { repo: 'design-system', n: 264, title: 'Tokens de cor para modo escuro', summary: 'Prepara as cores do sistema para um futuro modo escuro.', author: 'anselmo-j', state: 'merged', created: 9, end: 4, commits: 2 },
   { repo: 'design-system', n: 268, title: 'Ajustes de acessibilidade no menu lateral', summary: null, author: 'dalva-p', state: 'open', created: 3, commits: 2 },
-  // platform-observability
-  { repo: 'platform-observability', n: 58, title: 'Painel de latência dos webhooks', summary: null, author: 'anselmo-j', state: 'merged', created: 13, end: 10, commits: 3 },
-  { repo: 'platform-observability', n: 61, title: 'Alerta de fila de conciliação acumulada', summary: 'Suporte é avisado antes que a conciliação atrase.', author: 'caetano-u', state: 'merged', created: 6, end: 2, ini: '103', commits: 2 },
+  // sinais-plataforma
+  { repo: 'sinais-plataforma', n: 58, title: 'Painel de latência dos webhooks', summary: null, author: 'anselmo-j', state: 'merged', created: 13, end: 10, commits: 3 },
+  { repo: 'sinais-plataforma', n: 61, title: 'Alerta de fila de conferência acumulada', summary: 'O plantão é avisado antes que a conferência atrase.', author: 'caetano-u', state: 'merged', created: 6, end: 2, ini: '103', commits: 2 },
 ];
 
 // [repo#number, reviewer, verdict, days ago]
 const REVIEWS: Array<[string, string, ReviewVerdict, number]> = [
-  ['admin-console-web#412', 'bento-m', 'commented', 20],
-  ['admin-console-web#412', 'bento-m', 'approved', 18.4],
-  ['admin-console-web#418', 'iara-v', 'approved', 9.3],
-  ['admin-console-web#425', 'iara-v', 'approved', 3.2],
-  ['admin-billing-api#208', 'zelia-k', 'changes_requested', 18],
-  ['admin-billing-api#208', 'zelia-k', 'approved', 15.4],
-  ['admin-billing-api#214', 'iara-v', 'approved', 5.3],
-  ['admin-billing-api#217', 'zelia-k', 'approved', 2],
-  ['admin-billing-api#219', 'bento-m', 'commented', 12.5],
-  ['admin-permissions-svc#77', 'zelia-k', 'approved', 19.5],
-  ['admin-permissions-svc#83', 'bento-m', 'changes_requested', 2],
-  ['incident-gateway#301', 'maira-t', 'approved', 12.3],
-  ['incident-gateway#309', 'tupa-r', 'approved', 2.2],
-  ['payments-reconciler#145', 'maira-t', 'approved', 21.4],
-  ['payments-reconciler#151', 'tupa-r', 'approved', 1.5],
-  ['payments-reconciler#153', 'nilo-q', 'approved', 1.3],
+  ['bancada-web#412', 'bento-m', 'commented', 20],
+  ['bancada-web#412', 'bento-m', 'approved', 18.4],
+  ['bancada-web#418', 'iara-v', 'approved', 9.3],
+  ['bancada-web#425', 'iara-v', 'approved', 3.2],
+  ['fichas-api#208', 'zelia-k', 'changes_requested', 18],
+  ['fichas-api#208', 'zelia-k', 'approved', 15.4],
+  ['fichas-api#214', 'iara-v', 'approved', 5.3],
+  ['fichas-api#217', 'zelia-k', 'approved', 2],
+  ['fichas-api#219', 'bento-m', 'commented', 12.5],
+  ['crachas-svc#77', 'zelia-k', 'approved', 19.5],
+  ['crachas-svc#83', 'bento-m', 'changes_requested', 2],
+  ['plantao-ponte#301', 'maira-t', 'approved', 12.3],
+  ['plantao-ponte#309', 'tupa-r', 'approved', 2.2],
+  ['pecas-conferencia#145', 'maira-t', 'approved', 21.4],
+  ['pecas-conferencia#151', 'tupa-r', 'approved', 1.5],
+  ['pecas-conferencia#153', 'nilo-q', 'approved', 1.3],
   ['forge-ci-templates#34', 'anselmo-j', 'approved', 14.5],
   ['design-system#260', 'caetano-u', 'approved', 6.4],
   ['design-system#264', 'dalva-p', 'approved', 4.3],
   ['design-system#268', 'caetano-u', 'commented', 1],
-  ['platform-observability#58', 'caetano-u', 'approved', 10.3],
-  ['platform-observability#61', 'dalva-p', 'approved', 2.4],
+  ['sinais-plataforma#58', 'caetano-u', 'approved', 10.3],
+  ['sinais-plataforma#61', 'dalva-p', 'approved', 2.4],
 ];
 
 // [repo#number, pipeline, status, days ago]
 const RUNS: Array<[string, string, PipelineStatus, number]> = [
-  ['admin-console-web#429', 'ci', 'failure', 1.5], // blocks an open CR
-  ['admin-console-web#412', 'ci', 'success', 20],
-  ['admin-billing-api#214', 'build-and-test', 'failure', 7], // merged CR head, fails first...
-  ['admin-billing-api#214', 'build-and-test', 'success', 6.5], // ...then passes on re-run
-  ['incident-gateway#309', 'ci', 'success', 2.5],
-  ['payments-reconciler#151', 'lint', 'failure', 2.5],
+  ['bancada-web#429', 'ci', 'failure', 1.5], // blocks an open CR
+  ['bancada-web#412', 'ci', 'success', 20],
+  ['fichas-api#214', 'build-and-test', 'failure', 7], // merged CR head, fails first...
+  ['fichas-api#214', 'build-and-test', 'success', 6.5], // ...then passes on re-run
+  ['plantao-ponte#309', 'ci', 'success', 2.5],
+  ['pecas-conferencia#151', 'lint', 'failure', 2.5],
   ['forge-ci-templates#39', 'build-and-test', 'running', 0.1],
-  ['admin-permissions-svc#77', 'ci', 'success', 21],
+  ['crachas-svc#77', 'ci', 'success', 21],
 ];
 
 // [environment, status, repo, days ago, included CRs (numbers)]. Newest included CR gives the sha.
 const DEPLOYMENTS: Array<[DeploymentEnvironment, DeploymentStatus, string, number, number[]]> = [
-  ['production', 'success', 'admin-console-web', 17, [412]],
-  ['staging', 'success', 'admin-console-web', 8, [412, 418]], // 418 reaches staging only
-  ['production', 'success', 'admin-billing-api', 14, [208]],
-  ['staging', 'success', 'admin-billing-api', 4, [208, 214]], // 214 reaches staging only
-  ['production', 'success', 'incident-gateway', 11, [301]],
-  ['production', 'failure', 'incident-gateway', 1, [309]],
-  ['production', 'running', 'admin-console-web', 20 / 1440, [418]], // in flight right now (20 min ago)
+  ['production', 'success', 'bancada-web', 17, [412]],
+  ['staging', 'success', 'bancada-web', 8, [412, 418]], // 418 reaches staging only
+  ['production', 'success', 'fichas-api', 14, [208]],
+  ['staging', 'success', 'fichas-api', 4, [208, 214]], // 214 reaches staging only
+  ['production', 'success', 'plantao-ponte', 11, [301]],
+  ['production', 'failure', 'plantao-ponte', 1, [309]],
+  ['production', 'running', 'bancada-web', 20 / 1440, [418]], // in flight right now (20 min ago)
 ];
 
 // Two old commits in the otherwise silent repo: [days ago, author, message]
 const LEGACY_COMMITS: Array<[number, string, string]> = [
   [41, 'nilo-q', 'chore: atualiza dependências de segurança'],
-  [55, 'maira-t', 'fix: corrige máscara de CPF no formulário legado'],
+  [55, 'maira-t', 'fix: corrige máscara do número de série no formulário antigo'],
 ];
 
 
@@ -246,63 +246,63 @@ const LEGACY_COMMITS: Array<[number, string, string]> = [
 // Tracker issues (epics, stories derived from the change requests, extras)
 // ---------------------------------------------------------------------------
 
-const TRACKER_URL = 'https://tracker.demo.voomp.invalid/browse';
+const TRACKER_URL = 'https://tracker.demo.lanterna.invalid/browse';
 
 // [key, title, sprint]
 const EPICS: Array<[string, string]> = [
-  ['ADM-100', 'Painel financeiro do produtor'],
+  ['ADM-100', 'Quadro de pedidos da bancada'],
   ['ADM-110', 'Permissões por equipe'],
-  ['ADM-120', 'Saque e antecipação de recebíveis'],
-  ['ADM-130', 'Verificação de identidade do produtor'],
-  ['SUS-200', 'Estabilidade do gateway de pagamentos'],
-  ['SUS-210', 'Conciliação e fechamento diário'],
-  ['SUS-220', 'Retentativa de cobranças recusadas'],
-  ['SUS-240', 'Fraude no checkout'],
-  ['SUS-260', 'Conciliação: melhorias de backlog'],
+  ['ADM-120', 'Retirada antecipada de peças'],
+  ['ADM-130', 'Cadastro do cliente da oficina'],
+  ['SUS-200', 'Estabilidade da ponte de rádio'],
+  ['SUS-210', 'Conferência e fechamento diário'],
+  ['SUS-220', 'Nova tentativa de avisos que falharam'],
+  ['SUS-240', 'Fichas abertas sem dono'],
+  ['SUS-260', 'Conferência: melhorias de backlog'],
   ['ENB-300', 'Pipeline unificado de CI'],
   ['ENB-310', 'Evolução do design system'],
   ['ENB-320', 'Observabilidade da plataforma'],
-  ['ENB-330', 'Minhas compras'],
+  ['ENB-330', 'Minhas lanternas'],
 ];
 
 /** Epic of each change request: explicit overrides first, then by repository. */
 const CR_EPIC_BY_REPO: Record<string, string> = {
-  'admin-console-web': 'ADM-100',
-  'admin-billing-api': 'ADM-120',
-  'admin-permissions-svc': 'ADM-110',
-  'incident-gateway': 'SUS-200',
-  'payments-reconciler': 'SUS-210',
+  'bancada-web': 'ADM-100',
+  'fichas-api': 'ADM-120',
+  'crachas-svc': 'ADM-110',
+  'plantao-ponte': 'SUS-200',
+  'pecas-conferencia': 'SUS-210',
   'forge-ci-templates': 'ENB-300',
   'design-system': 'ENB-310',
-  'platform-observability': 'ENB-320',
-  'legacy-checkout': 'SUS-200',
+  'sinais-plataforma': 'ENB-320',
+  'catalogo-antigo': 'SUS-200',
 };
 const CR_EPIC_OVERRIDE: Record<string, string> = {
-  'incident-gateway#301': 'SUS-220',
-  'payments-reconciler#151': 'SUS-260',
+  'plantao-ponte#301': 'SUS-220',
+  'pecas-conferencia#151': 'SUS-260',
   'design-system#260': 'ADM-110',
 };
 /** The tracker says "em produção" for this change although Git only saw it in staging (divergence demo). */
-const TRACKER_AHEAD_OF_GIT = new Set(['admin-billing-api#214']);
+const TRACKER_AHEAD_OF_GIT = new Set(['fichas-api#214']);
 
 // Extra stories with no change request yet: [key, title, type, epic, status, statusName, sprint, productionDaysAgo]
 type Extra = [string, string, WorkItemType, string, WorkItemStatus, string, string | null, number | null];
 const EXTRA_ITEMS: Extra[] = [
-  ['ADM-401', 'Simulador de taxas da antecipação de recebíveis', 'story', 'ADM-120', 'todo', 'A fazer', 'Sprint 6', null],
-  ['ADM-402', 'Confirmação de saque com código enviado por e-mail', 'story', 'ADM-120', 'in_progress', 'Em desenvolvimento', 'Sprint 6', null],
-  ['ADM-403', 'Estado vazio do painel para produtor sem vendas', 'story', 'ADM-100', 'todo', 'A fazer', 'Sprint 6', null],
-  ['ADM-404', 'Documentar o cálculo de saldo para o suporte', 'task', 'ADM-100', 'done', 'Concluído', 'Sprint 5', null],
-  ['ADM-410', 'Envio de documento com foto (frente e verso)', 'story', 'ADM-130', 'in_progress', 'Em desenvolvimento', 'Sprint 6', null],
-  ['ADM-411', 'Integração com o provedor de verificação de identidade', 'story', 'ADM-130', 'in_progress', 'Em desenvolvimento', 'Sprint 6', null],
-  ['ADM-412', 'Fluxo de reprovação e reenvio de documentos', 'story', 'ADM-130', 'todo', 'A fazer', null, null],
-  ['ADM-413', 'Selfie rejeitada em aparelhos Android antigos', 'bug', 'ADM-130', 'todo', 'A fazer', 'Sprint 6', null],
-  ['SUS-401', 'Fila de retentativas para cobranças recusadas', 'story', 'SUS-220', 'done', 'Em produção', 'Sprint 5', 12],
-  ['SUS-402', 'Regras de intervalo entre retentativas', 'story', 'SUS-220', 'done', 'Em produção', 'Sprint 5', 12],
-  ['SUS-410', 'Regras de análise de risco no checkout', 'story', 'SUS-240', 'todo', 'A fazer', null, null],
-  ['SUS-411', 'Levantamento de chargebacks do último trimestre', 'task', 'SUS-240', 'todo', 'A fazer', 'Sprint 6', null],
-  ['ENB-401', 'Listagem de compras do comprador', 'story', 'ENB-330', 'done', 'Em produção', 'Sprint 5', 6],
-  ['ENB-402', 'Detalhe da compra e acesso ao produto', 'story', 'ENB-330', 'done', 'Em produção', 'Sprint 5', 6],
-  ['ENB-403', 'Segunda via de comprovante de compra', 'story', 'ENB-330', 'done', 'Em produção', 'Sprint 6', 5],
+  ['ADM-401', 'Simulador de prazo da retirada antecipada', 'story', 'ADM-120', 'todo', 'A fazer', 'Sprint 6', null],
+  ['ADM-402', 'Confirmação de retirada com código enviado por e-mail', 'story', 'ADM-120', 'in_progress', 'Em desenvolvimento', 'Sprint 6', null],
+  ['ADM-403', 'Estado vazio do quadro para oficina sem pedidos', 'story', 'ADM-100', 'todo', 'A fazer', 'Sprint 6', null],
+  ['ADM-404', 'Documentar a contagem de peças para o plantão', 'task', 'ADM-100', 'done', 'Concluído', 'Sprint 5', null],
+  ['ADM-410', 'Envio da foto da lanterna (frente e verso)', 'story', 'ADM-130', 'in_progress', 'Em desenvolvimento', 'Sprint 6', null],
+  ['ADM-411', 'Integração com o arquivo de modelos da oficina', 'story', 'ADM-130', 'in_progress', 'Em desenvolvimento', 'Sprint 6', null],
+  ['ADM-412', 'Fluxo de foto recusada e novo envio', 'story', 'ADM-130', 'todo', 'A fazer', null, null],
+  ['ADM-413', 'Foto rejeitada em aparelhos Android antigos', 'bug', 'ADM-130', 'todo', 'A fazer', 'Sprint 6', null],
+  ['SUS-401', 'Fila de novas tentativas para avisos que falharam', 'story', 'SUS-220', 'done', 'Em produção', 'Sprint 5', 12],
+  ['SUS-402', 'Regras de intervalo entre novas tentativas', 'story', 'SUS-220', 'done', 'Em produção', 'Sprint 5', 12],
+  ['SUS-410', 'Regras para fichas abertas sem dono', 'story', 'SUS-240', 'todo', 'A fazer', null, null],
+  ['SUS-411', 'Levantamento de devoluções do último trimestre', 'task', 'SUS-240', 'todo', 'A fazer', 'Sprint 6', null],
+  ['ENB-401', 'Listagem de lanternas do cliente', 'story', 'ENB-330', 'done', 'Em produção', 'Sprint 5', 6],
+  ['ENB-402', 'Detalhe da lanterna e acesso à ficha', 'story', 'ENB-330', 'done', 'Em produção', 'Sprint 5', 6],
+  ['ENB-403', 'Segunda via do comprovante de retirada', 'story', 'ENB-330', 'done', 'Em produção', 'Sprint 6', 5],
 ];
 
 // Display-only names (no contributor record): N2 / support staff from the planning sheet.
@@ -321,13 +321,13 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
   };
 
   const repoUrl = (repo: string) => `${BASE_URL}/${repo}`;
-  const defaultBranch = (repo: string) => (repo === 'legacy-checkout' ? 'master' : 'main');
+  const defaultBranch = (repo: string) => (repo === 'catalogo-antigo' ? 'master' : 'main');
 
   const repositories: Repository[] = REPOS.map(([name, squadId, language, description]) => ({
     id: repoId(name),
     squadId,
     name,
-    fullName: `voomp-demo/${name}`,
+    fullName: `lanterna-norte/${name}`,
     description,
     defaultBranch: defaultBranch(name),
     language,
@@ -407,15 +407,15 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
 
   // Old commits of the inactive repo.
   for (const [days, author, message] of LEGACY_COMMITS) {
-    const commitSha = sha(`legacy-checkout:${days}`);
+    const commitSha = sha(`catalogo-antigo:${days}`);
     commits.push({
       sha: commitSha,
-      repositoryId: repoId('legacy-checkout'),
+      repositoryId: repoId('catalogo-antigo'),
       authorId: ctId(author),
       message,
       committedAt: ago(days),
       changeRequestId: null,
-      webUrl: `${repoUrl('legacy-checkout')}/commit/${commitSha}`,
+      webUrl: `${repoUrl('catalogo-antigo')}/commit/${commitSha}`,
     });
   }
 
@@ -542,7 +542,7 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
   }
 
   // ---- Workstreams (fronts of the planning sheet) ---------------------------
-  const wiki = (slug: string) => `https://wiki.demo.voomp.invalid/planejamento/${slug}`;
+  const wiki = (slug: string) => `https://wiki.demo.lanterna.invalid/planejamento/${slug}`;
   const person = (handle: string, role: StaffAssignment['role'], specialty: string | null = null): StaffAssignment => ({
     role,
     personId: ctId(handle),
@@ -563,37 +563,37 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
   const workstreams: Workstream[] = [
     {
       id: 'ws-painel-financeiro',
-      name: 'Painel financeiro do produtor',
+      name: 'Quadro de pedidos da bancada',
       category: 'sprint_priority',
       squadIds: ['sq-admin'],
       initiativeId: 'ini-financial-panel',
-      repositoryIds: [repoId('admin-console-web')],
+      repositoryIds: [repoId('bancada-web')],
       epicKeys: ['ADM-100'],
       team: [person('iara-v', 'tl'), person('zelia-k', 'dev', 'fullstack'), person('bento-m', 'dev', 'front'), person('maira-t', 'qa'), person('otavio-b', 'pm')],
       plans: [plan('MVP Semana 2 - quinta', 4, 12)],
       dependencies: [],
       declaredDone: false,
       links: links('painel-financeiro', 'ADM-100'),
-      notes: ['Gráfico de receita depende da correção do pipeline de CI.'],
+      notes: ['O gráfico de serviços depende da correção do trilho de build.'],
     },
     {
-      id: 'ws-saque-antecipacao',
-      name: 'Tela de saque e antecipação',
+      id: 'ws-retirada-pecas',
+      name: 'Tela de retirada antecipada',
       category: 'sprint_priority',
       squadIds: ['sq-admin', 'sq-enable'],
       initiativeId: 'ini-financial-panel',
-      repositoryIds: [repoId('admin-billing-api'), repoId('design-system')],
+      repositoryIds: [repoId('fichas-api'), repoId('design-system')],
       epicKeys: ['ADM-120'],
       team: [person('iara-v', 'tl'), person('zelia-k', 'dev', 'back'), person('dalva-p', 'dev', 'front'), person('nilo-q', 'qa'), person('jandira-f', 'pm')],
       plans: [plan('MVP Semana 2 - quinta', -6, 20), plan('Semana 3', -2, 8)],
       dependencies: [],
       declaredDone: false,
-      links: links('saque-antecipacao', 'ADM-120'),
-      notes: ['O Jira marca a taxa de arredondamento como em produção, mas o Git só viu em homologação.'],
+      links: links('retirada-antecipada', 'ADM-120'),
+      notes: ['O quadro marca a contagem de parafusos como pronta, mas o Git só viu na bancada de teste.'],
     },
     {
       id: 'ws-verificacao-identidade',
-      name: 'Rollout de verificação de identidade',
+      name: 'Rollout do cadastro de clientes',
       category: 'sprint_priority',
       squadIds: ['sq-admin', 'sq-n3'],
       initiativeId: null,
@@ -603,57 +603,57 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
       plans: [plan('Semana 3', 9, 15), plan('Semana 4', 16, 3)],
       dependencies: [{ description: 'Dependência de infraestrutura (SRE)', kind: 'blocker' }],
       declaredDone: false,
-      links: links('verificacao-identidade', 'ADM-130'),
+      links: links('cadastro-clientes', 'ADM-130'),
       notes: ['Ambiente de homologação do provedor depende do time de SRE.'],
     },
     {
       id: 'ws-gateway-v2',
-      name: 'Fechamento: migração de gateway v2',
+      name: 'Fechamento: migração da ponte v2',
       category: 'closing',
       squadIds: ['sq-n3'],
       initiativeId: null,
-      repositoryIds: [repoId('incident-gateway')],
+      repositoryIds: [repoId('plantao-ponte')],
       epicKeys: ['SUS-200'],
       team: [person('tupa-r', 'tl'), person('nilo-q', 'dev', 'back'), person('maira-t', 'dev', 'back'), person('oriana-c', 'pm'), n2(1)],
       plans: [plan('Semana 2 - sexta', -4, 18)],
       dependencies: [],
       declaredDone: true,
-      links: links('gateway-v2', 'SUS-200'),
+      links: links('ponte-v2', 'SUS-200'),
       notes: ['Planilha marca como finalizado, porém a última publicação em produção falhou.'],
     },
     {
       id: 'ws-retentativa-cobrancas',
-      name: 'Retentativa de cobranças',
+      name: 'Nova tentativa de avisos',
       category: 'closing',
       squadIds: ['sq-n3'],
       initiativeId: null,
-      repositoryIds: [repoId('incident-gateway')],
+      repositoryIds: [repoId('plantao-ponte')],
       epicKeys: ['SUS-220'],
       team: [person('tupa-r', 'tl'), person('nilo-q', 'dev', 'back'), person('maira-t', 'qa'), person('oriana-c', 'pm')],
       plans: [plan('MVP Semana 2 - quinta', -8, 22)],
       dependencies: [],
       declaredDone: true,
-      links: links('retentativa-cobrancas', 'SUS-220'),
+      links: links('nova-tentativa-avisos', 'SUS-220'),
       notes: [],
     },
     {
       id: 'ws-sustentacao-n3',
-      name: 'Sustentação N3',
+      name: 'Plantão do Farol',
       category: 'sustaining',
       squadIds: ['sq-n3'],
       initiativeId: 'ini-payment-stability',
-      repositoryIds: [repoId('payments-reconciler'), repoId('legacy-checkout')],
+      repositoryIds: [repoId('pecas-conferencia'), repoId('catalogo-antigo')],
       epicKeys: ['SUS-210'],
       team: [person('tupa-r', 'tl'), person('nilo-q', 'dev', 'back'), person('maira-t', 'dev', 'back'), person('oriana-c', 'pm'), n2(2), n2(3)],
       plans: [plan('Sob demanda', null, 30)],
       dependencies: [{ description: 'Aguardando retorno da consultoria', kind: 'waiting' }],
       declaredDone: false,
-      links: links('sustentacao-n3', 'SUS-210'),
-      notes: ['Incidentes entram pelo suporte N2 e são triados diariamente.'],
+      links: links('plantao-farol', 'SUS-210'),
+      notes: ['Chamados entram pelo balcão e são triados diariamente.'],
     },
     {
-      id: 'ws-fraude-checkout',
-      name: 'Tema aberto: fraude no checkout',
+      id: 'ws-fichas-sem-dono',
+      name: 'Tema aberto: fichas sem dono',
       category: 'open_topic',
       squadIds: ['sq-n3'],
       initiativeId: null,
@@ -663,12 +663,12 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
       plans: [plan('Sob demanda', null, 10)],
       dependencies: [],
       declaredDone: false,
-      links: links('fraude-checkout', 'SUS-240'),
+      links: links('fichas-sem-dono', 'SUS-240'),
       notes: ['Ainda em levantamento; sem data comprometida.'],
     },
     {
       id: 'ws-minhas-compras',
-      name: 'Minhas compras',
+      name: 'Minhas lanternas',
       category: 'open_topic',
       squadIds: ['sq-enable'],
       initiativeId: null,
@@ -678,7 +678,7 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
       plans: [plan('Sob demanda', null, 40), plan('Semana 3', -9, 25), plan('Semana 4', -4, 12)],
       dependencies: [],
       declaredDone: true,
-      links: links('minhas-compras', 'ENB-330'),
+      links: links('minhas-lanternas', 'ENB-330'),
       notes: [],
     },
   ];
@@ -695,7 +695,7 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
       capabilities: { changeRequests: 'native', reviews: 'native', pipelines: 'native', deployments: 'native', documents: 'native', workItems: 'native', workstreams: 'native' },
       generatedAt: now.toISOString(),
     },
-    organization: { id: 'org-voomp-demo', name: 'Voomp (Demo)', slug: 'voomp-demo' },
+    organization: { id: 'org-lanterna-norte', name: 'Lanterna Norte', slug: 'lanterna-norte' },
     squads: SQUADS,
     repositories,
     contributors,

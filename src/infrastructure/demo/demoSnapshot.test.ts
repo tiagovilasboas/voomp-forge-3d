@@ -112,9 +112,9 @@ describe('demo snapshot', () => {
     });
   });
 
-  it('repo-legacy-checkout has no activity in the last 30 days', () => {
+  it('repo-catalogo-antigo has no activity in the last 30 days', () => {
     const cutoff = now.getTime() - 30 * DAY;
-    const id = 'repo-legacy-checkout';
+    const id = 'repo-catalogo-antigo';
     expect(s.repositories.some((r) => r.id === id)).toBe(true);
     const dates = [
       ...s.changeRequests.filter((c) => c.repositoryId === id).flatMap((c) => [c.createdAt, c.mergedAt, c.closedAt]),

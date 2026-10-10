@@ -17,7 +17,7 @@ function issuesOf(json: unknown): string[] {
 describe('parseSnapshot', () => {
   it('accepts the demo snapshot', () => {
     const snap = fresh();
-    expect(parseSnapshot(snap).organization.slug).toBe('voomp-demo');
+    expect(parseSnapshot(snap).organization.slug).toBe('lanterna-norte');
   });
 
   it('rejects non-objects', () => {

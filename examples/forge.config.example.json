@@ -16,7 +16,7 @@
       "email": "ana@example.com",
       "displayName": "Ana Souza",
       "role": "tech-lead",
-      "squadId": "sq-pagamentos"
+      "squadId": "sq-atelie"
     }
   ],
   "connectors": [
@@ -24,21 +24,21 @@
       "type": "git-local",
       "squads": [
         {
-          "id": "sq-pagamentos",
+          "id": "sq-atelie",
           "code": "A",
-          "name": "Pagamentos",
-          "description": "Checkout, repasses e conciliação.",
+          "name": "Ateliê",
+          "description": "Bancada de pedidos, fichas de serviço e agenda da oficina.",
           "repositories": [
             {
-              "path": "../clones/payments-api",
-              "name": "payments-api",
-              "webUrl": "https://git.example.com/acme/payments-api",
+              "path": "../clones/bancada-web",
+              "name": "bancada-web",
+              "webUrl": "https://git.example.com/acme/bancada-web",
               "defaultBranch": "main",
               "language": "TypeScript"
             },
             {
-              "path": "../clones/checkout-web",
-              "webUrl": "https://git.example.com/acme/checkout-web"
+              "path": "../clones/fichas-api",
+              "webUrl": "https://git.example.com/acme/fichas-api"
             }
           ]
         },
@@ -57,9 +57,9 @@
       "initiatives": [
         {
           "key": "INI-12",
-          "name": "Pix parcelado",
-          "summary": "Pagamento parcelado via Pix.",
-          "ownerSquadId": "sq-pagamentos",
+          "name": "Rotas da coleta",
+          "summary": "Janelas de visita e mapas da frota da oficina.",
+          "ownerSquadId": "sq-atelie",
           "status": "in_delivery"
         }
       ],
@@ -97,13 +97,13 @@
       ],
       "sprintStart": "2026-01-05",
       "fronts": {
-        "Checkout Pix": {
+        "Rota da Coleta": {
           "epicKeys": [
-            "PAY-1"
+            "ATL-1"
           ],
           "initiativeId": "ini-ini-12",
           "squadIds": [
-            "sq-pagamentos"
+            "sq-atelie"
           ],
           "links": [
             {
