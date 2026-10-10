@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { DemoDataSource } from '@infrastructure/demo/DemoDataSource';
 import { RemoteDataSource } from '@infrastructure/remote/RemoteDataSource';
+import { SnapshotFileDataSource } from '@infrastructure/file/SnapshotFileDataSource';
 import { useDataStore } from '@presentation/state/dataStore';
 import { useUiStore } from '@presentation/state/uiStore';
 import { HudLayout } from '@presentation/hud/HudLayout';
@@ -9,8 +10,20 @@ import { Icon } from '@presentation/hud/kit/Icon';
 
 const ForgeCanvas = lazy(() => import('@presentation/scene/ForgeCanvas'));
 
-const SOURCES = [new DemoDataSource(), new RemoteDataSource()];
-const DEFAULT_SOURCE = SOURCES[0];
+/** `?snapshot=<url>` opens an imported snapshot instead of the demo. */
+function snapshotUrlFromLocation(): string | null {
+  try {
+    return new URLSearchParams(window.location.search).get('snapshot');
+  } catch {
+    return null;
+  }
+}
+
+const DEMO_SOURCE = new DemoDataSource();
+const SNAPSHOT_URL = snapshotUrlFromLocation();
+const IMPORTED_SOURCE = SNAPSHOT_URL ? new SnapshotFileDataSource({ url: SNAPSHOT_URL }) : null;
+const SOURCES = [DEMO_SOURCE, ...(IMPORTED_SOURCE ? [IMPORTED_SOURCE] : []), new RemoteDataSource()];
+const DEFAULT_SOURCE = IMPORTED_SOURCE ?? DEMO_SOURCE;
 
 const WELCOME_KEY = 'voomp-forge.welcome-seen';
 
@@ -64,7 +77,7 @@ export default function App() {
           <p className="mt-1 text-sm text-fog">{state.error}</p>
           <button
             type="button"
-            onClick={() => void load(DEFAULT_SOURCE)}
+            onClick={() => void load(DEMO_SOURCE)}
             className="focus-ring mt-4 rounded-lg bg-forge px-4 py-2 text-sm font-semibold text-ink-950"
           >
             Voltar ao Demo Mode
