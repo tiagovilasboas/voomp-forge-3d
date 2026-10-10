@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { create } from 'zustand';
 import type { DeploymentEnvironment, ID } from '@domain/entities';
-import { listDeliveries, type Delivery, type StatusGroup } from '@application/queries/deliveries';
+import { listDeliveries, type Delivery, type StatusFilter } from '@application/queries/deliveries';
 import { PERIOD_OPTIONS, type PeriodDays } from '@application/queries/period';
 import { useReadyData } from '../../state/dataStore';
 import { useUiStore } from '../../state/uiStore';
@@ -13,7 +13,7 @@ import { ModalShell } from './ModalShell';
 import { useSnapshotNow, useVocabulary } from './viewHooks';
 
 export interface ExplorerPrefilter {
-  status?: StatusGroup | null;
+  status?: StatusFilter | null;
   initiativeId?: string | 'none' | null;
   repoId?: string | null;
   environment?: 'staging' | 'production' | null;
@@ -23,7 +23,7 @@ interface ExplorerFilters {
   squadId: ID | null;
   periodDays: PeriodDays;
   repoId: ID | null;
-  status: StatusGroup | null;
+  status: StatusFilter | null;
   initiativeId: ID | 'none' | null;
   environment: DeploymentEnvironment | null;
   text: string;
@@ -115,8 +115,12 @@ export function DeliveryExplorer() {
         <FilterSelect
           label="Status"
           value={status ?? ''}
-          onChange={(v) => set('status', (v || null) as StatusGroup | null)}
-          options={[['', 'Todos'], ...STATUS_GROUP_ORDER.map((g): [string, string] => [g, STATUS_GROUP_LABEL[g]])]}
+          onChange={(v) => set('status', (v || null) as StatusFilter | null)}
+          options={[
+            ['', 'Todos'],
+            ['awaiting_production', 'Aguardando produção (integrado ou staging)'],
+            ...STATUS_GROUP_ORDER.map((g): [string, string] => [g, STATUS_GROUP_LABEL[g]]),
+          ]}
         />
         <FilterSelect
           label="Iniciativa"

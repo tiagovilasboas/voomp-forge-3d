@@ -19,14 +19,14 @@ function useQuestions(): Question[] {
   return useMemo(() => {
     const count = (f: DeliveryFilter) => listDeliveries(index, scope, f).length;
     const staging = count({ status: 'staging' });
-    const integrated = count({ status: 'integrated' });
+    const awaiting = count({ status: 'awaiting_production' });
     return [
       { text: 'O que chegou em produção?', count: count({ status: 'production' }), prefilter: { status: 'production' } },
       {
         text: 'O que ainda não chegou à produção?',
-        count: staging + integrated,
-        hint: `${staging} em staging · ${integrated} só integradas`,
-        prefilter: { status: 'integrated' },
+        count: awaiting,
+        hint: `${staging} em staging · ${awaiting - staging} só integradas`,
+        prefilter: { status: 'awaiting_production' },
       },
       { text: 'O que aguarda revisão?', count: count({ status: 'review' }), prefilter: { status: 'review' } },
       { text: 'Há bloqueios técnicos?', count: count({ status: 'blocked' }), prefilter: { status: 'blocked' } },
