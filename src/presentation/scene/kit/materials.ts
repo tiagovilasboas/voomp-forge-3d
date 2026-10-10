@@ -17,8 +17,22 @@ function cached<T extends THREE.Material>(key: string, make: () => T): T {
 }
 
 export const mat = {
-  /** Matte black rack metal. */
+  /** Matte black rack metal — kept for the plinth/header trim. */
   rackMetal: () => cached('rackMetal', () => new THREE.MeshStandardMaterial({ color: '#16191F', roughness: 0.55, metalness: 0.65 })),
+  /** Translucent holographic glass shell for the rack body. */
+  rackGlass: () =>
+    cached(
+      'rackGlass',
+      () =>
+        new THREE.MeshStandardMaterial({
+          color: '#0B1422',
+          roughness: 0.06,
+          metalness: 0.45,
+          transparent: true,
+          opacity: 0.18,
+          depthWrite: false,
+        }),
+    ),
   rackInner: () => cached('rackInner', () => new THREE.MeshStandardMaterial({ color: '#0C0E12', roughness: 0.8, metalness: 0.3 })),
   blade: () => cached('blade', () => new THREE.MeshStandardMaterial({ color: '#23272F', roughness: 0.6, metalness: 0.5 })),
   graphite: () => cached('graphite', () => new THREE.MeshStandardMaterial({ color: PALETTE.ink700, roughness: 0.75, metalness: 0.25 })),
