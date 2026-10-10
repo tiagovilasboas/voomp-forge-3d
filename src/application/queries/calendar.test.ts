@@ -11,8 +11,8 @@ const scope = { periodDays: 14 as const, squadId: null, now };
 describe('deliveryCalendar', () => {
   const days = deliveryCalendar(idx, scope, 'UTC');
 
-  it('has one entry per day of the period, oldest first, without gaps', () => {
-    expect(days).toHaveLength(14);
+  it('has one entry per calendar date of the period, oldest first, without gaps', () => {
+    expect(days).toHaveLength(15);
     expect(days[days.length - 1].date).toBe('2026-10-09');
     expect([...days].map((d) => d.date).sort()).toEqual(days.map((d) => d.date));
   });
