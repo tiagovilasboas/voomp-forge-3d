@@ -6,6 +6,8 @@ import type { EntityRef } from '../world/worldModel';
 export type ViewMode = 'product' | 'engineering';
 export type Quality = 'high' | 'low';
 export type Overlay = 'explorer' | 'table' | 'welcome' | null;
+/** Phone bottom-navigation destinations. `map` means no tab sheet is open. */
+export type MobileTab = 'map' | 'questions' | 'deliveries' | 'initiatives' | 'more';
 
 export type CameraCommand =
   | { type: 'focus'; ref: EntityRef; nonce: number }
@@ -29,6 +31,14 @@ interface UiStore {
   reducedMotion: boolean;
   quality: Quality;
   camera: CameraCommand | null;
+  /** Phone: which bottom-nav sheet is open. */
+  mobileTab: MobileTab;
+  /** Phone: full-screen search sheet. */
+  searchOpen: boolean;
+  /** Tablet: left column drawer. */
+  leftDrawerOpen: boolean;
+  /** Phone: a bottom sheet is expanded to `full` (hides floating map controls). */
+  sheetFull: boolean;
 
   setPeriod: (p: PeriodDays) => void;
   setSquad: (id: ID | null) => void;
@@ -42,6 +52,10 @@ interface UiStore {
   setReducedMotion: (v: boolean) => void;
   setQuality: (q: Quality) => void;
   commandCamera: (cmd: DistributiveOmit<CameraCommand, 'nonce'>) => void;
+  setMobileTab: (tab: MobileTab) => void;
+  setSearchOpen: (open: boolean) => void;
+  setLeftDrawerOpen: (open: boolean) => void;
+  setSheetFull: (full: boolean) => void;
 }
 
 type DistributiveOmit<T, K extends keyof T> = T extends unknown ? Omit<T, K> : never;
@@ -50,6 +64,8 @@ const prefersReducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 const isSmallScreen = () => typeof window !== 'undefined' && window.innerWidth < 760;
+
+const isLandscapeTablet = () => typeof window !== 'undefined' && window.matchMedia?.('(min-width: 1024px)').matches === true;
 
 let nonce = 0;
 
@@ -67,6 +83,10 @@ export const useUiStore = create<UiStore>((set, get) => ({
   reducedMotion: prefersReducedMotion(),
   quality: isSmallScreen() ? 'low' : 'high',
   camera: null,
+  mobileTab: 'map',
+  searchOpen: false,
+  leftDrawerOpen: isLandscapeTablet(),
+  sheetFull: false,
 
   setPeriod: (periodDays) => set({ periodDays }),
   setSquad: (squadId) => {
@@ -92,4 +112,8 @@ export const useUiStore = create<UiStore>((set, get) => ({
   setReducedMotion: (reducedMotion) => set({ reducedMotion }),
   setQuality: (quality) => set({ quality }),
   commandCamera: (cmd) => set({ camera: { ...cmd, nonce: ++nonce } as CameraCommand }),
+  setMobileTab: (mobileTab) => set({ mobileTab }),
+  setSearchOpen: (searchOpen) => set({ searchOpen }),
+  setLeftDrawerOpen: (leftDrawerOpen) => set({ leftDrawerOpen }),
+  setSheetFull: (sheetFull) => set({ sheetFull }),
 }));
