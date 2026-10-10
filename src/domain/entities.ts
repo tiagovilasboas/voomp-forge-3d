@@ -88,6 +88,16 @@ export interface Contributor {
 
 export type ChangeRequestState = 'open' | 'closed' | 'merged';
 
+/**
+ * Reference to a task in any tracker (Jira, Linear, GitHub/GitLab issues…),
+ * extracted from the change request title, branch or description by a
+ * configured pattern. Never guessed.
+ */
+export interface WorkItemRef {
+  key: string;
+  url: string | null;
+}
+
 /** Where a change request comes from: the provider, or inferred from a merge/squash commit. */
 export type ChangeRequestOrigin = 'provider' | 'merge-commit';
 
@@ -111,6 +121,8 @@ export interface ChangeRequest {
   requestedReviewerIds: ID[];
   /** Explicit link to an initiative. Null = not identified (never guessed). */
   initiativeId: ID | null;
+  /** Tasks this change refers to. Empty = none referenced. */
+  workItems: WorkItemRef[];
   webUrl: string;
 }
 
