@@ -28,7 +28,27 @@ export interface ProviderInfo {
   vocabulary: ProviderVocabulary;
 }
 
-export type SourceKind = 'demo' | 'connected';
+/** demo = fictional data; imported = snapshot file (e.g. from forge-ingest); connected = Forge backend. */
+export type SourceKind = 'demo' | 'imported' | 'connected';
+
+/**
+ * What a source is able to know. The UI must tell "zero" apart from "unknown":
+ * a repository whose source has no pipeline data shows "sem dados", never "0 falhas".
+ *  native      = read from the provider (PRs/MRs, reviews, CI runs, deployments)
+ *  inferred    = derived from plain Git history (e.g. merge commit messages, tags)
+ *  unavailable = the source cannot know it
+ */
+export type CapabilityLevel = 'native' | 'inferred' | 'unavailable';
+
+export interface SourceCapabilities {
+  changeRequests: CapabilityLevel;
+  reviews: CapabilityLevel;
+  pipelines: CapabilityLevel;
+  deployments: CapabilityLevel;
+}
+
+/** Bumped on breaking changes of the snapshot contract. */
+export const SNAPSHOT_SCHEMA_VERSION = 1;
 
 export interface Organization {
   id: ID;
@@ -68,8 +88,12 @@ export interface Contributor {
 
 export type ChangeRequestState = 'open' | 'closed' | 'merged';
 
+/** How a change request is known: from the provider, or inferred from a merge/squash commit. */
+export type ChangeRequestEvidence = 'provider' | 'merge-commit';
+
 export interface ChangeRequest {
   id: ID;
+  evidence: ChangeRequestEvidence;
   number: number;
   repositoryId: ID;
   title: string;
@@ -153,7 +177,8 @@ export interface ProductInitiative {
 
 /** A complete, normalised picture returned by any data source. */
 export interface ForgeSnapshot {
-  source: { kind: SourceKind; provider: ProviderInfo; generatedAt: ISODate };
+  schemaVersion: number;
+  source: { kind: SourceKind; provider: ProviderInfo; capabilities: SourceCapabilities; generatedAt: ISODate };
   organization: Organization;
   squads: Squad[];
   repositories: Repository[];
