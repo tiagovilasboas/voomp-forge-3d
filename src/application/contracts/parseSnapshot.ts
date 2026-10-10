@@ -23,6 +23,11 @@ const ENVIRONMENTS = ['staging', 'production'];
 const DEPLOY_STATUS = ['running', 'success', 'failure'];
 const INITIATIVE_STATUS = ['discovery', 'in_delivery', 'released'];
 const DOC_KINDS = ['spec', 'adr', 'runbook', 'postmortem', 'guide'];
+const WORK_ITEM_TYPES = ['epic', 'story', 'task', 'bug'];
+const WORK_ITEM_STATUS = ['todo', 'in_progress', 'done'];
+const WS_CATEGORIES = ['sprint_priority', 'closing', 'sustaining', 'open_topic'];
+const STAFF_ROLES = ['tl', 'dev', 'qa', 'pm', 'n2'];
+const DEP_KINDS = ['blocker', 'waiting'];
 
 type Rec = Record<string, unknown>;
 
@@ -177,6 +182,8 @@ export function parseSnapshot(json: unknown): ForgeSnapshot {
   const deployments = c.list(json, 'deployments');
   const initiatives = c.list(json, 'initiatives');
   const documents = c.list(json, 'documents');
+  const workItems = c.list(json, 'workItems');
+  const workstreams = c.list(json, 'workstreams');
 
   const squadIds = c.ids(squads, 'squads');
   const repoIds = c.ids(repos, 'repositories');
@@ -187,6 +194,8 @@ export function parseSnapshot(json: unknown): ForgeSnapshot {
   c.ids(deployments, 'deployments');
   const initiativeIds = c.ids(initiatives, 'initiatives');
   c.ids(documents, 'documents');
+  const workItemKeys = c.ids(workItems, 'workItems', 'key');
+  c.ids(workstreams, 'workstreams');
 
   squads.forEach((s, i) => {
     const p = at('squads', i);
@@ -303,12 +312,65 @@ export function parseSnapshot(json: unknown): ForgeSnapshot {
     c.str(d, 'webUrl', p, { allowEmpty: true });
   });
 
+  workItems.forEach((w, i) => {
+    const p = at('workItems', i);
+    c.str(w, 'title', p);
+    c.oneOf(w, 'type', p, WORK_ITEM_TYPES);
+    c.oneOf(w, 'status', p, WORK_ITEM_STATUS);
+    c.str(w, 'statusName', p, { allowEmpty: true });
+    c.ref(w, 'epicKey', p, workItemKeys, 'workItems', true);
+    c.nullableStr(w, 'sprint', p);
+    c.date(w, 'updatedAt', p);
+    c.date(w, 'productionAt', p, true);
+    c.nullableStr(w, 'url', p);
+  });
+
+  workstreams.forEach((ws, i) => {
+    const p = at('workstreams', i);
+    c.str(ws, 'name', p);
+    c.oneOf(ws, 'category', p, WS_CATEGORIES);
+    c.refs(ws, 'squadIds', p, squadIds, 'squads');
+    c.ref(ws, 'initiativeId', p, initiativeIds, 'initiatives', true);
+    c.refs(ws, 'repositoryIds', p, repoIds, 'repositories');
+    c.strArray(ws, 'epicKeys', p);
+    c.bool(ws, 'declaredDone', p);
+    c.strArray(ws, 'notes', p);
+    validateObjects(c, ws, 'team', p, (t, tp) => {
+      c.oneOf(t, 'role', tp, STAFF_ROLES);
+      c.ref(t, 'personId', tp, contributorIds, 'contributors', true);
+      c.str(t, 'displayName', tp);
+      c.nullableStr(t, 'specialty', tp);
+    });
+    validateObjects(c, ws, 'plans', p, (pl, pp) => {
+      c.str(pl, 'label', pp);
+      c.date(pl, 'target', pp, true);
+      c.date(pl, 'recordedAt', pp);
+    });
+    validateObjects(c, ws, 'dependencies', p, (d, dp) => {
+      c.str(d, 'description', dp);
+      c.oneOf(d, 'kind', dp, DEP_KINDS);
+    });
+    validateObjects(c, ws, 'links', p, (l, lp) => {
+      c.str(l, 'label', lp);
+      c.str(l, 'url', lp);
+    });
+  });
+
   if (c.issues.length > 0) {
     const shown = c.issues.slice(0, MAX_ISSUES);
     if (c.issues.length > MAX_ISSUES) shown[MAX_ISSUES - 1] = `… e mais ${c.issues.length - MAX_ISSUES + 1} problemas.`;
     throw new SnapshotValidationError(shown);
   }
   return json as unknown as ForgeSnapshot;
+}
+
+function validateObjects(c: Checker, parent: Rec, key: string, path: string, each: (item: Rec, itemPath: string) => void): void {
+  const v = parent[key];
+  if (!Array.isArray(v)) return void c.add(`${path}.${key}: esperada uma lista.`);
+  v.forEach((item, j) => {
+    if (!c.isRec(item)) return c.add(`${path}.${key}[${j}]: esperado um objeto.`);
+    each(item, `${path}.${key}[${j}]`);
+  });
 }
 
 function validateSource(c: Checker, json: Rec): void {
@@ -325,7 +387,7 @@ function validateSource(c: Checker, json: Rec): void {
   }
   const caps = c.obj(source, 'capabilities', 'source');
   if (caps) {
-    for (const k of ['changeRequests', 'reviews', 'pipelines', 'deployments', 'documents'] as const) {
+    for (const k of ['changeRequests', 'reviews', 'pipelines', 'deployments', 'documents', 'workItems', 'workstreams'] as const) {
       c.oneOf(caps, k, 'source.capabilities', CAPABILITY);
     }
   }

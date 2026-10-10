@@ -11,6 +11,8 @@ import type {
   Repository,
   Review,
   Squad,
+  WorkItem,
+  Workstream,
 } from '@domain/entities';
 import type { ChangeRequestEvidence } from '@domain/rules/changeRequestProgress';
 
@@ -39,6 +41,10 @@ export interface ForgeIndex {
   docsByInitiative: Map<ID, KnowledgeDocument[]>;
   docsByRepo: Map<ID, KnowledgeDocument[]>;
   docsBySquad: Map<ID, KnowledgeDocument[]>;
+  workItem: Map<string, WorkItem>;
+  /** Issues grouped by parent epic key. */
+  workItemsByEpic: Map<string, WorkItem[]>;
+  workstream: Map<ID, Workstream>;
 }
 
 function groupBy<T>(items: T[], keys: (t: T) => (ID | null)[], date: (t: T) => string): Map<ID, T[]> {
@@ -83,6 +89,9 @@ export function buildIndex(s: ForgeSnapshot): ForgeIndex {
     docsByInitiative: groupBy(s.documents, (d) => d.initiativeIds, (d) => d.updatedAt),
     docsByRepo: groupBy(s.documents, (d) => d.repositoryIds, (d) => d.updatedAt),
     docsBySquad: groupBy(s.documents, (d) => [d.squadId], (d) => d.updatedAt),
+    workItem: new Map(s.workItems.map((w) => [w.key, w])),
+    workItemsByEpic: groupBy(s.workItems, (w) => [w.epicKey], (w) => w.updatedAt),
+    workstream: byId(s.workstreams),
   };
 }
 
