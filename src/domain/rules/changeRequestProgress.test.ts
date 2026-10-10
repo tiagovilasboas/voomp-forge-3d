@@ -67,7 +67,7 @@ const evidence = (o: Partial<ChangeRequestEvidence> = {}): ChangeRequestEvidence
   reviews: [],
   headRuns: [],
   deployments: [],
-  capabilities: { changeRequests: 'native', reviews: 'native', pipelines: 'native', deployments: 'native' },
+  capabilities: { changeRequests: 'native', reviews: 'native', pipelines: 'native', deployments: 'native', documents: 'native' },
   ...o,
 });
 const merged = (deployments: Deployment[] = []) =>
@@ -210,7 +210,7 @@ describe('timeline', () => {
 });
 
 describe('capabilities', () => {
-  const gitOnly = { changeRequests: 'inferred', reviews: 'unavailable', pipelines: 'unavailable', deployments: 'unavailable' } as const;
+  const gitOnly = { changeRequests: 'inferred', reviews: 'unavailable', pipelines: 'unavailable', deployments: 'unavailable', documents: 'unavailable' } as const;
 
   it('marks review and deployment stages unknown — never pending or done — when the source cannot know them', () => {
     const merged = cr({ origin: 'merge-commit', state: 'merged', mergedAt: T(5), mergeCommitSha: 'm' });
