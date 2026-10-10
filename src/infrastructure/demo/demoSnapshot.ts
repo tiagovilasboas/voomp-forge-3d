@@ -19,6 +19,7 @@ import type {
   Repository,
   Review,
   WorkItemRef,
+  DocumentKind,
   ReviewVerdict,
   Squad,
 } from '@domain/entities';
@@ -92,6 +93,20 @@ const INITIATIVES: ProductInitiative[] = [
   { id: 'ini-payment-stability', key: 'INI-103', name: 'Estabilidade de pagamentos', summary: 'Reduzir falhas e divergências nos pagamentos e na conciliação.', ownerSquadId: 'sq-n3', status: 'in_delivery' },
   { id: 'ini-unified-ci', key: 'INI-104', name: 'Pipeline unificado de CI', summary: 'Padronizar a integração contínua em todos os repositórios.', ownerSquadId: 'sq-enable', status: 'discovery' },
 ];
+// Knowledge base pages: [id, title, kind, space, squad, initiatives, repos, updated days ago]
+const DOCS: Array<[string, string, DocumentKind, string, string | null, string[], string[], number]> = [
+  ['doc-fin-spec', 'Especificação: painel financeiro do produtor', 'spec', 'Produto', 'sq-admin', ['ini-financial-panel'], ['admin-console-web', 'admin-billing-api'], 9],
+  ['doc-fin-adr', 'ADR-014: saldo calculado no billing, não no front', 'adr', 'ENG', 'sq-admin', ['ini-financial-panel'], ['admin-billing-api'], 20],
+  ['doc-perm-spec', 'Especificação: permissões por equipe', 'spec', 'Produto', 'sq-admin', ['ini-team-permissions'], ['admin-permissions-svc', 'design-system'], 6],
+  ['doc-perm-adr', 'ADR-017: modelo de papéis baseado em políticas', 'adr', 'ENG', 'sq-admin', ['ini-team-permissions'], ['admin-permissions-svc'], 15],
+  ['doc-pay-runbook', 'Runbook: falha do adquirente', 'runbook', 'Operação', 'sq-n3', ['ini-payment-stability'], ['incident-gateway'], 4],
+  ['doc-pay-pm', 'Post-mortem: divergência na conciliação de setembro', 'postmortem', 'Operação', 'sq-n3', ['ini-payment-stability'], ['payments-reconciler'], 11],
+  ['doc-legacy-guide', 'Guia: checkout legado em modo leitura', 'guide', 'Operação', 'sq-n3', [], ['legacy-checkout'], 52],
+  ['doc-ci-adr', 'ADR-021: templates únicos de pipeline', 'adr', 'Plataforma', 'sq-enable', ['ini-unified-ci'], ['forge-ci-templates'], 8],
+  ['doc-ds-guide', 'Guia de contribuição do design system', 'guide', 'Plataforma', 'sq-enable', [], ['design-system'], 26],
+  ['doc-obs-runbook', 'Runbook: alertas de latência', 'runbook', 'Plataforma', 'sq-enable', [], ['platform-observability'], 13],
+];
+
 const INI: Record<string, string> = {
   '101': 'ini-financial-panel',
   '102': 'ini-team-permissions',
@@ -377,7 +392,7 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
         name: 'Demo',
         vocabulary: { changeRequest: 'Pull request', changeRequestShort: 'PR', pipeline: 'Pipeline' },
       },
-      capabilities: { changeRequests: 'native', reviews: 'native', pipelines: 'native', deployments: 'native' },
+      capabilities: { changeRequests: 'native', reviews: 'native', pipelines: 'native', deployments: 'native', documents: 'native' },
       generatedAt: now.toISOString(),
     },
     organization: { id: 'org-voomp-demo', name: 'Voomp (Demo)', slug: 'voomp-demo' },
@@ -390,6 +405,17 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
     pipelineRuns,
     deployments,
     initiatives: INITIATIVES,
+    documents: DOCS.map(([id, title, kind, space, squadId, initiativeIds, repos, days]) => ({
+      id,
+      title,
+      kind,
+      space,
+      squadId,
+      initiativeIds,
+      repositoryIds: repos.map(repoId),
+      updatedAt: ago(days),
+      webUrl: `https://wiki.demo.voomp.invalid/${space.toLowerCase()}/${id}`,
+    })),
   };
 }
 
