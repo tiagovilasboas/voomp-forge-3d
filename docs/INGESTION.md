@@ -1,11 +1,11 @@
 # Ingestão de dados (snapshot diário)
 
-O Voomp Forge **não consulta o Git ao vivo**. Ele lê um arquivo JSON (`ForgeSnapshot`) gerado periodicamente (por exemplo, uma vez por dia) a partir do histórico Git dos repositórios. O navegador nunca recebe tokens nem fala com o provedor.
+O Voomp Forge **não consulta nenhuma fonte ao vivo**. Ele lê um arquivo JSON (`ForgeSnapshot`) gerado periodicamente (por exemplo, uma vez por dia) por **conectores**: Git local, Jira, planilha de planejamento (CSV) e Confluence. O navegador nunca recebe tokens nem fala com o provedor.
 
 ## Como funciona
 
 1. Um job (cron, CI agendado) mantém clones locais dos repositórios (`git fetch --all --tags`).
-2. `npm run ingest` lê o histórico (`git log --all` e `git for-each-ref refs/tags`, somente leitura), infere o que for possível e grava o JSON.
+2. `npm run ingest` executa todos os conectores de `connectors[]`, une os fragmentos (`mergeFragments`), valida (`parseSnapshot`) e grava o JSON. O git-local lê o histórico (`git log --all` e `git for-each-ref refs/tags`, somente leitura).
 3. O JSON é publicado em qualquer hospedagem estática.
 4. O app abre com `?snapshot=<url-do-json>`. A fonte "Demo Mode" continua disponível no seletor.
 
@@ -18,6 +18,58 @@ npm run ingest -- --config forge.config.json --out public/snapshot.json [--since
 - `--config`: arquivo de configuração (modelo em `examples/forge.config.example.json`). Caminhos `path` são relativos ao arquivo de configuração.
 - `--out`: arquivo de saída. O snapshot é validado (`parseSnapshot`) antes de ser gravado.
 - `--since`: limita a leitura aos últimos N dias de commits (padrão: todo o histórico).
+
+## Conectores
+
+`forge.config.json` aceita `connectors: [{ "type": "...", ... }]`. As chaves de topo (`organization`, `provider`, `people`, `initiatives`…) são herdadas pelo `git-local` (e `people` pelo `plan-csv`). **Compatibilidade:** sem `connectors`, o arquivo inteiro é tratado como um único conector `git-local` (formato antigo).
+
+Quando fragmentos conflitam, o último conector da lista vence (por id/chave). Capacidades: vale o melhor nível (`native` > `inferred` > `indisponível`). Organização e provedor vêm do primeiro fragmento que os informa.
+
+### Regra de evidência
+
+**"Em produção" só vem do Jira (status de produção ou versão liberada) ou de deploys no Git (tags).** A planilha apenas declara planos e times: um `Finalizado` na planilha vira `declaredDone` e nunca prova produção. Merge ≠ produção. Dado desconhecido não é zero.
+
+### `git-local`
+
+Campos descritos em [Configuração](#configuração). Sem segredos (lê clones locais).
+
+### `jira`
+
+```json
+{ "type": "jira", "baseUrl": "https://suaempresa.atlassian.net", "project": "PAY",
+  "epicLinkField": "customfield_10014", "sprintField": "customfield_10020",
+  "productionStatuses": ["Em Produção", "Deployed"], "productionByFixVersionReleased": false }
+```
+
+- Use `project` ou `jql`. Pagina `/rest/api/3/search`.
+- Segredos (variáveis de ambiente): `JIRA_EMAIL` e `JIRA_API_TOKEN` (Basic auth). Nunca vão para o JSON nem para logs.
+- Tipo vem do `issuetype`; status vira `todo`/`in_progress`/`done` pela categoria do status; épico vem de `parent` (se for épico) ou `epicLinkField`; sprint ativa (ou a última) de `sprintField`.
+- `productionAt`: data de mudança de categoria (ou resolução) quando o status está em `productionStatuses`; ou `releaseDate` da versão corrigida já liberada, se `productionByFixVersionReleased` for `true`. Caso contrário, `null`.
+
+### `plan-csv`
+
+```json
+{ "type": "plan-csv", "path": "frentes.csv", "previous": ["frentes-sprint4.csv"], "sprintStart": "2026-01-05",
+  "fronts": { "Checkout Pix": { "epicKeys": ["PAY-1"], "initiativeId": "ini-ini-12", "squadIds": ["sq-pagamentos"], "links": [{ "label": "Spec", "url": "https://..." }] } } }
+```
+
+Lê a planilha exportada em CSV no layout matriz: linhas de título opcionais (`FECHAMENTOS`, `PRIORIDADES DE ENTREGA NA SPRINT`, `TEMAS ABERTOS`, `SUSTENTAÇÃO`) definem a categoria (padrão: prioridade da sprint); uma linha de cabeçalho com os nomes das frentes; e linhas cujo primeiro campo é o papel (`TL`, `DEV`, `QA`, `PM`, `N2`), `Entrega` ou `Obs`.
+
+- Pessoas: `A/ B`, `Nome - Back`, `Nome (Front)`, `Nome (Reserva)`. O nome vira `displayName`; a especialidade vem do sufixo. `personId` só é preenchido se o nome casar com `people[].displayName` (e-mail → contribuidor).
+- `Entrega`: rótulo do plano. A data-alvo vem de `dd/mm`, `(dd)` ou `Semana N` (+ dia da semana) relativo a `sprintStart`. `Sob demanda` não tem data. `Finalizado`/`Entregue` marca `declaredDone`.
+- `Obs`: contendo "depend"/"bloque" vira bloqueio; "aguard"/"retorno" vira espera; o restante vira nota.
+- `previous`: exports anteriores (do mais antigo ao mais novo; data = data do arquivo, ou `{ "path", "date" }`). Um novo plano entra no histórico só se rótulo ou data-alvo mudaram (replanejamento).
+- `fronts`: vínculo opcional por nome da frente com épicos, links, iniciativa e squads. Sem segredos.
+
+### `confluence`
+
+```json
+{ "type": "confluence", "baseUrl": "https://suaempresa.atlassian.net", "spaceKeys": ["ENG"],
+  "labelToInitiative": { "ini-12": "ini-ini-12" }, "labelToRepo": { "payments-api": "repo-payments-api" } }
+```
+
+- Segredos: `CONFLUENCE_EMAIL` e `CONFLUENCE_API_TOKEN` (se ausentes, usa `JIRA_EMAIL`/`JIRA_API_TOKEN`).
+- Tipo do documento pelos rótulos: `adr`, `runbook`, `postmortem`, `spec`, `guide` (padrão `guide`). Vínculos com iniciativas/repositórios só pelos rótulos mapeados, nunca por texto.
 
 ## Configuração
 
