@@ -84,5 +84,6 @@ export function evidenceFor(idx: ForgeIndex, cr: ChangeRequest): ChangeRequestEv
     reviews: idx.reviewsByCr.get(cr.id) ?? [],
     headRuns: idx.runsBySha.get(cr.headSha) ?? [],
     deployments: idx.deploymentsByCr.get(cr.id) ?? [],
+    capabilities: idx.snapshot.source.capabilities,
   };
 }
