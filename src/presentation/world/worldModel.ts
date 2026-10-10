@@ -12,6 +12,10 @@ export type EntityRef =
   | { kind: 'initiative'; id: ID }
   | { kind: 'document'; id: ID }
   | { kind: 'whiteboard' }
+  /** Sector wall board. id = `${squadId}:changes` | `${squadId}:deliveries`. */
+  | { kind: 'board'; id: string }
+  /** A person's workstation (holographic desk monitor). id = personId. */
+  | { kind: 'desk'; id: ID }
   | { kind: 'gate' };
 
 export const refKey = (r: EntityRef) => ('id' in r ? `${r.kind}:${r.id}` : r.kind);

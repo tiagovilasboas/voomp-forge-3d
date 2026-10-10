@@ -87,6 +87,17 @@ export function focusFor(world: WorldModel, ref: EntityRef): FocusTarget | null 
       return { center: world.knowledgeVault, radius: 6 };
     case 'whiteboard':
       return { center: world.weekBoard, radius: 4.5 };
+    case 'board': {
+      const [squadId, which] = ref.id.split(':');
+      const s = world.sectors.find((x) => x.squadId === squadId);
+      if (!s) return null;
+      const p = which === 'deliveries' ? s.boards.deliveries : s.boards.changes;
+      return { center: [p[0], p[1] + 1.5], radius: 4 };
+    }
+    case 'desk': {
+      const f = world.figures.find((x) => x.personId === ref.id);
+      return f ? { center: f.desk, radius: 3.5 } : null;
+    }
     default:
       return null;
   }
