@@ -18,6 +18,7 @@ import type {
   ProductInitiative,
   Repository,
   Review,
+  WorkItemRef,
   ReviewVerdict,
   Squad,
 } from '@domain/entities';
@@ -67,6 +68,8 @@ const REPOS: Array<[string, string, string, string]> = [
   ['platform-observability', 'sq-enable', 'Go', 'Coletores, painéis e alertas de observabilidade da plataforma.'],
 ];
 
+const squadOf = (repo: string) => REPOS.find(([name]) => name === repo)?.[1] ?? '';
+
 // [handle, name, squad, role]. Two people have no authorised role (null).
 const PEOPLE: Array<[string, string, string, ContributorRole | null]> = [
   ['iara-v', 'Iara Venturim', 'sq-admin', 'tech-lead'],
@@ -114,6 +117,14 @@ interface CrRow {
   ini?: keyof typeof INI;
   commits: 2 | 3;
 }
+
+/** Fictional tracker keys per squad. Every fifth change references no task, on purpose. */
+const TASK_PREFIX: Record<string, string> = { 'sq-admin': 'ADM', 'sq-n3': 'SUS', 'sq-enable': 'ENB' };
+const taskRefs = (squadId: string, index: number): WorkItemRef[] => {
+  if (index % 5 === 4) return [];
+  const key = `${TASK_PREFIX[squadId] ?? 'TSK'}-${140 + index * 7}`;
+  return [{ key, url: `https://tracker.demo.voomp.invalid/browse/${key}` }];
+};
 
 const CRS: CrRow[] = [
   // admin-console-web
@@ -245,7 +256,7 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
   const mergeShas = new Map<string, string>();
   const commitPrefixes = ['feat', 'test', 'fix'];
 
-  const changeRequests: ChangeRequest[] = CRS.map((row) => {
+  const changeRequests: ChangeRequest[] = CRS.map((row, index) => {
     const id = crId(row.repo, row.n);
     const created = now.getTime() - row.created * 86_400_000;
     const end = row.end !== undefined ? now.getTime() - row.end * 86_400_000 : now.getTime();
@@ -297,6 +308,7 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
       targetBranch: defaultBranch(row.repo),
       requestedReviewerIds: (row.reviewers ?? []).map(ctId),
       initiativeId: row.ini ? INI[row.ini] : null,
+      workItems: taskRefs(squadOf(row.repo), index),
       webUrl: `${repoUrl(row.repo)}/changes/${row.n}`,
     };
   });
