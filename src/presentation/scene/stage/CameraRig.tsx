@@ -16,6 +16,8 @@ const POLAR = 0.98;
 const AZIMUTH_RANGE = 0.75;
 /** Screen pixels covered by the inspector on the right; focused items shift left of it. */
 const INSPECTOR_PX = 340;
+/** Screen pixels covered by the left column (LeftColumn); always present on wide layouts. */
+const LEFT_PANEL_PX = 320;
 
 interface SavedView {
   target: THREE.Vector3;
@@ -41,9 +43,22 @@ export function CameraRig({ world }: { world: WorldModel }) {
 
   const fitZoom = (f: FocusTarget, panelOpen: boolean) => {
     const { width, height } = sizeRef.current;
-    const usableW = width > 900 && panelOpen ? width - 640 : width;
+    // Discount the fixed panels from the viewport so the scene fits the free area.
+    // Mobile (< 600) uses the full width; wide layouts always reserve the left column,
+    // plus the inspector on the right when it is open.
+    const usableW =
+      width < 600
+        ? width
+        : width > 900
+          ? width - LEFT_PANEL_PX - (panelOpen ? INSPECTOR_PX : 0)
+          : width;
     const closer = width < 600 ? 1.35 : 1;
-    return Math.max(4, Math.min(120, (closer * Math.min(usableW, height * 0.8)) / (f.radius * 2)));
+    // 12% padding so rooms never touch the panel edges.
+    const PADDING = 0.88;
+    return Math.max(
+      4,
+      Math.min(120, (PADDING * closer * Math.min(usableW, height * 0.8)) / (f.radius * 2)),
+    );
   };
 
   /** Moves so `f` sits in the free area of the screen (left of the inspector when it is open). */
