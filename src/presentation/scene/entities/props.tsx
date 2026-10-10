@@ -5,46 +5,29 @@ import type { SectorFeature } from '@config/world';
 import { PALETTE } from '../../theme';
 import type { Vec2 } from '../../world/worldModel';
 import { Box, Cylinder, Decal, useCanvasTexture } from '../kit/Part';
+import { useInteractive } from '../../interaction/useInteractive';
+import { HoloMonitor, ProjectorRing, StatusOrb } from './holoProps';
 import { mat } from '../kit/materials';
 import { FONTS } from '../kit/canvasTexture';
 
 /** Static set dressing. Purely decorative, reused by every sector. */
 
-function codeScreen(ctx: CanvasRenderingContext2D, w: number, h: number, seed: number) {
-  ctx.fillStyle = '#0A0D12';
-  ctx.fillRect(0, 0, w, h);
-  let s = seed;
-  const rand = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
-  for (let y = 10; y < h - 6; y += 12) {
-    let x = 10 + Math.floor(rand() * 3) * 14;
-    const tokens = 2 + Math.floor(rand() * 4);
-    for (let t = 0; t < tokens && x < w - 20; t++) {
-      const len = 16 + rand() * 50;
-      ctx.fillStyle = rand() > 0.75 ? PALETTE.forge : rand() > 0.5 ? '#5E6675' : '#C9CDD4';
-      ctx.globalAlpha = 0.85;
-      ctx.fillRect(x, y, len, 5);
-      x += len + 8;
-    }
-  }
-  ctx.globalAlpha = 1;
-}
-
-/** Standing workstation with a monitor (facing +z). */
-export function Desk({ position, seed }: { position: Vec2; seed: number }) {
-  const screen = useCanvasTexture(256, 160, (ctx, w, h) => codeScreen(ctx, w, h, seed), [seed]);
+/** Standing workstation with a holographic screen (facing +z). Clickable. */
+export function Desk({ position, personId, seed, reducedMotion }: { position: Vec2; personId: string; seed: number; reducedMotion: boolean }) {
+  const { hovered, selected, handlers } = useInteractive({ kind: 'desk', id: personId });
   const [x, z] = position;
   return (
-    <group position={[x, 0, z]}>
+    <group position={[x, 0, z]} {...handlers}>
       <Box position={[0, 0.98, 0]} size={[1.5, 0.05, 0.75]} material={mat.deskTop()} />
-      <Box position={[0, 1.005, 0.3]} size={[1.46, 0.01, 0.08]} material={mat.glow(PALETTE.forge, 0.35)} shadows={false} />
+      <Box
+        position={[0, 1.005, 0.3]}
+        size={[1.46, 0.01, 0.08]}
+        material={mat.glow(selected ? PALETTE.forgeBright : PALETTE.forge, selected ? 1.2 : hovered ? 0.8 : 0.35)}
+        shadows={false}
+      />
       <Box position={[-0.68, 0.49, 0]} size={[0.06, 0.98, 0.6]} material={mat.steel()} />
       <Box position={[0.68, 0.49, 0]} size={[0.06, 0.98, 0.6]} material={mat.steel()} />
-      {/* monitor */}
-      <Box position={[0, 1.08, -0.18]} size={[0.06, 0.16, 0.06]} material={mat.steel()} />
-      <Box position={[0, 1.4, -0.2]} size={[0.92, 0.56, 0.05]} material={mat.rackMetal()} />
-      <Decal texture={screen} position={[0, 1.4, -0.172]} size={[0.86, 0.5]} glow opacity={0.95} />
-      {/* keyboard */}
-      <Box position={[0, 1.015, 0.1]} size={[0.5, 0.02, 0.16]} material={mat.blade()} shadows={false} />
+      <HoloMonitor seed={seed} active={hovered || selected} selected={selected} reducedMotion={reducedMotion} />
     </group>
   );
 }
@@ -54,8 +37,10 @@ export function Board({
   position,
   title,
   rows,
+  state = 'idle',
 }: {
   position: Vec2;
+  state?: 'idle' | 'hover' | 'selected';
   title: string;
   rows: { label: string; value: number; color: string }[];
 }) {
@@ -89,12 +74,23 @@ export function Board({
     },
     [title, key],
   );
+  const edgeGlow = state === 'selected' ? 1.6 : state === 'hover' ? 1.0 : 0.3;
   const [x, z] = position;
   return (
     <group position={[x, 0, z]}>
       <Box position={[0, 2.05, -0.06]} size={[3.3, 2.0, 0.08]} material={mat.rackMetal()} />
       <Decal texture={tex} position={[0, 2.05, -0.01]} size={[3.1, 1.82]} glow opacity={0.96} />
       <Box position={[0, 0.95, -0.06]} size={[0.08, 0.3, 0.08]} material={mat.steel()} />
+      {/* frame glow: orange, stronger on hover / selection */}
+      {[
+        [0, 3.07, 3.36, 0.05],
+        [0, 1.03, 3.36, 0.05],
+      ].map(([px, py, sx, sy], i) => (
+        <Box key={i} position={[px, py, 0]} size={[sx, sy, 0.03]} material={mat.glow(PALETTE.forge, edgeGlow)} shadows={false} />
+      ))}
+      {[-1.68, 1.68].map((px) => (
+        <Box key={px} position={[px, 2.05, 0]} size={[0.05, 2.05, 0.03]} material={mat.glow(PALETTE.forge, edgeGlow)} shadows={false} />
+      ))}
     </group>
   );
 }
@@ -130,7 +126,7 @@ function GlassRoom({ size, children }: { size: [number, number]; children?: Reac
   );
 }
 
-function MonitoringRoom() {
+function MonitoringRoom({ alert, reducedMotion }: { alert: boolean; reducedMotion: boolean }) {
   const wall = useCanvasTexture(
     512,
     200,
@@ -161,6 +157,9 @@ function MonitoringRoom() {
       <Decal texture={wall} position={[0, 1.45, -1.26]} size={[3.5, 1.0]} glow opacity={0.95} />
       <Box position={[0, 0.5, -0.3]} size={[2.6, 0.9, 0.5]} material={mat.graphite()} />
       <Box position={[0, 0.96, -0.3]} size={[2.6, 0.03, 0.5]} material={mat.glow(PALETTE.forge, 0.25)} shadows={false} />
+      <group position={[0, 0, 0.45]}>
+        <StatusOrb alert={alert} reducedMotion={reducedMotion} />
+      </group>
     </GlassRoom>
   );
 }
@@ -175,7 +174,7 @@ function ArchitectureRoom() {
   );
 }
 
-function CoordinationDesk() {
+function CoordinationDesk({ reducedMotion }: { reducedMotion: boolean }) {
   return (
     <group>
       <Box position={[0, 0.03, 0]} size={[3.8, 0.06, 2.6]} material={mat.graphite()} />
@@ -183,16 +182,19 @@ function CoordinationDesk() {
       <Cylinder position={[0, 0.94, 0]} radius={1.02} height={0.04} material={mat.glow(PALETTE.forge, 0.45)} />
       <Box position={[0, 1.5, -0.2]} size={[1.4, 0.8, 0.04]} material={mat.glass()} shadows={false} />
       <Box position={[0, 1.12, -0.2]} size={[1.4, 0.03, 0.05]} material={mat.glow(PALETTE.forgeBright, 0.8)} shadows={false} />
+      <group position={[0, 0, 0.35]}>
+        <ProjectorRing reducedMotion={reducedMotion} />
+      </group>
     </group>
   );
 }
 
-export function FeatureProp({ feature, position }: { feature: SectorFeature; position: Vec2 }) {
+export function FeatureProp({ feature, position, alert, reducedMotion }: { feature: SectorFeature; position: Vec2; alert: boolean; reducedMotion: boolean }) {
   return (
     <group position={[position[0], 0, position[1]]}>
-      {feature === 'monitoring-room' && <MonitoringRoom />}
+      {feature === 'monitoring-room' && <MonitoringRoom alert={alert} reducedMotion={reducedMotion} />}
       {feature === 'architecture-room' && <ArchitectureRoom />}
-      {feature === 'coordination-desk' && <CoordinationDesk />}
+      {feature === 'coordination-desk' && <CoordinationDesk reducedMotion={reducedMotion} />}
     </group>
   );
 }

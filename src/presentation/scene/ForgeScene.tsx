@@ -12,6 +12,7 @@ import { ProductionGate } from './entities/ProductionGate';
 import { WeekBoard } from './entities/WeekBoard';
 import { CreditPlaque } from './entities/CreditPlaque';
 import { KnowledgeVault } from './entities/KnowledgeVault';
+import { InfoTotem } from './entities/holoProps';
 import { RepoHologram } from './holo/RepoHologram';
 
 const PLATFORM_H = 0.14;
@@ -95,6 +96,22 @@ export function ForgeScene() {
         return null;
     }
   }, [selection, highlightInitiativeId, index]);
+  const squadAlert = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of world.racks) if (health.get(r.repoId)?.alert) set.add(r.squadId);
+    return set;
+  }, [world, health]);
+  /** Info totems along the main corridor, each labelled with the nearest sector. */
+  const totems = useMemo(() => {
+    const { min, max } = world.bounds;
+    const n = 3;
+    return Array.from({ length: n }, (_, i) => {
+      const x = min[0] + ((max[0] - min[0]) * (i + 1)) / (n + 1);
+      let best = world.sectors[0];
+      for (const s of world.sectors) if (Math.abs(s.center[0] - x) < Math.abs(best.center[0] - x)) best = s;
+      return { code: best.code, name: best.name, accent: best.theme.accent, position: [x, 2.3, world.corridorZ] as [number, number, number] };
+    });
+  }, [world]);
   const dimmedSquad = (squadId: string) => squadFilter !== null && squadFilter !== squadId;
 
   return (
@@ -107,7 +124,13 @@ export function ForgeScene() {
           figures={world.figures.filter((f) => f.squadId === s.squadId)}
           boards={boards.get(s.squadId)!}
           dimmed={dimmedSquad(s.squadId)}
+          alert={squadAlert.has(s.squadId)}
+          reducedMotion={reducedMotion}
         />
+      ))}
+
+      {totems.map((t) => (
+        <InfoTotem key={t.code} position={t.position} code={t.code} name={t.name} accent={t.accent} reducedMotion={reducedMotion} />
       ))}
 
       <group position={[0, PLATFORM_H, 0]}>

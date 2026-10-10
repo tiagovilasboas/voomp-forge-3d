@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { cloneElement, useMemo } from 'react';
 import { Edges } from '@react-three/drei';
 import { PALETTE } from '../../theme';
 import type { FigureLayout, RackLayout, SectorLayout } from '../../world/worldModel';
@@ -24,12 +24,20 @@ interface Props {
   boards: SectorBoards;
   /** Outside the active squad filter. */
   dimmed: boolean;
+  alert: boolean;
+  reducedMotion: boolean;
 }
 
 const PLATFORM_H = 0.14;
 
+/** Makes a wall board clickable and feeds hover/selected state to its frame glow. */
+function BoardHit({ id, children }: { id: string; children: React.ReactElement<{ state?: 'idle' | 'hover' | 'selected' }> }) {
+  const { hovered, selected, handlers } = useInteractive({ kind: 'board', id });
+  return <group {...handlers}>{cloneElement(children, { state: selected ? 'selected' : hovered ? 'hover' : 'idle' })}</group>;
+}
+
 /** Sector = squad. A raised platform with its racks, desks, boards and a themed room. */
-export function SectorEntity({ layout, racks, figures, boards, dimmed }: Props) {
+export function SectorEntity({ layout, racks, figures, boards, dimmed, alert, reducedMotion }: Props) {
   const { hovered, selected, handlers } = useInteractive({ kind: 'squad', id: layout.squadId });
   const [cx, cz] = layout.center;
   const [w, d] = layout.size;
@@ -95,6 +103,7 @@ export function SectorEntity({ layout, racks, figures, boards, dimmed }: Props) 
       </group>
 
       <group position={[0, PLATFORM_H, 0]}>
+        <BoardHit id={`${layout.squadId}:changes`}>
         <Board
           position={layout.boards.changes}
           title="Mudanças"
@@ -104,6 +113,8 @@ export function SectorEntity({ layout, racks, figures, boards, dimmed }: Props) 
             { label: 'Bloqueadas', value: boards.blocked, color: boards.blocked ? PALETTE.fail : PALETTE.fog },
           ]}
         />
+        </BoardHit>
+        <BoardHit id={`${layout.squadId}:deliveries`}>
         <Board
           position={layout.boards.deliveries}
           title="Entregas"
@@ -113,10 +124,11 @@ export function SectorEntity({ layout, racks, figures, boards, dimmed }: Props) 
             { label: 'Integradas, sem deploy', value: boards.integrated, color: PALETTE.forgeBright },
           ]}
         />
+        </BoardHit>
         {figures.map((f, i) => (
-          <Desk key={f.personId} position={f.desk} seed={i * 97 + layout.code.charCodeAt(0)} />
+          <Desk key={f.personId} personId={f.personId} reducedMotion={reducedMotion} position={f.desk} seed={i * 97 + layout.code.charCodeAt(0)} />
         ))}
-        <FeatureProp feature={layout.theme.feature} position={layout.feature} />
+        <FeatureProp feature={layout.theme.feature} position={layout.feature} alert={alert} reducedMotion={reducedMotion} />
         {racks.map((r) => (
           <CableTray key={r.repoId} from={[r.position[0], r.position[1]]} to={[r.position[0], cz - d / 2 + 0.3]} />
         ))}
