@@ -11,7 +11,7 @@ Transforma dados de entrega de software (mudanças, revisões, pipelines e deplo
 
 ![Visão geral do data center](docs/media/hero-overview.png)
 
-<p align="center"><a href="docs/media/voomp-forge-tour.mp4"><b>▶ Assista ao tour em vídeo (31 s, MP4)</b></a></p>
+<p align="center"><a href="https://tiagovilasboas.github.io/voomp-forge-3d/"><b>🚀 Abrir a demo ao vivo</b></a> · <a href="docs/media/voomp-forge-tour.mp4"><b>▶ Tour em vídeo (31 s)</b></a></p>
 
 > **DEMO DATA.** Todos os dados exibidos por padrão são **fictícios**, gerados localmente em `src/infrastructure/demo/`. Nenhuma pessoa, repositório ou número representa a Voomp real.
 
