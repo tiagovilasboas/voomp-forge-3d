@@ -59,6 +59,8 @@ export function buildWorld(squads: Squad[], repositories: Repository[], people: 
     corridorZ: LAYOUT.corridorZ,
     gate: [3.5, LAYOUT.gateZ],
     stagingDock: [-5.5, LAYOUT.gateZ],
+    weekBoard: [10.5, LAYOUT.gateZ - 0.4],
+    creditPlaque: [-12, LAYOUT.gateZ + 0.6],
     bounds: { min: [-half, -depth / 2 - 3], max: [half, LAYOUT.gateZ + 4] },
   };
 }

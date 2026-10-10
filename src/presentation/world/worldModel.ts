@@ -49,6 +49,9 @@ export interface WorldModel {
   corridorZ: number;
   gate: Vec2;
   stagingDock: Vec2;
+  /** "Entregue esta semana" whiteboard next to the gate. */
+  weekBoard: Vec2;
+  creditPlaque: Vec2;
   bounds: { min: Vec2; max: Vec2 };
 }
 
