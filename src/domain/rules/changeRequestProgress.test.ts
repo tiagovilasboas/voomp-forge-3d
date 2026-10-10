@@ -13,6 +13,7 @@ const T = (day: number) => `2026-10-${String(day).padStart(2, '0')}T10:00:00.000
 
 const cr = (o: Partial<ChangeRequest> = {}): ChangeRequest => ({
   id: 'cr-1',
+  evidence: 'provider',
   number: 1,
   repositoryId: 'repo-1',
   title: 't',
