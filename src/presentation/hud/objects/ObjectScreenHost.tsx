@@ -1,4 +1,6 @@
 import { useUiStore } from '../../state/uiStore';
+import { CalendarScreen } from '../fronts/CalendarScreen';
+import { FrontsScreen } from '../fronts/FrontsScreen';
 import { BoardScreen } from './BoardScreen';
 import { DeskScreen } from './DeskScreen';
 import { HubScreen } from './HubScreen';
@@ -24,5 +26,10 @@ export function ObjectScreenHost() {
       return <TerminalScreen />;
     case 'pinball':
       return <PinballScreen />;
+    case 'fronts':
+    case 'workstream':
+      return <FrontsScreen />;
+    case 'calendar':
+      return <CalendarScreen />;
   }
 }

@@ -20,6 +20,11 @@ export type EntityRef =
   | { kind: 'hub' }
   | { kind: 'terminal' }
   | { kind: 'pinball' }
+  /** Delivery fronts wall ("Mural de Frentes") and delivery calendar wall. */
+  | { kind: 'fronts' }
+  | { kind: 'calendar' }
+  /** A single delivery front. id = workstream id. */
+  | { kind: 'workstream'; id: ID }
   | { kind: 'gate' };
 
 export const refKey = (r: EntityRef) => ('id' in r ? `${r.kind}:${r.id}` : r.kind);
@@ -62,6 +67,9 @@ export interface WorldModel {
   /** "Entregue esta semana" whiteboard next to the gate. */
   weekBoard: Vec2;
   creditPlaque: Vec2;
+  /** "Mural de Frentes" and the delivery calendar, by the corridor near the gate. */
+  frontsWall: Vec2;
+  calendarWall: Vec2;
   /** Hub IA room: knowledge base, terminal and holographic pinball. */
   aiHub: { center: Vec2; size: Vec2; terminal: Vec2; pinball: Vec2 };
   /** Knowledge base vault (Confluence, Notion, docs in repos…), inside the Hub IA. */

@@ -15,6 +15,7 @@ export function MoreContent() {
   const openOverlay = useUiStore((s) => s.openOverlay);
   const setTourStep = useUiStore((s) => s.setTourStep);
   const setTab = useUiStore((s) => s.setMobileTab);
+  const select = useUiStore((s) => s.select);
 
   const run = (fn: () => void) => () => {
     setTab('map');
@@ -38,6 +39,8 @@ export function MoreContent() {
       <Card label="Explorar">
         <CardHeader title="Explorar" />
         <div className="px-2 pb-2">
+          <MenuButton label="Mural de Frentes" onClick={run(() => select({ kind: 'fronts' }))} />
+          <MenuButton label="Calendário" onClick={run(() => select({ kind: 'calendar' }))} />
           <MenuButton label="Delivery Explorer" onClick={run(() => useExplorerFilters.getState().open())} />
           <MenuButton label="Visão tabular" onClick={run(() => openOverlay('table'))} />
           <MenuButton label="Tour guiado" onClick={run(() => setTourStep(0))} />
