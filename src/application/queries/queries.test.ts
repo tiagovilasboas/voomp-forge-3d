@@ -160,3 +160,15 @@ describe('awaiting_production status filter', () => {
     }
   });
 });
+
+describe('work item references', () => {
+  it('finds deliveries by task key', () => {
+    const withTask = idx.snapshot.changeRequests.find((c) => c.workItems.length > 0)!;
+    const found = listDeliveries(idx, scope(), { text: withTask.workItems[0].key });
+    expect(found.map((d) => d.cr.id)).toContain(withTask.id);
+  });
+
+  it('leaves some changes without task references — never invented', () => {
+    expect(idx.snapshot.changeRequests.some((c) => c.workItems.length === 0)).toBe(true);
+  });
+});
