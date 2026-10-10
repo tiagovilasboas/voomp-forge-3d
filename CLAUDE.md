@@ -5,6 +5,12 @@
 - For each slice: **commit → push → open PR → if green, merge** (merge commit, keeps per-domain history). Then restart the working branch from the updated `main`.
 - "Green" = the PR's CI check passes (`.github/workflows/ci.yml`: typecheck, tests, build). Never merge red; never skip or disable tests to get green.
 - Never commit code that doesn't compile. Work in progress stays uncommitted (or in a stash) until its slice is green.
+- Continuous delivery (harness-core `continuous-delivery`, always): smallest independent unit of value; a PR over ~400 changed lines needs a written reason; push right after committing (no local commits older than 1h); green CI → merge, a green PR never waits more than a working day; every merge is an auditable, revertible delivery. Anti-patterns: mega-feature PRs, PRs with no deadline, "just one more thing" for more than a day.
+
+## Evidence over assumptions (harness-core `no-assumptions`, always)
+- Never state as fact what you have not confirmed (test, log, screenshot, official docs, or the owner's word). Cite the source; otherwise mark it as "a confirmar"/hypothesis.
+- In reports: "not found" ≠ "does not exist"; say what was not visually verified (e.g. a screenshot that does not show the feature).
+- Non-obvious decisions (2+ viable options with a trade-off) go to `docs/DECISIONS.md` with date, options, choice and why (harness-core `adr-trigger`).
 
 ## Commits
 - Always in **English**, Conventional Commits, **one commit per domain** with the domain as scope (see `CONTRIBUTING.md`): `domain`, `application`, `infrastructure`, `config`, `world`, `animation`, `interaction`, `state`, `theme`, `scene`, `hud`, `app`, `architecture`, `build`; `test(<scope>)` and `docs` separate.
@@ -23,6 +29,7 @@
 - Demo data is fictional and always flagged DEMO DATA. Never put real people's names or company data in the repo.
 - Robots/characters are illustrative: no presence, workload, productivity or rankings of individuals.
 - PM-first: plain pt-BR copy, status always icon + text.
+- World layout: rooms face each other across shared aisles and fill a compact square footprint (grid), never a long strip. New rooms slot into the grid.
 
 ## Team of agents (from harness-core)
 Agents live in `.claude/agents/`; the shared policy is `docs/agents/ORCHESTRATION.md`.
