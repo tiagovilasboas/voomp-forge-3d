@@ -21,6 +21,7 @@ import type {
   ReviewVerdict,
   Squad,
 } from '@domain/entities';
+import { SNAPSHOT_SCHEMA_VERSION } from '@domain/entities';
 
 const BASE_URL = 'https://git.demo.voomp.invalid/voomp-demo';
 
@@ -279,6 +280,7 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
     }
 
     return {
+      evidence: 'provider',
       id,
       number: row.n,
       repositoryId: repoId(row.repo),
@@ -355,6 +357,7 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
   });
 
   return {
+    schemaVersion: SNAPSHOT_SCHEMA_VERSION,
     source: {
       kind: 'demo',
       provider: {
@@ -362,6 +365,7 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
         name: 'Demo',
         vocabulary: { changeRequest: 'Pull request', changeRequestShort: 'PR', pipeline: 'Pipeline' },
       },
+      capabilities: { changeRequests: 'native', reviews: 'native', pipelines: 'native', deployments: 'native' },
       generatedAt: now.toISOString(),
     },
     organization: { id: 'org-voomp-demo', name: 'Voomp (Demo)', slug: 'voomp-demo' },
