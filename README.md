@@ -2,9 +2,46 @@
 
 **From Code to Delivery** — Engineering Delivery Intelligence em 3D.
 
-O Voomp Forge transforma dados de entrega de software (mudanças, revisões, pipelines e deploys) em um data center 3D explorável: cada **setor** é uma squad, cada **rack** é um repositório e a luz que corre pelo chão são eventos de integração e deploy. A mesma informação está disponível para Produto, em linguagem simples ("o que chegou em produção?"), e para Engenharia, com evidências (SHA, pipeline, deploy). A regra central: **integrado ≠ em produção** — uma etapa só aparece como concluída quando existe um registro que a comprove.
+O Voomp Forge transforma dados de entrega de software (mudanças, revisões, pipelines e deploys) em um data center 3D explorável: cada **setor** é uma squad, cada **rack** é um repositório, e a luz que corre pelo chão são eventos de integração e deploy.
+A mesma informação serve a Produto, em linguagem simples ("o que chegou em produção?"), e a Engenharia, com evidências (SHA, pipeline, deploy). Regra central: **integrado ≠ em produção**. Uma etapa só aparece como concluída quando existe um registro que a comprove.
+
+![Visão geral do data center](docs/media/overview.png)
 
 > **DEMO DATA.** Todos os dados exibidos são **fictícios**, gerados localmente por `src/infrastructure/demo/`. Nenhuma pessoa, repositório ou número representa a Voomp real. O modo "Conectado" ainda não existe (veja [docs/HANDOFF.md](docs/HANDOFF.md)).
+
+## Destaques
+
+- Data center 3D isométrico com squads, racks e robôs ilustrativos.
+- Hologramas do repositório ao selecionar um rack.
+- Timeline de entrega com evidência: integrado ≠ em produção.
+- Product View com perguntas de negócio ("o que chegou em produção?").
+- Delivery Explorer com filtros e cards de evidência.
+- Arquivo de Conhecimento (Confluence, Notion, docs) ligado a iniciativas.
+- Quadro do time com notas.
+- Mobile-first, com PWA e uso offline.
+- Agnóstico de Git (GitHub, GitLab, Bitbucket, Azure DevOps) com snapshot diário.
+- Visão tabular acessível, sem 3D, com fallback automático quando não há WebGL.
+
+## Telas
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/media/holograms.png" width="420"><br><sub>Hologramas do repositório</sub></td>
+    <td align="center"><img src="docs/media/delivery-timeline.png" width="420"><br><sub>Da pergunta à entrega em 2 cliques</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/initiative-knowledge.png" width="420"><br><sub>Iniciativa + Arquivo de Conhecimento</sub></td>
+    <td align="center"><img src="docs/media/team-whiteboard.png" width="420"><br><sub>Quadro do time</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/robots.png" width="420"><br><sub>Androids do time (ilustrativos)</sub></td>
+    <td align="center"><img src="docs/media/welcome.png" width="420"><br><sub>Boas-vindas e tour</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/media/phone.png" width="420"><br><sub>Celular</sub></td>
+    <td align="center"><img src="docs/media/tablet.png" width="420"><br><sub>Tablet</sub></td>
+  </tr>
+</table>
 
 ## Quickstart
 
@@ -15,6 +52,16 @@ npm test            # testes unitários (Vitest)
 npm run typecheck   # tsc -b
 npm run build       # typecheck + build de produção em dist/
 ```
+
+### Dados reais (snapshot diário)
+
+O app não consulta o Git ao vivo. Ele lê um snapshot JSON gerado periodicamente a partir do histórico dos repositórios:
+
+```bash
+npm run ingest -- --config forge.config.json --out public/snapshot.json
+```
+
+Depois, abra o app com `?snapshot=./snapshot.json`. O modelo de configuração está em `examples/forge.config.example.json`. Detalhes de configuração, o que é inferido e o que não existe estão em [docs/INGESTION.md](docs/INGESTION.md).
 
 ## Controles
 
@@ -62,12 +109,18 @@ Regras de dependência e fluxo de dados: [docs/ARCHITECTURE.md](docs/ARCHITECTUR
 
 ## Documentação
 
-- [docs/DESIGN.md](docs/DESIGN.md) — design de produto e visual (Etapa A)
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — camadas e fluxo de dados
+- [docs/DESIGN.md](docs/DESIGN.md) — design de produto e visual
 - [docs/HUD_SPEC.md](docs/HUD_SPEC.md) — especificação das regiões do HUD
-- [docs/HANDOFF.md](docs/HANDOFF.md) — handoff de engenharia, testes e backlog (Etapa C)
-- [CONTRIBUTING.md](CONTRIBUTING.md) — commits e checagens antes do push
+- [docs/HANDOFF.md](docs/HANDOFF.md) — handoff de engenharia, testes e backlog
+- [docs/RESPONSIVE_SPEC.md](docs/RESPONSIVE_SPEC.md) — especificação de layout responsivo
+- [docs/INGESTION.md](docs/INGESTION.md) — ingestão de dados (snapshot diário)
+- [CONTRIBUTING.md](CONTRIBUTING.md) — convenção de commits e checagens antes do push
 
 ---
 
 Inspirado na experiência do WareTrack (siddik-web/waretrack) — nenhum código ou asset reaproveitado.
+
+Feito com Claude Code.
+
+Criado por [@tiagovilasboas](https://github.com/tiagovilasboas) · [♥ Sponsor](https://github.com/sponsors/tiagovilasboas)
