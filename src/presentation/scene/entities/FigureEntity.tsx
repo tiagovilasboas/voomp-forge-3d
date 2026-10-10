@@ -44,6 +44,17 @@ const CYL = new THREE.CylinderGeometry(1, 1, 1, 24);
 const SCREEN = new THREE.PlaneGeometry(1, 1);
 const JOINT_DARK = new THREE.MeshStandardMaterial({ color: '#16181D', roughness: 0.55, metalness: 0.45 });
 
+const HOLO_CYAN = '#38E1FF';
+const HOLO_ORANGE = '#FF8C32';
+const holo = (color: string, opacity: number, intensity = 1.3) =>
+  new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(intensity), transparent: true, opacity, toneMapped: false, depthWrite: false });
+const SCOOTER_DECK = holo(HOLO_CYAN, 0.55);
+const SCOOTER_ACCENT = holo(HOLO_ORANGE, 0.9, 1.6);
+const SCOOTER_WHEEL = holo(HOLO_CYAN, 0.8, 1.8);
+/** Light trail: a few stretched quads behind the scooter, fading out. */
+const TRAIL = [0.42, 0.3, 0.2, 0.12, 0.06].map((o) => holo(HOLO_CYAN, o, 1.6));
+const WHEEL_GEO = new THREE.TorusGeometry(0.075, 0.018, 8, 20);
+
 interface Props {
   layout: FigureLayout;
   person: Contributor;
@@ -96,6 +107,7 @@ export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: 
   const legL = useRef<THREE.Group>(null);
   const legR = useRef<THREE.Group>(null);
   const device = useRef<THREE.Group>(null);
+  const scooter = useRef<THREE.Group>(null);
   const tag = useRef<THREE.Sprite>(null);
   const expression = useRef<Expression>('neutral');
 
@@ -122,7 +134,8 @@ export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: 
       ? { position: layout.home, heading: Math.PI, action: 'idle' as const, elapsed: 0 }
       : sample(script, time);
     const rig = rigPose(pose.action, pose.elapsed, reducedMotion ? 0 : time);
-    const q = reducedMotion ? null : quirkAt(person.id, time, pose.action);
+    const riding = pose.action === 'ride';
+    const q = reducedMotion || riding ? null : quirkAt(person.id, time, pose.action);
     const quirk = q ? quirkOffsets(q) : NO_QUIRK;
 
     if (root.current) {
@@ -133,14 +146,15 @@ export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: 
     }
     livePositions.set(person.id, pose.position);
     if (body.current) {
-      body.current.position.y = rig.bob + quirk.bob;
-      body.current.rotation.set(quirk.bodyPitch, 0, quirk.bodyRoll);
+      body.current.position.y = rig.bob + quirk.bob + (riding ? 0.08 : 0);
+      body.current.rotation.set(quirk.bodyPitch + rig.lean, 0, quirk.bodyRoll);
     }
     if (head.current) head.current.rotation.set(rig.headPitch * 0.7, quirk.headYaw, quirk.headRoll);
     if (armL.current) armL.current.rotation.set(rig.armL + quirk.armLift, 0, rig.armSpread + 0.08);
     if (armR.current) armR.current.rotation.set(rig.armR + quirk.armLift, 0, -rig.armSpread - 0.08);
     if (legL.current) legL.current.rotation.x = rig.legL * 0.8;
     if (legR.current) legR.current.rotation.x = rig.legR * 0.8;
+    if (scooter.current) scooter.current.visible = riding;
     if (device.current) device.current.visible = rig.holdsDevice && style.device !== null && pose.action !== 'type';
 
     const next = reducedMotion ? 'neutral' : expressionFor(pose.action, q?.quirk ?? null, time, seed);
@@ -286,6 +300,22 @@ export function FigureEntity({ layout, person, script, dimmed, reducedMotion }: 
             </group>
           ))}
         </group>
+      </group>
+
+      {/* holographic scooter: only shown while riding (toggled in useFrame) */}
+      <group ref={scooter} visible={false}>
+        <Box position={[0, 0.055, 0]} size={[0.26, 0.03, 0.82]} material={SCOOTER_DECK} shadows={false} />
+        <Box position={[0, 0.072, 0]} size={[0.22, 0.004, 0.76]} material={SCOOTER_ACCENT} shadows={false} />
+        <Box position={[0, 0.4, 0.4]} size={[0.035, 0.7, 0.035]} material={SCOOTER_DECK} shadows={false} />
+        <Box position={[0, 0.74, 0.4]} size={[0.44, 0.035, 0.035]} material={SCOOTER_ACCENT} shadows={false} />
+        {[0.38, -0.38].map((z) => (
+          <mesh key={z} geometry={WHEEL_GEO} material={SCOOTER_WHEEL} position={[0, 0.075, z]} rotation={[0, Math.PI / 2, 0]} />
+        ))}
+        {TRAIL.map((m, i) => (
+          <mesh key={i} material={m} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, -0.62 - i * 0.3]}>
+            <planeGeometry args={[0.2 - i * 0.025, 0.32]} />
+          </mesh>
+        ))}
       </group>
 
       <sprite ref={tag} position={[0, 1.38, 0]} scale={[0.95, 0.245, 1]} renderOrder={10} visible={false}>

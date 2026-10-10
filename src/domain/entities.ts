@@ -178,6 +178,8 @@ export interface Deployment {
   status: DeploymentStatus;
   /** Change requests proven to be contained in `sha` — the only evidence link used. */
   changeRequestIds: ID[];
+  /** Who triggered it, when the CD tool records it; null = unknown. */
+  triggeredById: ID | null;
   webUrl: string;
 }
 

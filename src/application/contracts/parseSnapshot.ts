@@ -288,6 +288,7 @@ export function parseSnapshot(json: unknown): ForgeSnapshot {
     c.date(d, 'createdAt', p);
     c.oneOf(d, 'status', p, DEPLOY_STATUS);
     c.refs(d, 'changeRequestIds', p, crIds, 'changeRequests');
+    c.ref(d, 'triggeredById', p, contributorIds, 'contributors', true);
     c.str(d, 'webUrl', p, { allowEmpty: true });
   });
 

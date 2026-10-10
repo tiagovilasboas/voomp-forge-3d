@@ -1,5 +1,5 @@
 import type { ID } from '@domain/entities';
-import type { FigureLayout, Vec2, WorldModel } from '../world/worldModel';
+import type { FigureLayout, SectorLayout, Vec2, WorldModel } from '../world/worldModel';
 import type { Script, Step } from './script';
 
 /**
@@ -14,6 +14,8 @@ export interface ActivityFacts {
   reviewingRepoIds: ID[];
   /** Took part in a change confirmed in production recently. */
   celebrates: boolean;
+  /** Production ride to the gate: a deployment they triggered is running, or just succeeded. */
+  ride: 'deploying' | 'celebrating' | null;
 }
 
 const AISLE_Z = 1.1;
@@ -48,6 +50,27 @@ function offsetFor(id: string): number {
   return (h % 1000) / 37;
 }
 
+/** Scooter ride from the sector exit along the corridor to the gate and back. */
+function rideToGate(figure: FigureLayout, ride: 'deploying' | 'celebrating', sector: SectorLayout, world: WorldModel): Step[] {
+  const exitX = sector.center[0] - sector.size[0] / 2 + 0.7;
+  const pickup: Vec2 = [exitX, world.corridorZ];
+  const stop: Vec2 = [world.gate[0], world.gate[1] - 1.4];
+  const onGate: Step = ride === 'celebrating'
+    ? { action: 'celebrate', duration: 2.4, face: world.gate }
+    : { action: 'inspect', duration: 2, face: world.gate };
+  return [
+    ...routeTo(figure.home, [exitX, AISLE_Z]),
+    { action: 'walk', to: pickup },
+    { action: 'ride', to: [world.gate[0], world.corridorZ] },
+    { action: 'ride', to: stop },
+    onGate,
+    { action: 'ride', to: [world.gate[0], world.corridorZ] },
+    { action: 'ride', to: pickup },
+    { action: 'walk', to: [exitX, AISLE_Z] },
+    ...routeHome([exitX, AISLE_Z], figure.home),
+  ];
+}
+
 export function planBehaviour(figure: FigureLayout, facts: ActivityFacts, world: WorldModel): Script {
   const rackFor = (repoId: ID) => world.racks.find((r) => r.repoId === repoId);
   const sector = world.sectors.find((s) => s.squadId === figure.squadId);
@@ -56,6 +79,8 @@ export function planBehaviour(figure: FigureLayout, facts: ActivityFacts, world:
   const visit = (target: Vec2, face: Vec2, action: 'inspect' | 'tablet' | 'present', duration: number) => {
     steps.push(...routeTo(figure.home, target), { action, duration, face }, ...routeHome(target, figure.home));
   };
+
+  if (facts.ride && sector) steps.push(...rideToGate(figure, facts.ride, sector, world));
 
   const authoring = facts.authoringRepoIds.map(rackFor).find(Boolean);
   const reviewing = facts.reviewingRepoIds.map(rackFor).find(Boolean);

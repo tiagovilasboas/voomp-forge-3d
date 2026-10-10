@@ -80,12 +80,14 @@ describe('parseSnapshot', () => {
     s.changeRequests[0].initiativeId = 'ini-x';
     s.reviews[0].changeRequestId = 'cr-x';
     s.deployments[0].changeRequestIds = ['cr-x'];
+    s.deployments[1].triggeredById = 'ct-x';
     const issues = issuesOf(s);
     expect(issues).toContain('repositories[0].squadId: "sq-x" não existe em squads.');
     expect(issues).toContain('changeRequests[0].authorId: "ct-x" não existe em contributors.');
     expect(issues.some((i) => i.includes('initiativeId'))).toBe(true);
     expect(issues.some((i) => i.startsWith('reviews[0].changeRequestId'))).toBe(true);
     expect(issues.some((i) => i.startsWith('deployments[0].changeRequestIds'))).toBe(true);
+    expect(issues).toContain('deployments[1].triggeredById: "ct-x" não existe em contributors.');
   });
 
   it('reports duplicate ids and bad dates', () => {
