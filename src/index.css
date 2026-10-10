@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import 'tailwindcss';
+
+/* Voomp Forge design tokens. Components use these names, never raw hex. */
+@theme {
+  --color-ink-950: #090b10;
+  --color-ink-900: #13161c;
+  --color-ink-800: #1a1e26;
+  --color-ink-700: #242932;
+  --color-ink-600: #323844;
+  --color-ink-500: #4a5160;
+  --color-fog: #9da3ae;
+  --color-snow: #f5f5f5;
+  --color-forge: #ff6a00;
+  --color-forge-bright: #ff8c32;
+  --color-ok: #34c88a;
+  --color-fail: #ef5350;
+  --color-warn: #f6b94d;
+  --color-idle: #6b7280;
+  --color-unknown: #8b8fb8;
+
+  --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --animate-panel-in: panel-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-pulse-soft: pulse-soft 1.8s ease-in-out infinite;
+}
+
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  background: var(--color-ink-950);
+  color: var(--color-snow);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* Floating HUD card — the WareTrack-style building block, in Forge black/orange. */
+@utility hud-card {
+  background: color-mix(in srgb, var(--color-ink-900) 86%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-snow) 8%, transparent);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.7), inset 0 1px 0 rgb(255 255 255 / 0.04);
+  backdrop-filter: blur(14px) saturate(1.2);
+}
+
+@utility focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--color-forge-bright);
+    outline-offset: 2px;
+  }
+}
+
+@utility scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-600) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
