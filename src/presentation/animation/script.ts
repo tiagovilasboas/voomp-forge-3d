@@ -6,11 +6,13 @@ import type { Vec2 } from '../world/worldModel';
  * (no per-frame allocation in the renderer beyond reading the result).
  */
 
-export type Action = 'idle' | 'walk' | 'type' | 'inspect' | 'tablet' | 'present' | 'celebrate';
+export type Action = 'idle' | 'walk' | 'type' | 'inspect' | 'tablet' | 'present' | 'celebrate' | 'ride';
 
 export type Step =
   | { action: 'walk'; to: Vec2 }
-  | { action: Exclude<Action, 'walk'>; duration: number; face?: Vec2 };
+  /** Scooter ride: like a walk, but faster. */
+  | { action: 'ride'; to: Vec2 }
+  | { action: Exclude<Action, 'walk' | 'ride'>; duration: number; face?: Vec2 };
 
 export interface Script {
   start: Vec2;
@@ -29,6 +31,7 @@ export interface Pose {
 }
 
 const WALK_SPEED = 1.15; // world units per second
+const RIDE_SPEED = 3.4;
 
 interface Segment {
   action: Action;
@@ -49,10 +52,10 @@ export function compile(script: Script): { segments: Segment[]; length: number }
   let heading = Math.PI;
   let t = 0;
   for (const step of script.steps) {
-    if (step.action === 'walk') {
-      const duration = Math.max(0.01, dist(pos, step.to) / WALK_SPEED);
+    if (step.action === 'walk' || step.action === 'ride') {
+      const duration = Math.max(0.01, dist(pos, step.to) / (step.action === 'ride' ? RIDE_SPEED : WALK_SPEED));
       heading = dist(pos, step.to) > 1e-3 ? headingTo(pos, step.to) : heading;
-      segments.push({ action: 'walk', from: pos, to: step.to, heading, start: t, duration });
+      segments.push({ action: step.action, from: pos, to: step.to, heading, start: t, duration });
       pos = step.to;
       t += duration;
     } else {
@@ -75,7 +78,7 @@ export function sample(compiled: CompiledScript, time: number): Pose {
   // Scripts are short (< 12 steps): a linear scan is simpler than a search and just as fast.
   const seg = segments.find((s) => t < s.start + s.duration) ?? segments[segments.length - 1];
   const elapsed = t - seg.start;
-  const k = seg.action === 'walk' ? Math.min(1, elapsed / seg.duration) : 0;
+  const k = seg.action === 'walk' || seg.action === 'ride' ? Math.min(1, elapsed / seg.duration) : 0;
   return {
     position: [seg.from[0] + (seg.to[0] - seg.from[0]) * k, seg.from[1] + (seg.to[1] - seg.from[1]) * k],
     heading: seg.heading,

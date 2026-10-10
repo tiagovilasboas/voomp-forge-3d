@@ -12,9 +12,11 @@ export interface RigPose {
   headPitch: number;
   /** Accessory visible in hand. */
   holdsDevice: boolean;
+  /** Whole-body forward lean (radians). */
+  lean: number;
 }
 
-const REST: RigPose = { armL: 0, armR: 0, armSpread: 0, legL: 0, legR: 0, bob: 0, headPitch: 0, holdsDevice: false };
+const REST: RigPose = { armL: 0, armR: 0, armSpread: 0, legL: 0, legR: 0, bob: 0, headPitch: 0, holdsDevice: false, lean: 0 };
 
 /**
  * @param elapsed seconds since the action began
@@ -41,6 +43,9 @@ export function rigPose(action: Action, elapsed: number, time: number): RigPose 
       const gesture = Math.sin(elapsed * 2.2) * 0.35;
       return { ...REST, armR: -1.5 + gesture, armL: -0.9, bob: breathe, headPitch: -0.08, holdsDevice: true };
     }
+    case 'ride':
+      // Feet together on the deck, leaning forward, both hands on the handlebar.
+      return { ...REST, armL: -1.1, armR: -1.1, bob: Math.sin(elapsed * 9) * 0.008, headPitch: -0.06, lean: 0.14 };
     case 'celebrate': {
       const hop = Math.max(0, Math.sin(elapsed * 7));
       return { ...REST, armL: -2.8, armR: -2.8, armSpread: 0.35, bob: hop * 0.18, headPitch: -0.2 };
