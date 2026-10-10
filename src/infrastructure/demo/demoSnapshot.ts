@@ -22,6 +22,11 @@ import type {
   DocumentKind,
   ReviewVerdict,
   Squad,
+  StaffAssignment,
+  WorkItem,
+  WorkItemStatus,
+  WorkItemType,
+  Workstream,
 } from '@domain/entities';
 import { SNAPSHOT_SCHEMA_VERSION } from '@domain/entities';
 
@@ -231,6 +236,73 @@ const LEGACY_COMMITS: Array<[number, string, string]> = [
   [55, 'maira-t', 'fix: corrige máscara de CPF no formulário legado'],
 ];
 
+
+// ---------------------------------------------------------------------------
+// Tracker issues (epics, stories derived from the change requests, extras)
+// ---------------------------------------------------------------------------
+
+const TRACKER_URL = 'https://tracker.demo.voomp.invalid/browse';
+
+// [key, title, sprint]
+const EPICS: Array<[string, string]> = [
+  ['ADM-100', 'Painel financeiro do produtor'],
+  ['ADM-110', 'Permissões por equipe'],
+  ['ADM-120', 'Saque e antecipação de recebíveis'],
+  ['ADM-130', 'Verificação de identidade do produtor'],
+  ['SUS-200', 'Estabilidade do gateway de pagamentos'],
+  ['SUS-210', 'Conciliação e fechamento diário'],
+  ['SUS-220', 'Retentativa de cobranças recusadas'],
+  ['SUS-240', 'Fraude no checkout'],
+  ['SUS-260', 'Conciliação: melhorias de backlog'],
+  ['ENB-300', 'Pipeline unificado de CI'],
+  ['ENB-310', 'Evolução do design system'],
+  ['ENB-320', 'Observabilidade da plataforma'],
+  ['ENB-330', 'Minhas compras'],
+];
+
+/** Epic of each change request: explicit overrides first, then by repository. */
+const CR_EPIC_BY_REPO: Record<string, string> = {
+  'admin-console-web': 'ADM-100',
+  'admin-billing-api': 'ADM-120',
+  'admin-permissions-svc': 'ADM-110',
+  'incident-gateway': 'SUS-200',
+  'payments-reconciler': 'SUS-210',
+  'forge-ci-templates': 'ENB-300',
+  'design-system': 'ENB-310',
+  'platform-observability': 'ENB-320',
+  'legacy-checkout': 'SUS-200',
+};
+const CR_EPIC_OVERRIDE: Record<string, string> = {
+  'incident-gateway#301': 'SUS-220',
+  'payments-reconciler#151': 'SUS-260',
+  'design-system#260': 'ADM-110',
+};
+/** The tracker says "em produção" for this change although Git only saw it in staging (divergence demo). */
+const TRACKER_AHEAD_OF_GIT = new Set(['admin-billing-api#214']);
+
+// Extra stories with no change request yet: [key, title, type, epic, status, statusName, sprint, productionDaysAgo]
+type Extra = [string, string, WorkItemType, string, WorkItemStatus, string, string | null, number | null];
+const EXTRA_ITEMS: Extra[] = [
+  ['ADM-401', 'Simulador de taxas da antecipação de recebíveis', 'story', 'ADM-120', 'todo', 'A fazer', 'Sprint 6', null],
+  ['ADM-402', 'Confirmação de saque com código enviado por e-mail', 'story', 'ADM-120', 'in_progress', 'Em desenvolvimento', 'Sprint 6', null],
+  ['ADM-403', 'Estado vazio do painel para produtor sem vendas', 'story', 'ADM-100', 'todo', 'A fazer', 'Sprint 6', null],
+  ['ADM-404', 'Documentar o cálculo de saldo para o suporte', 'task', 'ADM-100', 'done', 'Concluído', 'Sprint 5', null],
+  ['ADM-410', 'Envio de documento com foto (frente e verso)', 'story', 'ADM-130', 'in_progress', 'Em desenvolvimento', 'Sprint 6', null],
+  ['ADM-411', 'Integração com o provedor de verificação de identidade', 'story', 'ADM-130', 'in_progress', 'Em desenvolvimento', 'Sprint 6', null],
+  ['ADM-412', 'Fluxo de reprovação e reenvio de documentos', 'story', 'ADM-130', 'todo', 'A fazer', null, null],
+  ['ADM-413', 'Selfie rejeitada em aparelhos Android antigos', 'bug', 'ADM-130', 'todo', 'A fazer', 'Sprint 6', null],
+  ['SUS-401', 'Fila de retentativas para cobranças recusadas', 'story', 'SUS-220', 'done', 'Em produção', 'Sprint 5', 12],
+  ['SUS-402', 'Regras de intervalo entre retentativas', 'story', 'SUS-220', 'done', 'Em produção', 'Sprint 5', 12],
+  ['SUS-410', 'Regras de análise de risco no checkout', 'story', 'SUS-240', 'todo', 'A fazer', null, null],
+  ['SUS-411', 'Levantamento de chargebacks do último trimestre', 'task', 'SUS-240', 'todo', 'A fazer', 'Sprint 6', null],
+  ['ENB-401', 'Listagem de compras do comprador', 'story', 'ENB-330', 'done', 'Em produção', 'Sprint 5', 6],
+  ['ENB-402', 'Detalhe da compra e acesso ao produto', 'story', 'ENB-330', 'done', 'Em produção', 'Sprint 5', 6],
+  ['ENB-403', 'Segunda via de comprovante de compra', 'story', 'ENB-330', 'done', 'Em produção', 'Sprint 6', 5],
+];
+
+// Display-only names (no contributor record): N2 / support staff from the planning sheet.
+const N2_NAMES = ['Letícia Aracati', 'Murilo Cajueiro', 'Sabrina Guaporé', 'Ícaro Tabatinga'];
+
 // ---------------------------------------------------------------------------
 // Builder
 // ---------------------------------------------------------------------------
@@ -383,6 +455,228 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
     };
   });
 
+
+  // ---- Tracker issues ------------------------------------------------------
+  const productionAtByCr = new Map<string, string>();
+  for (const d of deployments) {
+    if (d.environment !== 'production' || d.status !== 'success') continue;
+    for (const id of d.changeRequestIds) {
+      const prev = productionAtByCr.get(id);
+      if (!prev || d.createdAt > prev) productionAtByCr.set(id, d.createdAt);
+    }
+  }
+  const reposWithDeploys = new Set(deployments.map((d) => d.repositoryId));
+  const itemUrl = (key: string) => `${TRACKER_URL}/${key}`;
+  const workItems: WorkItem[] = EPICS.map(([key, title]) => ({
+    key,
+    title,
+    type: 'epic' as const,
+    status: 'in_progress' as const,
+    statusName: 'Em andamento',
+    epicKey: null,
+    sprint: null,
+    updatedAt: ago(1),
+    productionAt: null,
+    url: itemUrl(key),
+  }));
+  changeRequests.forEach((cr, index) => {
+    const ref = cr.workItems[0];
+    if (!ref) return;
+    const row = CRS[index];
+    const crKey = `${row.repo}#${row.n}`;
+    const prodAt = productionAtByCr.get(cr.id) ?? null;
+    let status: WorkItemStatus;
+    let statusName: string;
+    let productionAt: string | null = null;
+    if (prodAt) {
+      status = 'done';
+      statusName = 'Em produção';
+      productionAt = prodAt;
+    } else if (cr.state === 'merged') {
+      const hasDeploys = reposWithDeploys.has(cr.repositoryId);
+      status = hasDeploys && !TRACKER_AHEAD_OF_GIT.has(crKey) ? 'in_progress' : 'done';
+      statusName = TRACKER_AHEAD_OF_GIT.has(crKey) ? 'Em produção' : hasDeploys ? 'Aguardando deploy' : 'Concluído';
+      if (TRACKER_AHEAD_OF_GIT.has(crKey)) productionAt = ago(2);
+    } else if (cr.state === 'closed') {
+      status = 'todo';
+      statusName = 'Backlog';
+    } else if (cr.draft) {
+      status = 'todo';
+      statusName = 'A fazer';
+    } else {
+      status = 'in_progress';
+      statusName = 'Em revisão';
+    }
+    workItems.push({
+      key: ref.key,
+      title: row.title.replace(/^Rascunho: /, '').replace(/ \(substituída.*\)$/, ''),
+      type: /^Corrige/.test(row.title) ? 'bug' : 'story',
+      status,
+      statusName,
+      epicKey: CR_EPIC_OVERRIDE[crKey] ?? CR_EPIC_BY_REPO[row.repo] ?? null,
+      sprint: row.created >= 14 ? 'Sprint 5' : 'Sprint 6',
+      updatedAt: ago(row.end ?? Math.max(0, row.created - 1)),
+      productionAt,
+      url: ref.url,
+    });
+  });
+  for (const [key, title, type, epicKey, status, statusName, sprint, prodDays] of EXTRA_ITEMS) {
+    workItems.push({
+      key,
+      title,
+      type,
+      status,
+      statusName,
+      epicKey,
+      sprint,
+      updatedAt: ago(prodDays ?? 2),
+      productionAt: prodDays !== null ? ago(prodDays) : null,
+      url: itemUrl(key),
+    });
+  }
+
+  // ---- Workstreams (fronts of the planning sheet) ---------------------------
+  const wiki = (slug: string) => `https://wiki.demo.voomp.invalid/planejamento/${slug}`;
+  const person = (handle: string, role: StaffAssignment['role'], specialty: string | null = null): StaffAssignment => ({
+    role,
+    personId: ctId(handle),
+    displayName: PEOPLE.find(([h]) => h === handle)![1],
+    specialty,
+  });
+  const n2 = (i: number): StaffAssignment => ({ role: 'n2', personId: null, displayName: N2_NAMES[i], specialty: 'apoio' });
+  const plan = (label: string, targetDays: number | null, recordedDaysAgo: number) => ({
+    label,
+    target: targetDays === null ? null : ago(-targetDays),
+    recordedAt: ago(recordedDaysAgo),
+  });
+  const links = (slug: string, epic: string) => [
+    { label: 'Planejamento (wiki)', url: wiki(slug) },
+    { label: `Épico ${epic}`, url: itemUrl(epic) },
+  ];
+
+  const workstreams: Workstream[] = [
+    {
+      id: 'ws-painel-financeiro',
+      name: 'Painel financeiro do produtor',
+      category: 'sprint_priority',
+      squadIds: ['sq-admin'],
+      initiativeId: 'ini-financial-panel',
+      repositoryIds: [repoId('admin-console-web')],
+      epicKeys: ['ADM-100'],
+      team: [person('iara-v', 'tl'), person('zelia-k', 'dev', 'fullstack'), person('bento-m', 'dev', 'front'), person('maira-t', 'qa'), person('otavio-b', 'pm')],
+      plans: [plan('MVP Semana 2 - quinta', 4, 12)],
+      dependencies: [],
+      declaredDone: false,
+      links: links('painel-financeiro', 'ADM-100'),
+      notes: ['Gráfico de receita depende da correção do pipeline de CI.'],
+    },
+    {
+      id: 'ws-saque-antecipacao',
+      name: 'Tela de saque e antecipação',
+      category: 'sprint_priority',
+      squadIds: ['sq-admin', 'sq-enable'],
+      initiativeId: 'ini-financial-panel',
+      repositoryIds: [repoId('admin-billing-api'), repoId('design-system')],
+      epicKeys: ['ADM-120'],
+      team: [person('iara-v', 'tl'), person('zelia-k', 'dev', 'back'), person('dalva-p', 'dev', 'front'), person('nilo-q', 'qa'), person('jandira-f', 'pm')],
+      plans: [plan('MVP Semana 2 - quinta', -6, 20), plan('Semana 3', -2, 8)],
+      dependencies: [],
+      declaredDone: false,
+      links: links('saque-antecipacao', 'ADM-120'),
+      notes: ['O Jira marca a taxa de arredondamento como em produção, mas o Git só viu em homologação.'],
+    },
+    {
+      id: 'ws-verificacao-identidade',
+      name: 'Rollout de verificação de identidade',
+      category: 'sprint_priority',
+      squadIds: ['sq-admin', 'sq-n3'],
+      initiativeId: null,
+      repositoryIds: [],
+      epicKeys: ['ADM-130'],
+      team: [person('iara-v', 'tl'), person('zelia-k', 'dev', 'fullstack'), person('tupa-r', 'dev', 'back'), person('maira-t', 'qa'), person('otavio-b', 'pm'), n2(0)],
+      plans: [plan('Semana 3', 9, 15), plan('Semana 4', 16, 3)],
+      dependencies: [{ description: 'Dependência de infraestrutura (SRE)', kind: 'blocker' }],
+      declaredDone: false,
+      links: links('verificacao-identidade', 'ADM-130'),
+      notes: ['Ambiente de homologação do provedor depende do time de SRE.'],
+    },
+    {
+      id: 'ws-gateway-v2',
+      name: 'Fechamento: migração de gateway v2',
+      category: 'closing',
+      squadIds: ['sq-n3'],
+      initiativeId: null,
+      repositoryIds: [repoId('incident-gateway')],
+      epicKeys: ['SUS-200'],
+      team: [person('tupa-r', 'tl'), person('nilo-q', 'dev', 'back'), person('maira-t', 'dev', 'back'), person('oriana-c', 'pm'), n2(1)],
+      plans: [plan('Semana 2 - sexta', -4, 18)],
+      dependencies: [],
+      declaredDone: true,
+      links: links('gateway-v2', 'SUS-200'),
+      notes: ['Planilha marca como finalizado, porém a última publicação em produção falhou.'],
+    },
+    {
+      id: 'ws-retentativa-cobrancas',
+      name: 'Retentativa de cobranças',
+      category: 'closing',
+      squadIds: ['sq-n3'],
+      initiativeId: null,
+      repositoryIds: [repoId('incident-gateway')],
+      epicKeys: ['SUS-220'],
+      team: [person('tupa-r', 'tl'), person('nilo-q', 'dev', 'back'), person('maira-t', 'qa'), person('oriana-c', 'pm')],
+      plans: [plan('MVP Semana 2 - quinta', -8, 22)],
+      dependencies: [],
+      declaredDone: true,
+      links: links('retentativa-cobrancas', 'SUS-220'),
+      notes: [],
+    },
+    {
+      id: 'ws-sustentacao-n3',
+      name: 'Sustentação N3',
+      category: 'sustaining',
+      squadIds: ['sq-n3'],
+      initiativeId: 'ini-payment-stability',
+      repositoryIds: [repoId('payments-reconciler'), repoId('legacy-checkout')],
+      epicKeys: ['SUS-210'],
+      team: [person('tupa-r', 'tl'), person('nilo-q', 'dev', 'back'), person('maira-t', 'dev', 'back'), person('oriana-c', 'pm'), n2(2), n2(3)],
+      plans: [plan('Sob demanda', null, 30)],
+      dependencies: [{ description: 'Aguardando retorno da consultoria', kind: 'waiting' }],
+      declaredDone: false,
+      links: links('sustentacao-n3', 'SUS-210'),
+      notes: ['Incidentes entram pelo suporte N2 e são triados diariamente.'],
+    },
+    {
+      id: 'ws-fraude-checkout',
+      name: 'Tema aberto: fraude no checkout',
+      category: 'open_topic',
+      squadIds: ['sq-n3'],
+      initiativeId: null,
+      repositoryIds: [],
+      epicKeys: ['SUS-240'],
+      team: [person('tupa-r', 'tl'), person('oriana-c', 'pm'), n2(2)],
+      plans: [plan('Sob demanda', null, 10)],
+      dependencies: [],
+      declaredDone: false,
+      links: links('fraude-checkout', 'SUS-240'),
+      notes: ['Ainda em levantamento; sem data comprometida.'],
+    },
+    {
+      id: 'ws-minhas-compras',
+      name: 'Minhas compras',
+      category: 'open_topic',
+      squadIds: ['sq-enable'],
+      initiativeId: null,
+      repositoryIds: [],
+      epicKeys: ['ENB-330'],
+      team: [person('caetano-u', 'tl'), person('anselmo-j', 'dev', 'front'), person('dalva-p', 'dev', 'fullstack'), person('jandira-f', 'pm')],
+      plans: [plan('Sob demanda', null, 40), plan('Semana 3', -9, 25), plan('Semana 4', -4, 12)],
+      dependencies: [],
+      declaredDone: true,
+      links: links('minhas-compras', 'ENB-330'),
+      notes: [],
+    },
+  ];
+
   return {
     schemaVersion: SNAPSHOT_SCHEMA_VERSION,
     source: {
@@ -392,7 +686,7 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
         name: 'Demo',
         vocabulary: { changeRequest: 'Pull request', changeRequestShort: 'PR', pipeline: 'Pipeline' },
       },
-      capabilities: { changeRequests: 'native', reviews: 'native', pipelines: 'native', deployments: 'native', documents: 'native' },
+      capabilities: { changeRequests: 'native', reviews: 'native', pipelines: 'native', deployments: 'native', documents: 'native', workItems: 'native', workstreams: 'native' },
       generatedAt: now.toISOString(),
     },
     organization: { id: 'org-voomp-demo', name: 'Voomp (Demo)', slug: 'voomp-demo' },
@@ -416,6 +710,8 @@ export function buildDemoSnapshot(now: Date): ForgeSnapshot {
       updatedAt: ago(days),
       webUrl: `https://wiki.demo.voomp.invalid/${space.toLowerCase()}/${id}`,
     })),
+    workItems,
+    workstreams,
   };
 }
 

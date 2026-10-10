@@ -354,6 +354,9 @@ export function buildSnapshotFromGit(input: BuildSnapshotInput): ForgeSnapshot {
         pipelines: 'unavailable',
         deployments: (config.deployments ?? []).length > 0 ? 'inferred' : 'unavailable',
         documents: 'unavailable',
+        // TODO: Jira/plan ingestion sets these to 'native' when it supplies workItems / workstreams.
+        workItems: 'unavailable',
+        workstreams: 'unavailable',
       },
       generatedAt: input.generatedAt,
     },
@@ -368,5 +371,8 @@ export function buildSnapshotFromGit(input: BuildSnapshotInput): ForgeSnapshot {
     deployments,
     initiatives,
     documents: [],
+    // TODO: filled by the tracker (Jira) and planning-sheet ingestion hooks.
+    workItems: [],
+    workstreams: [],
   };
 }
