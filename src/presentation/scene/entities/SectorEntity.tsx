@@ -8,6 +8,7 @@ import { Box, Decal, useCanvasTexture } from '../kit/Part';
 import { mat } from '../kit/materials';
 import { FONTS, makeHatchTexture } from '../kit/canvasTexture';
 import { Board, CableTray, Desk, FeatureProp } from './props';
+import { SectorProps } from './SectorProps';
 
 export interface SectorBoards {
   open: number;
@@ -131,6 +132,7 @@ export function SectorEntity({ layout, racks, figures, boards, dimmed, alert, re
           <Desk key={f.personId} personId={f.personId} reducedMotion={reducedMotion} position={f.desk} yaw={yaw} seed={i * 97 + layout.code.charCodeAt(0)} />
         ))}
         <FeatureProp feature={layout.theme.feature} position={layout.feature} yaw={yaw} alert={alert} reducedMotion={reducedMotion} />
+        <SectorProps layout={layout} openPRCount={boards.open} reducedMotion={reducedMotion} />
         {racks.map((r) => (
           <CableTray key={r.repoId} from={[r.position[0], r.position[1]]} to={[r.position[0], toWorld(layout.center, layout.facing, [0, -d / 2 + 0.3])[1]]} />
         ))}
