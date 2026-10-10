@@ -60,6 +60,7 @@ const deploy = (environment: Deployment['environment'], status: Deployment['stat
   createdAt: T(day),
   status,
   changeRequestIds: ['cr-1'],
+  triggeredById: null,
   webUrl: 'https://x.invalid/dep',
 });
 const evidence = (o: Partial<ChangeRequestEvidence> = {}): ChangeRequestEvidence => ({
