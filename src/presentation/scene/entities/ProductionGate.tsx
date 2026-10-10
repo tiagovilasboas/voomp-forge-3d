@@ -50,13 +50,23 @@ export function ProductionGate({
 }) {
   const { hovered, selected, handlers } = useInteractive({ kind: 'gate' });
   const beam = useRef<THREE.MeshBasicMaterial>(null);
+  const chevrons = useRef<(THREE.Group | null)[]>([]);
   const gateSign = useSignTexture('PRODUÇÃO', productionCount, 'DEPLOYS CONFIRMADOS', PALETTE.ok);
   const dockSign = useSignTexture('STAGING', stagingCount, 'DEPLOYS EM HOMOLOGAÇÃO', PALETTE.warn);
 
   useFrame(({ clock }) => {
-    if (!beam.current) return;
-    const k = reducedMotion ? 0.5 : 0.35 + (Math.sin(clock.elapsedTime * 1.4) + 1) * 0.2;
-    beam.current.opacity = productionCount ? k : 0.08;
+    const t = clock.elapsedTime;
+    if (beam.current) {
+      // Stronger pulse when the gate is lit (a production deploy has landed).
+      const base = productionCount ? 0.3 : 0.08;
+      const amp = productionCount ? 0.22 : 0;
+      beam.current.opacity = reducedMotion ? base + amp * 0.5 : base + (Math.sin(t * 1.6) + 1) * 0.5 * amp;
+    }
+    chevrons.current.forEach((c, i) => {
+      if (!c) return;
+      // Chevrons drift along +z to signal flow direction; frozen when reduced-motion.
+      c.position.z = reducedMotion ? 0.12 : 0.12 + Math.sin(t * 2 + i) * 0.18;
+    });
   });
 
   const lit = productionCount > 0;
@@ -67,19 +77,32 @@ export function ProductionGate({
       {/* corridor apron */}
       <Box position={[(gate[0] + dock[0]) / 2, 0.02, gate[1] - 0.2]} size={[Math.abs(gate[0] - dock[0]) + 6, 0.04, 4.2]} material={mat.platform()} />
 
-      {/* production arch */}
+      {/* production arch — thin emissive frame instead of solid metal mass */}
       <group position={[gate[0], 0, gate[1]]}>
         <Box position={[0, 0.06, 0]} size={[4.4, 0.12, 2.2]} material={mat.graphite()} />
-        <Box position={[-1.9, 1.6, 0]} size={[0.5, 3.2, 0.7]} material={mat.rackMetal()} />
-        <Box position={[1.9, 1.6, 0]} size={[0.5, 3.2, 0.7]} material={mat.rackMetal()} />
-        <Box position={[0, 3.35, 0]} size={[4.4, 0.5, 0.8]} material={mat.rackMetal()} />
+        {/* pillars: thin emissive edges (0.08 wide) */}
+        <Box position={[-1.9, 1.6, 0]} size={[0.08, 3.2, 0.08]} material={mat.glow(PALETTE.ok, 1.0)} shadows={false} />
+        <Box position={[1.9, 1.6, 0]} size={[0.08, 3.2, 0.08]} material={mat.glow(PALETTE.ok, 1.0)} shadows={false} />
+        {/* lintel: thin emissive edge, no solid mass */}
+        <Box position={[0, 3.2, 0]} size={[3.88, 0.08, 0.08]} material={mat.glow(PALETTE.ok, 1.0)} shadows={false} />
+        {/* existing fine inner edges — state-reactive glow */}
         <Box position={[-1.64, 1.6, 0]} size={[0.03, 3.0, 0.5]} material={mat.glow(lit ? PALETTE.ok : PALETTE.idle, hl ? 1.8 : 1.2)} shadows={false} />
         <Box position={[1.64, 1.6, 0]} size={[0.03, 3.0, 0.5]} material={mat.glow(lit ? PALETTE.ok : PALETTE.idle, hl ? 1.8 : 1.2)} shadows={false} />
         <Decal texture={gateSign} position={[0, 3.35, 0.41]} size={[2.6, 0.8]} glow />
+        {/* translucent mint portal */}
         <mesh position={[0, 1.6, 0]}>
           <boxGeometry args={[3.2, 3.1, 0.05]} />
           <meshBasicMaterial ref={beam} color={PALETTE.ok} transparent opacity={0.3} toneMapped={false} depthWrite={false} />
         </mesh>
+        {/* flow-direction chevrons — three mint arrows drifting along +z */}
+        {[0.6, 1.6, 2.6].map((y, i) => (
+          <group key={y} ref={(el) => { chevrons.current[i] = el; }} position={[0, y, 0.12]}>
+            <mesh rotation={[Math.PI / 2, 0, 0]}>
+              <coneGeometry args={[0.22, 0.4, 3]} />
+              <meshBasicMaterial color={PALETTE.ok} transparent opacity={0.85} toneMapped={false} depthWrite={false} />
+            </mesh>
+          </group>
+        ))}
       </group>
 
       {/* staging dock */}

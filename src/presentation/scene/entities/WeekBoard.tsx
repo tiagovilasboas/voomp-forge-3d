@@ -1,13 +1,14 @@
 import type { Delivery } from '@application/queries/deliveries';
 import type { Vec2 } from '../../world/worldModel';
 import type { Note, NoteColor } from '../../state/notesStore';
+import { PALETTE } from '../../theme';
 import { useInteractive } from '../../interaction/useInteractive';
 import { Box, Decal, useCanvasTexture } from '../kit/Part';
 import { mat } from '../kit/materials';
 import { FONTS } from '../kit/canvasTexture';
 import { SIGN_YAW } from '../kit/orientation';
 
-const INK = { blue: '#1F3A8A', green: '#15803D', orange: '#E45A00', grey: '#6B7280' };
+const INK = { blue: '#00DFCC', green: '#15803D', orange: '#E45A00', grey: '#5BA8A0' };
 export const STICKY: Record<NoteColor, string> = { yellow: '#FDE68A', orange: '#FDBA74', green: '#BBF7D0', blue: '#BFDBFE' };
 
 const W = 1536;
@@ -146,11 +147,11 @@ export function WeekBoard({
     W,
     H,
     (ctx) => {
-      ctx.fillStyle = '#F4F4F0';
+      ctx.fillStyle = '#0A1A2A';
       ctx.fillRect(0, 0, W, H);
-      ctx.fillStyle = 'rgba(31,58,138,0.035)';
+      ctx.fillStyle = 'rgba(0,223,204,0.05)';
       for (let i = 0; i < 8; i++) ctx.fillRect(70 + i * 170, 130 + (i % 3) * 140, 230, 24);
-      ctx.strokeStyle = 'rgba(31,58,138,0.25)';
+      ctx.strokeStyle = 'rgba(0,223,204,0.3)';
       ctx.setLineDash([14, 12]);
       ctx.lineWidth = 3;
       ctx.beginPath();
@@ -165,7 +166,7 @@ export function WeekBoard({
   );
 
   const [x, z] = position;
-  const frame = selected ? mat.matte('#FF6A00') : hovered ? mat.matte('#FF8C32') : mat.matte('#B9BEC6');
+  const frame = selected ? mat.glow(PALETTE.ok, 1.2) : hovered ? mat.glow(PALETTE.ok, 1.2) : mat.glow(PALETTE.idle, 0.8);
   return (
     <group position={[x, 0, z]} rotation={[0, SIGN_YAW, 0]} {...handlers}>
       <Box position={[-2.25, 0.95, -0.12]} size={[0.06, 1.9, 0.06]} material={mat.steel()} />
