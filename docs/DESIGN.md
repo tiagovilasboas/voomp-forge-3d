@@ -20,7 +20,7 @@ Dois modos de leitura (`ViewMode`), mesma cena e mesmos dados:
 
 Primeira visita: o modal de boas-vindas abre sozinho (flag `voomp-forge.welcome-seen` no `localStorage`; se o storage falhar, ele apenas reaparece).
 
-## 2. Layout da tela
+## 2. Layout da tela (desktop, ≥ 1280 px)
 
 Regiões posicionadas por `HudLayout.tsx` (o overlay ignora o ponteiro; só os cards o capturam, então o mundo continua explorável entre painéis):
 
@@ -29,17 +29,23 @@ Regiões posicionadas por `HudLayout.tsx` (o overlay ignora o ponteiro; só os c
 │ logo · squad · DEMO DATA · 7d/14d/30d · Product|Eng · busca · 🔔 ⚙ · [Delivery Explorer]
 ├────────────────────────────────────────────────────────────────────────┤
 │ KpiStrip (5 cards)                                   [MapControls] [Inspector]
-│ ┌ LeftColumn (272px, ≥ lg) ┐                                     (quando há
+│ ┌ LeftColumn (272px) ┐                                     (quando há
 │ │ Perguntas da semana /    │                                      seleção)
 │ │   Saúde técnica          │              Mundo 3D
 │ │ Iniciativas              │          (tela inteira, atrás)
 │ │ Modo                     │
 │ └──────────────────────────┘
-│ DeliveryTracking (≥ md)      Legend (≥ xl)        ActivityTabs (≥ md, sem seleção)
+│ DeliveryTracking             Legend               ActivityTabs (sem seleção)
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-Responsividade: abaixo de `lg` a coluna esquerda some; abaixo de `md` somem MapControls, DeliveryTracking e ActivityTabs, e o Inspector vira uma folha na base da tela (`max-h-[62vh]`). Com um item selecionado o `ActivityTabs` é substituído pelo `Inspector` e o `MapControls` desloca-se para a esquerda dele.
+Três arranjos de HUD, escolhidos pela largura (`useBreakpoint`; detalhes em `RESPONSIVE_SPEC.md`):
+
+- **Celular** (< 768 px): topo compacto, carrossel de KPIs, navegação inferior (Mapa, Perguntas, Entregas, Iniciativas, Mais) e folhas deslizantes para inspetor e listas.
+- **Tablet** (768–1279 px): a coluna esquerda fica numa gaveta (aberta por padrão só em paisagem, a partir de 1024 px); o inspetor é um painel lateral.
+- **Desktop** (≥ 1280 px): o layout completo desta seção.
+
+Com um item selecionado no desktop, o `ActivityTabs` é substituído pelo `Inspector` e o `MapControls` desloca-se para a esquerda dele.
 
 ### Mapeamento para a referência WareTrack
 
@@ -131,11 +137,19 @@ Todo estado é **ícone + rótulo + cor** (`theme.ts`, tipo `Look`).
 | `draft` | Rascunho | `draft` | idle |
 | `closed` | Fechado sem integrar | `x` | idle |
 
-Na cena, onde não cabe texto, o sinal é redundante: beacon + marcador "!" para alertas, módulos com LED e a Legend sempre visível no HUD (≥ xl) ou a visão tabular com rótulos.
+Na cena, onde não cabe texto, o sinal é redundante: beacon + marcador "!" para alertas, módulos com LED e a Legend sempre visível no HUD desktop (≥ 1280 px) ou a visão tabular com rótulos.
 
 ## 4. Data center
 
 Layout calculado por `world/buildWorld.ts` a partir dos dados (squads, repositórios, pessoas); `config/world.ts` só define aparência e parâmetros. Adicionar uma squad ou repositório nos dados adiciona um setor ou rack sem tocar na cena.
+
+### Layout em grade
+
+O mundo é um **quadrado de salas**: a Hub IA e uma sala por squad ficam em **duas fileiras voltadas uma para a outra**, separadas por um **corredor central**. As salas são divididas entre as fileiras pela largura, para equilibrá-las. A Hub IA fica sempre na fileira norte. No corredor fica a **praça de produção**, de um lado ao outro: calendário, placa de créditos, doca de staging, portão de produção, quadro da semana e parede de frentes.
+
+- Cada sala é desenhada em coordenadas próprias (frente voltada para +z) e colocada no mundo com uma rotação de 180° na fileira sul.
+- Placas e painéis planos não giram com a sala: ficam alinhados aos eixos da grade, de frente para a câmera isométrica.
+- Cada fileira tem sua faixa de scooter no corredor; as pessoas saem da sala pela frente, sem atravessar outras salas.
 
 ### Setores = squads
 
@@ -164,10 +178,10 @@ Cada rack tem placa com nome, linguagem e branch padrão, e **4 módulos de 2 l�
 
 ### Mesas, quadros e corredor
 
-- **Mesas** (uma por pessoa da squad): estação em pé com monitor mostrando código decorativo. Não indicam presença.
-- **Cable trays**: calhas luminosas ligando cada rack à parede de fundo (decoração).
-- **Corredor** compartilhado em frente aos setores: a "linha principal de integração".
-- **Doca de staging** (esquerda) e **Portão de produção** (direita), à frente do corredor. As placas mostram contagens de deploys bem-sucedidos no período (`STAGING` / `PRODUÇÃO`). O feixe do portão só acende quando há deploy de produção confirmado. O portão é clicável (inspetor "Portão de produção").
+- **Mesas** (uma por pessoa da squad): estação com tela holográfica decorativa, que ganha brilho ao passar o mouse ou selecionar. Não indicam presença.
+- **Conduítes holográficos**: faixas translúcidas e finas no chão, rentes ao piso, que ligam cada rack ao fundo da sala (decoração).
+- **Corredor central** entre as duas fileiras: a "linha principal de integração".
+- **Doca de staging** (esquerda) e **Portão de produção** (direita), no corredor central. As placas mostram contagens de deploys bem-sucedidos no período (`STAGING` / `PRODUÇÃO`). O feixe do portão ganha força com deploys de produção confirmados no período; sem nenhum, fica quase apagado. O portão é clicável (inspetor "Portão de produção").
 
 ### Fluxos de luz
 
@@ -182,23 +196,40 @@ Um fluxo por par (repositório, tipo de evento): pulsos instanciados percorrendo
 
 Com um rack, mudança ou iniciativa em foco, os demais fluxos esmaecem.
 
+### Hub IA
+
+Sala de ferramentas e exploração, sempre na fileira norte. Cada objeto abre uma **tela de objeto** (Object Screen) com a versão legível do item:
+
+| Objeto | O que mostra | Tela |
+|--------|--------------|------|
+| Cofre de conhecimento (`KnowledgeVault`) | Documentos (specs, ADRs, runbooks, postmortems) ligados a iniciativas e repositórios | Inspetor de documento |
+| Terminal holográfico | Terminal sem IA: comandos determinísticos sobre o snapshot carregado (`status`, `prs`, `entregas`, `docs`, `task`…) | Tela do terminal |
+| Pinball holográfico | Jogo com quebra-cabeças; recorde salvo neste navegador | Tela do pinball |
+| Mesa n8n | Fluxo sugerido: o n8n roda `npm run ingest` todo dia e publica o snapshot. **Só documentação**: nada é executado a partir do Forge | Tela de Automações |
+
+O **Forge Bot** é um NPC ilustrativo (não é uma pessoa da equipe). Ele inspeciona a mesa n8n e dá uma volta pelo hub, passando pelo cofre, pelo pinball e pelo terminal. Clicar nele abre a tela de Automações.
+
+### Praça de produção
+
+No corredor central, a praça reúne os objetos de entrega: portão e doca (seção "Setores"), **quadro da semana** (entregas da semana e lembretes do time; abre o Quadro do time), **placa de créditos** (autoria), **parede de frentes** (Mural de Frentes: frentes, roadmap e alocação) e **calendário** (entregas por dia). A parede de frentes e o calendário abrem telas de objeto com os mesmos dados dos painéis.
+
 ## 5. Personagens
 
-**Anatomia:** figura de blocos (pernas, quadril, torso, braços, pescoço, cabeça arredondada, cabelo, olhos) com tom de pele e cabelo derivados do `id` (determinístico). A cena só mapeia ângulos do rig sobre as malhas; a pose vem de `animation/`.
+**Anatomia:** androides ilustrativos ("chibi"): capacete grande com tela de rosto em LEDs, corpo blindado compacto e juntas com anéis. Cada robô tem acabamento e variação próprios, derivados do `id` da pessoa (determinístico). A cena só mapeia ângulos do rig sobre as malhas; a pose vem de `animation/`.
 
-**Roupa por função** (`OUTFITS` em `FigureEntity.tsx`):
+**Acento e dispositivo por função** (`ROLE_STYLE` em `FigureEntity.tsx`; etiqueta em `ROLE_TAG`):
 
-| Função | Camisa / detalhe | Dispositivo |
-|--------|------------------|-------------|
-| `developer` | Grafite, faixa laranja | Laptop |
-| `reviewer` | Azul-acinzentado, faixa laranja clara | Tablet |
-| `tech-lead` | Preto, faixa amarela + marcador amarelo na cabeça | Tablet |
-| `product-manager` | Clara (areia), faixa laranja | Cartão |
-| **desconhecida** (`role: null`) | **Cinza neutro, sem dispositivo** | Nenhum |
+| Função | Acento | Dispositivo | Etiqueta |
+|--------|--------|-------------|----------|
+| `developer` | Laranja (`forge`) | Laptop | Dev |
+| `reviewer` | Laranja claro (`forge-bright`) | Tablet | Reviewer |
+| `tech-lead` | Amarelo (`warn`) | Tablet | Tech Lead |
+| `product-manager` | Claro (`snow`) | Cartão | Product |
+| **desconhecida** (`role: null`) | **Cinza neutro (`fog`)** | Nenhum | Função não informada |
 
-A função só vem de fonte autorizada (`Contributor.role`, nunca inferida da atividade). Sem função, a figura é neutra e o inspetor mostra "Função não informada".
+A função só vem de fonte autorizada (`Contributor.role`, nunca inferida da atividade). Sem função, o robô é neutro e o inspetor mostra "Função não informada".
 
-**Ações** (`animation/script.ts`) e o que representam:
+**Ações** (`animation/script.ts`, `rig.ts`) e o que representam:
 
 | Ação | Quando aparece | Significado |
 |------|----------------|-------------|
@@ -207,8 +238,15 @@ A função só vem de fonte autorizada (`Contributor.role`, nunca inferida da at
 | `inspect` | Pessoa tem mudança **aberta** de sua autoria: vai ao rack dela | "Há trabalho dela neste repositório" |
 | `tablet` | Revisou mudanças no período (vai ao rack); `tech-lead` vai ao quadro de Mudanças | "Participou de revisão neste repositório" |
 | `present` | `product-manager` vai ao quadro de Entregas | Leitura do quadro de entregas |
-| `celebrate` | Participou de entrega que chegou à produção nos últimos 7 dias | Entrega confirmada em produção |
+| `celebrate` | Participou de uma entrega que chegou à produção nos últimos 7 dias | Entrega confirmada em produção |
+| `ride` | Disparou o último deploy de produção: pega a scooter na saída da sala e vai até o portão | Ver "Deploy ride" abaixo |
 | `idle` | Fim do ciclo | Pausa na mesa |
+
+**Deploy ride (scooter até o portão):** a pessoa que **disparou** o deploy de produção mais recente pega uma scooter holográfica, vai pela faixa da sua fileira até o portão e volta.
+
+- Deploy em andamento: ride "implantando" (inspeção no portão).
+- Deploy bem-sucedido nas últimas 48 horas: ride "comemorando" (pose de comemoração no portão).
+- Quem disparou não é informado (o CD não registra) ou o deploy falhou: **nenhuma** ride. O sistema nunca inventa quem fez o deploy.
 
 **Regra:** a animação reflete **onde** houve trabalho no período (derivado de `personSummary`), **nunca** presença, carga ou desempenho. Quem está "andando" não está "online"; quem não anda não está "ocioso". Sem ranking, sem nota numérica. O aviso aparece no card "Modo" ("Personagens são ilustrativos…") e no inspetor de pessoa. Cada figura tem um deslocamento de fase determinístico para não se mover em sincronia.
 
@@ -244,8 +282,15 @@ Comandos (`CameraCommand`, via `uiStore.commandCamera`): `focus` (entidade), `ov
 | Módulo `deploy` | `Deployment` mais recente | |
 | Módulo `commits` | `Commit` no período | |
 | Beacon | `RepositoryHealth` (`alert`, `hot`, `idle`) | |
-| Personagem | `Contributor` | Ilustrativo |
+| Personagem (androide) | `Contributor` | Ilustrativo |
+| Forge Bot | Nenhum (NPC) | Ilustrativo; não representa pessoa |
 | Mesa | Pessoa da squad | Decorativa |
+| Cofre de conhecimento | `KnowledgeDocument` (clique abre o documento no inspetor) | |
+| Terminal | Consultas ao snapshot carregado | Sem IA |
+| Pinball, Mesa n8n | Jogo (sem dados) e documentação do fluxo de ingestão | Não executa nada |
+| Quadro da semana | Entregas da semana e notas do time (`notesStore`, neste navegador) | Abre o Quadro do time |
+| Mural de Frentes (parede) | `Workstream` | Abre as abas Mural, Roadmap e Alocação |
+| Calendário (parede) | `Delivery` por dia | |
 | Quadro "Mudanças" | `ChangeRequest` da squad por estado | |
 | Quadro "Entregas" | `Delivery` por grupo de status | |
 | Corredor | Linha principal de integração | |
@@ -267,7 +312,7 @@ Comandos (`CameraCommand`, via `uiStore.commandCamera`): `focus` (entidade), `ov
 |---|--------|-----------|
 | 1 | O data center de entregas | Limpa seleção, câmera em visão geral |
 | 2 | Escolha uma squad | `setSquad` (usa `sq-admin`; senão a primeira squad) |
-| 3 | Abra um rack | Seleciona `repo-admin-console-web` (fallback: primeiro repo da squad) |
+| 3 | Abra um rack | Seleciona `repo-admin-console-web` (fallback: primeiro repo da squad; depois o primeiro do snapshot) |
 | 4 | Histórico de uma mudança | Seleciona a mudança mais recente do repo |
 | 5 | Integrado não é em produção | Seleciona a entrega em produção mais recente (30 dias) |
 | 6 | Visão de Produto | Product View, limpa seleção, destaca a primeira iniciativa |
