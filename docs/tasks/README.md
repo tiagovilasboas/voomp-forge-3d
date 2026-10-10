@@ -8,8 +8,8 @@ Backlog captured from the v0.1.0 QA/UX pass. Each item is a small, independently
 | P1 | B2 — Lighting balance (hub vs. sectors) | B (stage) | [UX-REVIEW](UX-REVIEW.md) |
 | P1 | A1 — Holo-glass racks | A (entities/holo) | [UX-REVIEW](UX-REVIEW.md) |
 | P1 | A2 — Aggregate-data props in sector rear halves | A (entities) | [UX-REVIEW](UX-REVIEW.md) |
-| P2 | B3 — Overview camera fits the free viewport | B (stage) | [UX-REVIEW](UX-REVIEW.md) |
-| P2 | A3 — Holo-style ProductionGate and WeekBoard | A | [UX-REVIEW](UX-REVIEW.md) |
+| ✅ | B3 — Overview camera fits the free viewport | B (stage) | merged 2026-10-10 PR #25 |
+| ✅ | A3 — Holo-style ProductionGate and WeekBoard | A | merged 2026-10-10 PR #26 |
 | P2 | B4 — Room titles at the room edge, clamp subtitles | B (world) | [UX-REVIEW](UX-REVIEW.md) |
 | P2 | A4 — Shared HoloTag | A | [UX-REVIEW](UX-REVIEW.md) |
 | P2 | B5 — Plaza lane chevrons + flow legend | B | [UX-REVIEW](UX-REVIEW.md) |
