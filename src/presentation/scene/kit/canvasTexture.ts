@@ -59,6 +59,49 @@ export function makeFloorTexture(): THREE.CanvasTexture {
   return tex;
 }
 
+/**
+ * Large non-repeating grid for the ground horizon. Thin cyan-leaning lines on a
+ * transparent canvas, fading radially to zero toward the edges so the plane
+ * dissolves into the fog instead of ending with a hard rim. One cell maps to
+ * `cells` divisions across the whole plane, so the renderer sizes the plane to
+ * keep cells aligned with the room grid rhythm.
+ */
+export function makeGroundGridTexture(cells = 48, line = 'rgba(125,149,201,0.55)'): THREE.CanvasTexture {
+  const size = 1024;
+  const tex = makeCanvasTexture(size, size, (ctx, w, h) => {
+    ctx.clearRect(0, 0, w, h);
+    const step = w / cells;
+
+    // Grid lines drawn onto an offscreen pass is overkill; draw straight, then
+    // multiply by a radial alpha gradient so lines vanish toward the edges.
+    ctx.strokeStyle = line;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i = 0; i <= cells; i++) {
+      const p = Math.round(i * step) + 0.5;
+      ctx.moveTo(p, 0);
+      ctx.lineTo(p, h);
+      ctx.moveTo(0, p);
+      ctx.lineTo(w, p);
+    }
+    ctx.stroke();
+
+    // Radial fade: keep the centre, erase the borders. `destination-in` keeps
+    // existing pixels weighted by the gradient's alpha.
+    const grad = ctx.createRadialGradient(w / 2, h / 2, w * 0.06, w / 2, h / 2, w * 0.5);
+    grad.addColorStop(0, 'rgba(0,0,0,1)');
+    grad.addColorStop(0.55, 'rgba(0,0,0,0.6)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.globalCompositeOperation = 'destination-in';
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = 'source-over';
+  });
+  // Single large plane, no tiling — the fade is baked in, so clamp the edges.
+  tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+  return tex;
+}
+
 /** Diagonal hazard hatch used on sector edges. */
 export function makeHatchTexture(color: string): THREE.CanvasTexture {
   const tex = makeCanvasTexture(64, 64, (ctx, w, h) => {
