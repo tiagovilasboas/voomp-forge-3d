@@ -7,6 +7,11 @@
 - Never commit code that doesn't compile. Work in progress stays uncommitted (or in a stash) until its slice is green.
 - Continuous delivery (harness-core `continuous-delivery`, always): smallest independent unit of value; a PR over ~400 changed lines needs a written reason; push right after committing (no local commits older than 1h); green CI → merge, a green PR never waits more than a working day; every merge is an auditable, revertible delivery. Anti-patterns: mega-feature PRs, PRs with no deadline, "just one more thing" for more than a day.
 
+## Engineering baseline (harness-core `engineering-baseline`, maximum rule)
+- Everything executed follows KISS, clean code, YAGNI and DRY; **SRP weighs heavily** (one reason to change per module/function/component; data, rules and UI apart).
+- Minimal per-domain layered architecture (see Architecture rules below) — no layer or abstraction without real use.
+- **Unit tests are mandatory** for complex or business-risky logic (evidence/status rules, parsing external data, connectors, security, schedules/animation math) and ship in the same PR as the code.
+
 ## Evidence over assumptions (harness-core `no-assumptions`, always)
 - Never state as fact what you have not confirmed (test, log, screenshot, official docs, or the owner's word). Cite the source; otherwise mark it as "a confirmar"/hypothesis.
 - In reports: "not found" ≠ "does not exist"; say what was not visually verified (e.g. a screenshot that does not show the feature).
