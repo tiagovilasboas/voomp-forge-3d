@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { DemoDataSource } from '@infrastructure/demo/DemoDataSource';
+import { RemoteDataSource } from '@infrastructure/remote/RemoteDataSource';
 import { useDataStore } from '@presentation/state/dataStore';
 import { useUiStore } from '@presentation/state/uiStore';
 import { HudLayout } from '@presentation/hud/HudLayout';
@@ -7,6 +8,9 @@ import { TableView } from '@presentation/hud/views/TableView';
 import { Icon } from '@presentation/hud/kit/Icon';
 
 const ForgeCanvas = lazy(() => import('@presentation/scene/ForgeCanvas'));
+
+const SOURCES = [new DemoDataSource(), new RemoteDataSource()];
+const DEFAULT_SOURCE = SOURCES[0];
 
 const WELCOME_KEY = 'voomp-forge.welcome-seen';
 
@@ -31,12 +35,14 @@ function readFlag(key: string): boolean {
 export default function App() {
   const state = useDataStore((s) => s.state);
   const load = useDataStore((s) => s.load);
+  const registerSources = useDataStore((s) => s.registerSources);
   const openOverlay = useUiStore((s) => s.openOverlay);
   const [webgl] = useState(supportsWebGL);
 
   useEffect(() => {
-    void load(new DemoDataSource());
-  }, [load]);
+    registerSources(SOURCES);
+    void load(DEFAULT_SOURCE);
+  }, [load, registerSources]);
 
   useEffect(() => {
     if (state.status === 'ready' && !readFlag(WELCOME_KEY)) {
@@ -58,7 +64,7 @@ export default function App() {
           <p className="mt-1 text-sm text-fog">{state.error}</p>
           <button
             type="button"
-            onClick={() => void load(new DemoDataSource())}
+            onClick={() => void load(DEFAULT_SOURCE)}
             className="focus-ring mt-4 rounded-lg bg-forge px-4 py-2 text-sm font-semibold text-ink-950"
           >
             Voltar ao Demo Mode
