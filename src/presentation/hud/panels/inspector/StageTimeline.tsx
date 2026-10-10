@@ -20,10 +20,23 @@ function Marker({ stage }: { stage: Stage }) {
       </span>
     );
   }
+  if (stage.state === 'unknown') {
+    return (
+      <span className={`${base} border-dotted border-unknown text-unknown`} title="A fonte de dados não informa esta etapa">
+        <Icon name="help" size={12} />
+      </span>
+    );
+  }
   return <span className={`${base} ${stage.state === 'not_applicable' ? 'border-dashed border-idle/60' : 'border-idle'} bg-transparent`} />;
 }
 
-const STATE_TEXT = { done: 'Concluído', blocked: 'Bloqueado', pending: 'Sem evidência ainda', not_applicable: 'Não se aplica' } as const;
+const STATE_TEXT = {
+  done: 'Concluído',
+  blocked: 'Bloqueado',
+  pending: 'Sem evidência ainda',
+  not_applicable: 'Não se aplica',
+  unknown: 'Fonte não informa',
+} as const;
 
 /** Vertical timeline of the six delivery stages. A stage is only "done" when the evidence rule says so. */
 export function StageTimeline({ stages }: { stages: Stage[] }) {
@@ -37,7 +50,7 @@ export function StageTimeline({ stages }: { stages: Stage[] }) {
           </div>
           <div className="min-w-0 flex-1 pb-3">
             <div className="flex items-baseline justify-between gap-2">
-              <span className={`text-xs font-semibold ${stage.state === 'pending' || stage.state === 'not_applicable' ? 'text-fog' : 'text-snow'}`}>
+              <span className={`text-xs font-semibold ${stage.state === 'pending' || stage.state === 'not_applicable' || stage.state === 'unknown' ? 'text-fog' : 'text-snow'}`}>
                 {STAGE_LABEL[stage.id]}
                 <span className="sr-only"> — {STATE_TEXT[stage.state]}</span>
               </span>

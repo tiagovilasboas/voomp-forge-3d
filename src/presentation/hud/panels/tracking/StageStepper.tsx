@@ -15,6 +15,7 @@ const STATE_TEXT: Record<StageState, string> = {
   blocked: 'bloqueado',
   pending: 'pendente',
   not_applicable: 'não se aplica',
+  unknown: 'fonte não informa',
 };
 
 const shortDate = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' });
@@ -23,6 +24,7 @@ function circleClass(stage: Stage): string {
   if (stage.state === 'done') return stage.id === 'production' ? 'bg-ok text-ink-950' : 'bg-forge text-ink-950';
   if (stage.state === 'blocked') return 'bg-ink-900 text-fail ring-2 ring-fail';
   if (stage.state === 'not_applicable') return 'border-2 border-dashed border-white/20 text-transparent';
+  if (stage.state === 'unknown') return 'border-2 border-dotted border-unknown text-unknown';
   return 'border-2 border-white/25 text-transparent';
 }
 

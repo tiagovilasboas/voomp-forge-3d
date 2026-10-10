@@ -6,6 +6,7 @@ const STATE_TEXT: Record<StageState, string> = {
   blocked: 'bloqueado',
   pending: 'sem evidência ainda',
   not_applicable: 'não se aplica',
+  unknown: 'fonte não informa',
 };
 
 const DOT: Record<StageState, string> = {
@@ -13,6 +14,7 @@ const DOT: Record<StageState, string> = {
   blocked: 'bg-fail/20 border-fail',
   pending: 'border-idle bg-transparent',
   not_applicable: 'border-dashed border-idle/60 bg-transparent',
+  unknown: 'border-dotted border-unknown bg-transparent',
 };
 
 /** Six tiny dots, one per stage. Production done turns green. Never marks a stage without evidence. */
