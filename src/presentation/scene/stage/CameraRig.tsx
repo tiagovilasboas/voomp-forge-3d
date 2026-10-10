@@ -36,11 +36,14 @@ export function CameraRig({ world }: { world: WorldModel }) {
   const saved = useRef<SavedView | null>(null);
   const sizeRef = useRef(size);
   sizeRef.current = size;
+  // Phones: frame closer and react faster to touch (small screens felt far away and sluggish).
+  const phone = size.width < 600;
 
   const fitZoom = (f: FocusTarget, panelOpen: boolean) => {
     const { width, height } = sizeRef.current;
     const usableW = width > 900 && panelOpen ? width - 640 : width;
-    return Math.max(4, Math.min(120, Math.min(usableW, height * 0.8) / (f.radius * 2)));
+    const closer = width < 600 ? 1.35 : 1;
+    return Math.max(4, Math.min(120, (closer * Math.min(usableW, height * 0.8)) / (f.radius * 2)));
   };
 
   /** Moves so `f` sits in the free area of the screen (left of the inspector when it is open). */
@@ -123,8 +126,9 @@ export function CameraRig({ world }: { world: WorldModel }) {
     <CameraControls
       ref={controls}
       makeDefault
-      smoothTime={reducedMotion ? 0 : 0.35}
-      draggingSmoothTime={0.08}
+      smoothTime={reducedMotion ? 0 : phone ? 0.18 : 0.35}
+      draggingSmoothTime={phone ? 0.02 : 0.08}
+      dollySpeed={phone ? 1.8 : 1}
       minZoom={5}
       maxZoom={140}
       minPolarAngle={POLAR - 0.25}
