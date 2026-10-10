@@ -9,8 +9,8 @@ import { Box, Decal, useCanvasTexture } from '../kit/Part';
 import { mat } from '../kit/materials';
 import { FONTS } from '../kit/canvasTexture';
 
-/** Knowledge has its own hue so it never reads as a delivery status. */
-export const KNOWLEDGE = '#A5A8F0';
+/** Knowledge uses the hub cyan so it stays in the room palette, not a status color. */
+export const KNOWLEDGE = '#38E1FF';
 const TOWER_RADIUS = 2.1;
 const LEVEL_H = 0.55;
 const CRYSTAL = new THREE.OctahedronGeometry(0.16, 0);

@@ -50,7 +50,7 @@ export function Environment({ world, shadows }: { world: WorldModel; shadows: bo
         shadow-camera-far={140}
       />
       {/* cool rim light from the back for silhouette separation */}
-      <directionalLight position={[-20, 14, -26]} intensity={1.0} color="#7F95C9" />
+      <directionalLight position={[-20, 14, -26]} intensity={1.0} color="#C5CDD6" />
 
       {/* warm practical lights over each sector: a key plus a lower, warmer
           area-fill so sectors read as bright as the hub in the overview. */}
