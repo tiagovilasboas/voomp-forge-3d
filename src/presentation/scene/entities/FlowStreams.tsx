@@ -16,7 +16,10 @@ const FLOW_COLOR: Record<DeliveryEventKind, string> = {
 
 const PULSES_PER_FLOW = 3;
 const SPEED = 2.6; // units per second
-const Y = 0.2;
+/** Flows are light trails painted on the floor, not floating tubes. */
+/** Just above the room platforms (0.14) so trails stay visible inside rooms. */
+const LINE_Y = 0.155;
+const PULSE_Y = 0.16;
 
 interface Flow {
   id: string;
@@ -58,7 +61,12 @@ export function FlowStreams({
 
   const mesh = useRef<THREE.InstancedMesh>(null);
   const count = flows.length * PULSES_PER_FLOW;
-  const dummy = useMemo(() => new THREE.Object3D(), []);
+  // Flat discs: rotate once so every pulse lies on the floor.
+  const dummy = useMemo(() => {
+    const d = new THREE.Object3D();
+    d.rotation.x = -Math.PI / 2;
+    return d;
+  }, []);
 
   useLayoutEffect(() => {
     const m = mesh.current;
@@ -79,8 +87,8 @@ export function FlowStreams({
         const travel = reducedMotion ? (p + 0.5) / PULSES_PER_FLOW : ((t * SPEED) / f.length + f.phase + p / PULSES_PER_FLOW) % 1;
         const [x, z] = pointAt(f.path, travel, f.length);
         // Pulses swell in the middle of their trip and shrink on arrival.
-        const s = reducedMotion ? 0.09 : 0.07 + Math.sin(travel * Math.PI) * 0.07;
-        dummy.position.set(x, Y, z);
+        const s = reducedMotion ? 0.1 : 0.08 + Math.sin(travel * Math.PI) * 0.06;
+        dummy.position.set(x, PULSE_Y, z);
         dummy.scale.setScalar(s);
         dummy.updateMatrix();
         m.setMatrixAt(i * PULSES_PER_FLOW + p, dummy.matrix);
@@ -94,18 +102,18 @@ export function FlowStreams({
       {flows.map((f) => (
         <Line
           key={f.id}
-          points={f.path.map(([x, z]) => [x, 0.17, z] as [number, number, number])}
+          points={f.path.map(([x, z]) => [x, LINE_Y, z] as [number, number, number])}
           color={f.color}
-          lineWidth={focusRepoIds?.has(f.repoId) ? 2.4 : 1.2}
+          lineWidth={focusRepoIds?.has(f.repoId) ? 2 : 1}
           transparent
-          opacity={focusRepoIds && !focusRepoIds.has(f.repoId) ? 0.06 : 0.28}
+          opacity={focusRepoIds && !focusRepoIds.has(f.repoId) ? 0.05 : 0.35}
           toneMapped={false}
         />
       ))}
       {count > 0 && (
         <instancedMesh key={count} ref={mesh} args={[undefined, undefined, count]} frustumCulled={false}>
-          <sphereGeometry args={[1, 12, 10]} />
-          <meshBasicMaterial toneMapped={false} />
+          <circleGeometry args={[1, 16]} />
+          <meshBasicMaterial toneMapped={false} transparent opacity={0.8} depthWrite={false} />
         </instancedMesh>
       )}
     </group>
