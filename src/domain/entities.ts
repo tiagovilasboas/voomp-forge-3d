@@ -45,6 +45,7 @@ export interface SourceCapabilities {
   reviews: CapabilityLevel;
   pipelines: CapabilityLevel;
   deployments: CapabilityLevel;
+  documents: CapabilityLevel;
 }
 
 /** Bumped on breaking changes of the snapshot contract. */
@@ -187,6 +188,26 @@ export interface ProductInitiative {
   status: InitiativeStatus;
 }
 
+export type DocumentKind = 'spec' | 'adr' | 'runbook' | 'postmortem' | 'guide';
+
+/**
+ * A page of the company knowledge base — Confluence, Notion, Google Docs or
+ * Markdown inside a repository. Links to initiatives and repositories are
+ * explicit (labels, page properties, front matter), never inferred from text.
+ */
+export interface KnowledgeDocument {
+  id: ID;
+  title: string;
+  kind: DocumentKind;
+  /** Space / folder / wiki section, e.g. "ENG", "Produto". */
+  space: string;
+  squadId: ID | null;
+  initiativeIds: ID[];
+  repositoryIds: ID[];
+  updatedAt: ISODate;
+  webUrl: string;
+}
+
 /** A complete, normalised picture returned by any data source. */
 export interface ForgeSnapshot {
   schemaVersion: number;
@@ -201,4 +222,5 @@ export interface ForgeSnapshot {
   pipelineRuns: PipelineRun[];
   deployments: Deployment[];
   initiatives: ProductInitiative[];
+  documents: KnowledgeDocument[];
 }
