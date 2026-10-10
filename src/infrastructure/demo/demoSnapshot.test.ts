@@ -137,3 +137,19 @@ describe('demo snapshot', () => {
     for (const u of urls) expect(u).not.toContain('github.com');
   });
 });
+
+describe('knowledge documents', () => {
+  const s = buildDemoSnapshot(new Date('2026-10-09T12:00:00Z'));
+  it('link only to existing squads, initiatives and repositories', () => {
+    const squads = new Set(s.squads.map((x) => x.id));
+    const initiatives = new Set(s.initiatives.map((x) => x.id));
+    const repos = new Set(s.repositories.map((x) => x.id));
+    expect(s.documents.length).toBeGreaterThan(0);
+    for (const d of s.documents) {
+      if (d.squadId) expect(squads.has(d.squadId)).toBe(true);
+      d.initiativeIds.forEach((id) => expect(initiatives.has(id)).toBe(true));
+      d.repositoryIds.forEach((id) => expect(repos.has(id)).toBe(true));
+      expect(d.webUrl).not.toContain('atlassian.net');
+    }
+  });
+});
