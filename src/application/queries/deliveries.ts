@@ -41,6 +41,14 @@ export const STATUS_GROUP: Record<DeliveryStatus, StatusGroup> = {
   closed: 'closed',
 };
 
+/** Status filter: a single group, or `awaiting_production` (integrated or in staging — merged but not live). */
+export type StatusFilter = StatusGroup | 'awaiting_production';
+
+export function matchesStatus(status: DeliveryStatus, filter: StatusFilter): boolean {
+  const group = STATUS_GROUP[status];
+  return filter === 'awaiting_production' ? group === 'integrated' || group === 'staging' : group === filter;
+}
+
 export function toDelivery(idx: ForgeIndex, cr: ChangeRequest): Delivery {
   const evidence = evidenceFor(idx, cr);
   const repo = idx.repo.get(cr.repositoryId)!;
@@ -66,7 +74,7 @@ export function toDelivery(idx: ForgeIndex, cr: ChangeRequest): Delivery {
 
 export interface DeliveryFilter {
   repoId?: ID | null;
-  status?: StatusGroup | null;
+  status?: StatusFilter | null;
   /** `'none'` = change requests without an identified initiative. */
   initiativeId?: ID | 'none' | null;
   environment?: DeploymentEnvironment | null;
@@ -82,7 +90,7 @@ export function listDeliveries(idx: ForgeIndex, scope: ScopeFilter, f: DeliveryF
         inSquad(scope, d.squad.id) &&
         inPeriod(scope, d.lastActivityAt) &&
         (!f.repoId || d.repo.id === f.repoId) &&
-        (!f.status || STATUS_GROUP[d.status] === f.status) &&
+        (!f.status || matchesStatus(d.status, f.status)) &&
         (!f.initiativeId || (f.initiativeId === 'none' ? d.initiative === null : d.initiative?.id === f.initiativeId)) &&
         (!f.environment || d.environments.includes(f.environment)) &&
         (!text ||
