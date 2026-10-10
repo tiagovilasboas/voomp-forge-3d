@@ -26,6 +26,7 @@ function WideTopBar({ tablet }: { tablet: boolean }) {
   const viewMode = useUiStore((s) => s.viewMode);
   const setViewMode = useUiStore((s) => s.setViewMode);
   const openOverlay = useUiStore((s) => s.openOverlay);
+  const select = useUiStore((s) => s.select);
 
   return (
     <header aria-label="Barra superior" className="hud-card relative z-30 flex h-[52px] items-center gap-2 px-3">
@@ -68,6 +69,22 @@ function WideTopBar({ tablet }: { tablet: boolean }) {
         {tablet && <ActivityPopover />}
         <AlertsPopover />
         <SettingsPopover />
+        <button
+          type="button"
+          onClick={() => select({ kind: 'fronts' })}
+          className="focus-ring hidden h-8 tap:h-11 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 text-[13px] font-semibold text-snow transition hover:bg-white/[0.12] md:flex"
+        >
+          <Icon name="target" size={14} />
+          <span className="sr-only xl:not-sr-only">Mural de Frentes</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => select({ kind: 'calendar' })}
+          className="focus-ring hidden h-8 tap:h-11 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.06] px-2.5 text-[13px] font-semibold text-snow transition hover:bg-white/[0.12] md:flex"
+        >
+          <Icon name="clock" size={14} />
+          <span className="sr-only xl:not-sr-only">Calendário</span>
+        </button>
         <button
           type="button"
           onClick={() => openOverlay('explorer')}

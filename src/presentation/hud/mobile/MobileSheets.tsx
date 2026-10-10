@@ -4,6 +4,7 @@ import { BottomSheet, type Snap } from '../kit/BottomSheet';
 import { ActivityTabs } from '../panels/ActivityTabs';
 import { DeliveryTracking } from '../panels/DeliveryTracking';
 import { InspectorContent } from '../panels/Inspector';
+import { FrontsCard } from '../panels/left/FrontsCard';
 import { InitiativesCard } from '../panels/left/InitiativesCard';
 import { TechHealth } from '../panels/left/TechHealth';
 import { WeeklyQuestions } from '../panels/left/WeeklyQuestions';
@@ -21,7 +22,12 @@ function TabContent({ tab }: { tab: Exclude<MobileTab, 'map'> }) {
   const viewMode = useUiStore((s) => s.viewMode);
   switch (tab) {
     case 'questions':
-      return <div className="p-3">{viewMode === 'product' ? <WeeklyQuestions /> : <TechHealth />}</div>;
+      return (
+        <div className="space-y-3 p-3">
+          {viewMode === 'product' ? <WeeklyQuestions /> : <TechHealth />}
+          {viewMode === 'product' && <FrontsCard />}
+        </div>
+      );
     case 'deliveries':
       return (
         <div className="space-y-3 p-3">

@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import { listDeliveries, type DeliveryFilter } from '@application/queries/deliveries';
 import { useReadyData } from '@presentation/state/dataStore';
 import { useScope } from '@presentation/state/selectors';
+import { listWorkstreams } from '@application/queries/workstreams';
+import { useUiStore } from '@presentation/state/uiStore';
 import { Card, CardHeader } from '@presentation/hud/kit/primitives';
 import { useExplorerFilters, type ExplorerPrefilter } from '../../views/DeliveryExplorer';
 import { ListRow } from './ListRow';
@@ -42,6 +44,14 @@ function useQuestions(): Question[] {
 /** Product View: business questions answered by the Delivery Explorer. */
 export function WeeklyQuestions() {
   const questions = useQuestions();
+  const { index } = useReadyData();
+  const scope = useScope();
+  const select = useUiStore((s) => s.select);
+  const fronts = useMemo(() => {
+    const all = listWorkstreams(index, scope);
+    const count = (st: string) => all.filter((v) => v.progress.status === st).length;
+    return { total: all.length, blocked: count('blocked'), atRisk: count('at_risk') };
+  }, [index, scope]);
   return (
     <Card label="Perguntas da semana">
       <CardHeader title="Perguntas da semana" />
@@ -57,6 +67,17 @@ export function WeeklyQuestions() {
             </ListRow>
           </li>
         ))}
+        <li>
+          <ListRow onClick={() => select({ kind: 'fronts' })} label={`Como estão as frentes? ${fronts.total}`}>
+            <div className="flex items-start justify-between gap-2">
+              <span className="text-[13px] leading-snug text-snow">Como estão as frentes?</span>
+              <span className="font-display text-base font-semibold text-forge-bright">{fronts.total}</span>
+            </div>
+            <div className="text-[11px] text-fog">
+              {fronts.blocked} bloqueada(s) · {fronts.atRisk} em risco
+            </div>
+          </ListRow>
+        </li>
       </ul>
     </Card>
   );

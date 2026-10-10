@@ -3,6 +3,7 @@ import { Card, CardHeader, Segmented } from '@presentation/hud/kit/primitives';
 import { WeeklyQuestions } from './left/WeeklyQuestions';
 import { TechHealth } from './left/TechHealth';
 import { InitiativesCard } from './left/InitiativesCard';
+import { FrontsCard } from './left/FrontsCard';
 
 const MODE_EXPLANATION: Record<ViewMode, string> = {
   product: 'Product View: o que foi entregue, o que falta chegar à produção e a que iniciativa cada mudança pertence.',
@@ -40,6 +41,7 @@ export function LeftColumn() {
   return (
     <div className="scroll-thin flex h-full flex-col gap-3 overflow-y-auto overflow-x-hidden pr-0.5">
       {viewMode === 'product' ? <WeeklyQuestions /> : <TechHealth />}
+      {viewMode === 'product' && <FrontsCard />}
       <InitiativesCard />
       <ModeCard />
     </div>

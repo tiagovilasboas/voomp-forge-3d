@@ -34,7 +34,11 @@ function exists(index: ForgeIndex, ref: EntityRef): boolean {
     case 'hub':
     case 'terminal':
     case 'pinball':
+    case 'fronts':
+    case 'calendar':
       return true;
+    case 'workstream':
+      return index.workstream.has(ref.id);
   }
 }
 
@@ -58,6 +62,9 @@ function Variant({ selection }: { selection: EntityRef }) {
     case 'hub':
     case 'terminal':
     case 'pinball':
+    case 'fronts':
+    case 'calendar':
+    case 'workstream':
       return null; // shown as an Object Screen instead
     case 'gate':
       return (
