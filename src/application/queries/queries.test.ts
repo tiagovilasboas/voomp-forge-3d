@@ -146,3 +146,17 @@ describe('personSummary', () => {
     expect(s.authored.length).toBeGreaterThan(0);
   });
 });
+
+describe('awaiting_production status filter', () => {
+  it('returns exactly the integrated and staging deliveries — merged but not live', () => {
+    const awaiting = listDeliveries(idx, scope(), { status: 'awaiting_production' });
+    const integrated = listDeliveries(idx, scope(), { status: 'integrated' });
+    const staging = listDeliveries(idx, scope(), { status: 'staging' });
+    expect(awaiting.length).toBe(integrated.length + staging.length);
+    expect(awaiting.length).toBeGreaterThan(0);
+    for (const d of awaiting) {
+      expect(['integrated', 'staging']).toContain(STATUS_GROUP[d.status]);
+      expect(d.environments).not.toContain('production');
+    }
+  });
+});
