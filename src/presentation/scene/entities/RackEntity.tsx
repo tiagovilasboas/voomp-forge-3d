@@ -111,7 +111,22 @@ export function RackEntity({ layout, repo, health, highlighted, dimmed, reducedM
     <group position={[x, 0, z]} rotation={[0, yawFor(layout.facing), 0]} {...handlers}>
       {/* plinth + frame */}
       <Box position={[0, 0.06, 0]} size={[W + 0.12, 0.12, D + 0.12]} material={mat.rubber()} />
-      <Box position={[0, H / 2 + 0.12, 0]} size={[W, H, D]} material={mat.rackMetal()} />
+      {/* holographic glass body — translucent shell, status colour on edges */}
+      <Box position={[0, H / 2 + 0.12, 0]} size={[W, H, D]} material={mat.rackGlass()} />
+      {/* top glow strip in status colour */}
+      <Box position={[0, H + 0.15, 0]} size={[W + 0.04, 0.04, D + 0.04]} material={mat.glow(beaconColor, dimmed ? 0.25 : 1.5)} shadows={false} />
+      {/* 4 vertical corner trims */}
+      {([-1, 1] as const).flatMap((sx) =>
+        ([-1, 1] as const).map((sz) => (
+          <Box
+            key={`c${sx}${sz}`}
+            position={[sx * (W / 2 + 0.01), H / 2 + 0.12, sz * (D / 2 + 0.01)]}
+            size={[0.04, H + 0.04, 0.04]}
+            material={mat.glow(beaconColor, dimmed ? 0.18 : 1.0)}
+            shadows={false}
+          />
+        ))
+      )}
       <Box position={[0, H / 2 + 0.12, frontZ - 0.02]} size={[W - 0.18, H - 0.22, 0.04]} material={mat.rackInner()} shadows={false} />
 
       {/* blades + module LED strips */}
