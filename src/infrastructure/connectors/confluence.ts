@@ -1,6 +1,6 @@
 import type { Connector, ConnectorContext, SnapshotFragment } from '@application/ports/connectors';
 import type { DocumentKind, KnowledgeDocument } from '@domain/entities';
-import { basicAuthHeaders, defaultFetchJson, trimSlash, type FetchJson } from './http';
+import { assertSafeBaseUrl, basicAuthHeaders, defaultFetchJson, MAX_PAGES, trimSlash, type FetchJson } from './http';
 
 export interface ConfluenceConfig {
   baseUrl: string;
@@ -57,6 +57,7 @@ export class ConfluenceConnector implements Connector<ConfluenceConfig> {
     private readonly fetchJson: FetchJson = defaultFetchJson,
   ) {
     if (!config.baseUrl) throw new Error('confluence: "baseUrl" é obrigatório.');
+    assertSafeBaseUrl('confluence', config.baseUrl);
     if (!config.spaceKeys?.length) throw new Error('confluence: informe ao menos um item em "spaceKeys".');
   }
 
@@ -67,12 +68,13 @@ export class ConfluenceConnector implements Connector<ConfluenceConfig> {
     const documents: KnowledgeDocument[] = [];
     for (const space of config.spaceKeys) {
       let start = 0;
-      for (;;) {
+      for (let pages = 0; ; pages++) {
+        if (pages >= MAX_PAGES) throw new Error(`confluence: limite de ${MAX_PAGES} páginas excedido.`);
         const url =
           `${trimSlash(config.baseUrl)}/wiki/rest/api/content?spaceKey=${encodeURIComponent(space)}&type=page` +
           `&expand=${encodeURIComponent('metadata.labels,version,space')}&start=${start}&limit=${limit}`;
         const page = (await this.fetchJson(url, headers)) as { results?: ConfluenceRaw[]; size?: number };
-        const results = page.results ?? [];
+        const results = Array.isArray(page.results) ? page.results : [];
         for (const r of results) documents.push(mapConfluencePage(r, config));
         start += results.length;
         if (results.length < limit) break;
